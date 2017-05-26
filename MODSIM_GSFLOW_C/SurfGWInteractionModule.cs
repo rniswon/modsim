@@ -38,7 +38,7 @@ public static class SurfGWModule
     //Fortran DLL interface
     
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void gsflow_prms(ref string process, ref bool AFR);
+    public static extern void gsflow_prms(ref string process, ref bool AFR, ref int Numts, ref bool MODSIM_on);
 
     //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
     //public static extern void MFNWT_INIT();
@@ -67,46 +67,53 @@ public static class SurfGWModule
         string arg;
         arg = "setdims";
         bool afr = true;
-        gsflow_prms(ref arg,ref afr);
+        bool MODSIM_on = true;
+        int Numts = 1;
+        gsflow_prms(ref arg, ref afr, ref Numts, ref MODSIM_on);
         arg = "decl";
-        gsflow_prms(ref arg, ref afr);
+        gsflow_prms(ref arg, ref afr, ref Numts, ref MODSIM_on);
         arg = "init";
-        gsflow_prms(ref arg, ref afr);
-        for (int i = 0; i < 5 ; i++)
+        gsflow_prms(ref arg, ref afr, ref Numts, ref MODSIM_on);
+        if (MODSIM_on == false)
         {
-            arg = "run";
-            gsflow_prms(ref arg, ref afr);
+            for (int i = 0; i < Numts; i++)
+            {
+                arg = "run";
+                gsflow_prms(ref arg, ref afr, ref Numts, ref MODSIM_on);
+            }
         }
+        else
+        { 
+            string FileName = CmdArgs[0];
+            myModel = new Model();
+            myModel.Init += OnInitialize;
+            myModel.IterBottom += OnIterationBottom;
+            myModel.IterTop += OnIterationTop;
+            myModel.Converged += OnIterationConverge;
+            myModel.End += OnFinished;
+            myModel.OnMessage += OnMessage;
+            myModel.OnModsimError += OnError;
+            try
+            {
+                XYFileReader.Read(myModel, FileName);
+                PrepareMODSIMNetwork(Directory.GetCurrentDirectory() + "\\" + CmdArgs[1]);
+                XYFileWriter.Write(myModel, FileName.Replace(".xy", "MSGSF.xy"));
+                Modsim.RunSolver(myModel);
+                //Copy output to the original file name - Custom Output carries the MF Dep/Acc
+                File.Copy(FileName.Replace(".xy", "MSGSFOUTPUT.mdb"), FileName.Replace(".xy", "OUTPUT.mdb"), true);
+                Console.WriteLine(" MF_MS Simulation Finished Succesfully");
 
-        string FileName = CmdArgs[0];
-        myModel = new Model();
-        myModel.Init += OnInitialize;
-        myModel.IterBottom += OnIterationBottom;
-        myModel.IterTop += OnIterationTop;
-        myModel.Converged += OnIterationConverge;
-        myModel.End += OnFinished;
-        myModel.OnMessage += OnMessage;
-        myModel.OnModsimError += OnError;
-        try
-        {
-            XYFileReader.Read(myModel, FileName);
-            PrepareMODSIMNetwork(Directory.GetCurrentDirectory() + "\\" + CmdArgs[1]);
-            XYFileWriter.Write(myModel, FileName.Replace(".xy", "MSGSF.xy"));
-            Modsim.RunSolver(myModel);
-            //Copy output to the original file name - Custom Output carries the MF Dep/Acc
-            File.Copy(FileName.Replace(".xy", "MSGSFOUTPUT.mdb"), FileName.Replace(".xy", "OUTPUT.mdb"), true);
-            Console.WriteLine(" MF_MS Simulation Finished Succesfully");
-            
-        }
-        catch (Exception ex)
-        {
-            Console.Write(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.Write(ex.Message);
 
-        }
-        finally
-        {
-            sw.Close();
-            
+            }
+            finally
+            {
+                sw.Close();
+
+            }
         }
     }
 
