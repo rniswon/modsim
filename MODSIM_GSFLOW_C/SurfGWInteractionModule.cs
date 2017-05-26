@@ -36,30 +36,48 @@ public static class SurfGWModule
     public static List<int> Main_Ditches = new List<int>();
 
     //Fortran DLL interface
-    [DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void MFNWT_INIT();
+    
+    [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
+    public static extern void gsflow_prms(ref string process, ref bool AFR);
 
-    [DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void MFNWT_RDSTRESS(ref int a);
+    //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
+    //public static extern void MFNWT_INIT();
 
-    [DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void MFNWT_RUN(ref int a, ref int b, [In, Out] double[] Segs, [In, Out] double[] RealDiv_Amt, ref bool AdvFlwRdr);  
+    //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
+    //public static extern void MFNWT_RDSTRESS(ref int a);
 
-    [DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
-    //public static extern void COMPUTE_EXCHG([In, Out] double[] Exchng, [In, Out] double[] LKVol, ref int a);
-    public static extern void COMPUTE_EXCHG([In, Out] double[] Exchng_Ident, [In, Out] double[] Exchng_Amt, ref int a);
+    //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
+    //public static extern void MFNWT_RUN(ref int a, ref int b, [In, Out] double[] Segs, [In, Out] double[] RealDiv_Amt, ref bool AdvFlwRdr);  
 
-    [DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void MFNWT_OCBUDGET(ref int a, ref int b, [In, Out] double[] Segs, [In, Out] double[] RealDiv_Amt);
+    //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
+    ////public static extern void COMPUTE_EXCHG([In, Out] double[] Exchng, [In, Out] double[] LKVol, ref int a);
+    //public static extern void COMPUTE_EXCHG([In, Out] double[] Exchng_Ident, [In, Out] double[] Exchng_Amt, ref int a);
+
+    //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
+    //public static extern void MFNWT_OCBUDGET(ref int a, ref int b, [In, Out] double[] Segs, [In, Out] double[] RealDiv_Amt);
 
     //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
     //public static extern void MFNWT_WRITERAS(ref int a);
 
-    [DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void MFNWT_CLEAN();
+    //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
+    //public static extern void MFNWT_CLEAN();
 
     public static void Main(string[] CmdArgs)
     {
+        string arg;
+        arg = "setdims";
+        bool afr = true;
+        gsflow_prms(ref arg,ref afr);
+        arg = "decl";
+        gsflow_prms(ref arg, ref afr);
+        arg = "init";
+        gsflow_prms(ref arg, ref afr);
+        for (int i = 0; i < 5 ; i++)
+        {
+            arg = "run";
+            gsflow_prms(ref arg, ref afr);
+        }
+
         string FileName = CmdArgs[0];
         myModel = new Model();
         myModel.Init += OnInitialize;
@@ -207,7 +225,7 @@ public static class SurfGWModule
 
     private static void OnInitialize()
     {
-        MFNWT_INIT();
+        //MFNWT_INIT();
 
         //Link m_Link;
         //List<int> Divs_List = new List<int>();
@@ -363,7 +381,7 @@ public static class SurfGWModule
         {
             MF_TimeStep = myModel.mInfo.CurrentModelTimeStepIndex;
             MF_TimeStep += 1;
-            MFNWT_RDSTRESS(ref MF_TimeStep);
+            //MFNWT_RDSTRESS(ref MF_TimeStep);
             MFRunYet = false;
             //Set flag for GSFlow that models converge and need to advance time step
             Adv_TabF = true;
@@ -482,7 +500,7 @@ public static class SurfGWModule
         //    MF_TimeStep += 1;
         //}
         //if (TS_old != MF_TimeStep) Adv_TabF = true;
-        MFNWT_RUN(ref MF_TimeStep, ref MF_TimeStep, MF_Segs, MF_ActDivs, ref Adv_TabF);  //For now, MODSIM-MODFLOW requires one time step per stress period
+        //MFNWT_RUN(ref MF_TimeStep, ref MF_TimeStep, MF_Segs, MF_ActDivs, ref Adv_TabF);  //For now, MODSIM-MODFLOW requires one time step per stress period
         MFRunYet = true;
 
         // reset the Adv_TabF flag
@@ -548,7 +566,7 @@ public static class SurfGWModule
             //Some debug code, can be removed
             //Console.WriteLine("MODSIM Res: " + String.Format("{0:#,###}", resStorage) + "   MODFLOW Res: " + String.Format("{0:#,###}", MODF_LAK));
 
-            MFNWT_OCBUDGET(ref MF_TimeStep, ref MF_TimeStep, MF_Segs, MF_ActDivs);
+            //MFNWT_OCBUDGET(ref MF_TimeStep, ref MF_TimeStep, MF_Segs, MF_ActDivs);
 
             //MFNWT_WRITERAS(ref MF_TimeStep);
 
@@ -654,7 +672,7 @@ public static class SurfGWModule
         //    converge = true;
         //}
 
-        COMPUTE_EXCHG(MF_Acc_Dep_Identifier, MF_Acc_Dep, ref MF_TimeStep);
+        //COMPUTE_EXCHG(MF_Acc_Dep_Identifier, MF_Acc_Dep, ref MF_TimeStep);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Some Debug code that can be commented out later.  Copied and pasted from "GetMODFLOW_Acc_Dep" above
