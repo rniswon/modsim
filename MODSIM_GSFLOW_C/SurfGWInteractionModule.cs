@@ -67,7 +67,7 @@ public static class SurfGWModule
         string arg;
         arg = "setdims";
         bool afr = true;
-        bool MODSIM_on = true;
+        bool MODSIM_on = false;
         int Numts = 1;
         gsflow_prms(ref arg, ref afr, ref Numts, ref MODSIM_on);
         arg = "decl";
