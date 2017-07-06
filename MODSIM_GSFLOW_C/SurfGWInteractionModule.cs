@@ -85,6 +85,7 @@ public static class SurfGWModule
         file has link Name, iseg, diversion, ResRelease */
         gsflow_prmsSettings(ref Numts, ref Model_mode, ref mappingFileName, ref startTime[0]);
 
+        // 0=GSFLOW; 1=PRMS; 2=MODFLOW; 11=MODSIM-GSFLOW; 12=MODSIM-PRMS; 13=MODSIM-MODFLOW; 14=MODSIM
         if (Model_mode < 13)
         {
             arg = "decl";
@@ -93,9 +94,11 @@ public static class SurfGWModule
             arg = "init";
             gsflow_prms(ref arg, ref afr, ref Diversions[0]);
         }
+
+        arg = "run";
+
         if (Model_mode < 11)
-        { 
-            arg = "run";
+        {
             for (int i = 0; i < Numts; i++)
             {
                 gsflow_prms(ref arg, ref afr, ref Diversions[1]);
@@ -107,7 +110,7 @@ public static class SurfGWModule
 
         else
         {
-            
+            // need file names input some other way, possibly Control File
             string FileName = CmdArgs[0];
             myModel = new Model();
             myModel.Init += OnInitialize;
@@ -534,12 +537,14 @@ public static class SurfGWModule
         //}
         if (TS_old != MF_TimeStep) afr = true;
         //MFNWT_RUN(ref MF_TimeStep, ref MF_TimeStep, MF_Segs, MF_ActDivs, ref Adv_TabF);  //For now, MODSIM-MODFLOW requires one time step per stress period
-        
+
         /* MODSIM calls each timestep and iteration */
         /* AFR is set to FALSE for 2nd iteration */
 
-        arg = "run";
-        gsflow_prms(ref arg, ref afr, ref Diversions[1]);
+        if (Model_mode != 14) // not sure what to do with MODSIM-MODFLOW (13), maybe call MFNWT_RUN
+        {
+            gsflow_prms(ref arg, ref afr, ref Diversions[1]);
+        }
 
         MFRunYet = true;
 
