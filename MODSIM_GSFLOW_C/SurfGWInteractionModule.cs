@@ -40,6 +40,7 @@ public static class SurfGWModule
     public static int[] startTime = new int[6];
     public static string arg;
     public static string mappingFileName;
+    public static string xyFileName;
 
     //Fortran DLL interface
 
@@ -47,7 +48,7 @@ public static class SurfGWModule
     public static extern void gsflow_prms(ref string arg, ref bool afr, ref double Diversions);
 
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void gsflow_prmsSettings(ref int Numts, ref int Model_mode, ref string mappingFileName, ref int startTime);
+    public static extern void gsflow_prmsSettings(ref int Numts, ref int Model_mode, ref string mappingFileName, ref int startTime, ref string xyFileName);
 
     //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
     //public static extern void MFNWT_INIT();
@@ -83,7 +84,7 @@ public static class SurfGWModule
         
         /* need file name of mapping file, read from GSFLOW Control File
         file has link Name, iseg, diversion, ResRelease */
-        gsflow_prmsSettings(ref Numts, ref Model_mode, ref mappingFileName, ref startTime[0]);
+        gsflow_prmsSettings(ref Numts, ref Model_mode, ref mappingFileName, ref startTime[0], ref xyFileName);
 
         // 0=GSFLOW; 1=PRMS; 2=MODFLOW; 11=MODSIM-GSFLOW; 12=MODSIM-PRMS; 13=MODSIM-MODFLOW; 14=MODSIM
         if (Model_mode < 13)
@@ -111,7 +112,7 @@ public static class SurfGWModule
         else
         {
             // need file names input some other way, possibly Control File
-            string FileName = CmdArgs[0];
+            string FileName = xyFileName;
             myModel = new Model();
             myModel.Init += OnInitialize;
             myModel.IterBottom += OnIterationBottom;
