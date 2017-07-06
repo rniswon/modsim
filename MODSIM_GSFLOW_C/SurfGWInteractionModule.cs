@@ -27,6 +27,7 @@ public static class SurfGWModule
     public static double[] MF_ActDivs = new double[600];
     public static double[] MF_Acc_Dep_Identifier = new double[1000];
     public static double[] MF_Acc_Dep; //= new double[1000];
+    public static double[] Diversions = new double[1000];
     public static object RAD_list;
     public static DataTable m_table;
     public static DataTable map_table;
@@ -34,11 +35,19 @@ public static class SurfGWModule
     public static double[] MF_Segs_Converge; //= new double[25];
     public static double[] MF_Segs_Converge_Prev; //= new double[25];
     public static List<int> Main_Ditches = new List<int>();
+    public static bool afr;
+    public static int Model_mode;
+    public static int[] startTime = new int[6];
+    public static string arg;
+    public static string mappingFileName;
 
     //Fortran DLL interface
-    
+
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void gsflow_prms(ref string process, ref bool AFR, ref int Numts, ref bool MODSIM_on);
+    public static extern void gsflow_prms(ref string arg, ref bool afr, ref double Diversions);
+
+    [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
+    public static extern void gsflow_prmsSettings(ref int Numts, ref int Model_mode, ref string mappingFileName, ref int startTime);
 
     //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
     //public static extern void MFNWT_INIT();
@@ -64,26 +73,41 @@ public static class SurfGWModule
 
     public static void Main(string[] CmdArgs)
     {
-        string arg;
-        arg = "setdims";
-        bool afr = true;
-        bool MODSIM_on = false;
+        
         int Numts = 1;
-        gsflow_prms(ref arg, ref afr, ref Numts, ref MODSIM_on);
-        arg = "decl";
-        gsflow_prms(ref arg, ref afr, ref Numts, ref MODSIM_on);
-        arg = "init";
-        gsflow_prms(ref arg, ref afr, ref Numts, ref MODSIM_on);
-        if (MODSIM_on == false)
+        arg = "setdims";
+        afr = true;
+        /* pass 2 arrays with NSS values, first has Diversion flag, second has ResRelease flag */
+        /* need to pass DIVS */
+        gsflow_prms(ref arg, ref afr, ref Diversions[0]);
+        
+        /* need file name of mapping file, read from GSFLOW Control File
+        file has link Name, iseg, diversion, ResRelease */
+        gsflow_prmsSettings(ref Numts, ref Model_mode, ref mappingFileName, ref startTime[0]);
+
+        if (Model_mode < 13)
         {
+            arg = "decl";
+            gsflow_prms(ref arg, ref afr, ref Diversions[0]);
+
+            arg = "init";
+            gsflow_prms(ref arg, ref afr, ref Diversions[0]);
+        }
+        if (Model_mode < 11)
+        { 
+            arg = "run";
             for (int i = 0; i < Numts; i++)
             {
-                arg = "run";
-                gsflow_prms(ref arg, ref afr, ref Numts, ref MODSIM_on);
+                gsflow_prms(ref arg, ref afr, ref Diversions[1]);
             }
+
+            arg = "clean";
+            gsflow_prms(ref arg, ref afr, ref Diversions[0]);
         }
+
         else
-        { 
+        {
+            
             string FileName = CmdArgs[0];
             myModel = new Model();
             myModel.Init += OnInitialize;
@@ -456,11 +480,13 @@ public static class SurfGWModule
     static long volDiff=0;
     static double MODF_LAK;         // MF Lake Vol
     static bool MFRunYet = false;   // Needed in MODFLOWComputeReturns
+    static int TS_old = 0;
 
     private static void OnIterationConverge()
     {
         bool MODFLOWConverge = false;
         int a = 0;
+        afr = false;
 
         //extract the MODSIM calculated diversion values for inserting into an array that is passed to MF
         SortedList myDiversions = new SortedList();
@@ -506,8 +532,15 @@ public static class SurfGWModule
         //    MF_TimeStep = myModel.mInfo.CurrentModelTimeStepIndex;
         //    MF_TimeStep += 1;
         //}
-        //if (TS_old != MF_TimeStep) Adv_TabF = true;
+        if (TS_old != MF_TimeStep) afr = true;
         //MFNWT_RUN(ref MF_TimeStep, ref MF_TimeStep, MF_Segs, MF_ActDivs, ref Adv_TabF);  //For now, MODSIM-MODFLOW requires one time step per stress period
+        
+        /* MODSIM calls each timestep and iteration */
+        /* AFR is set to FALSE for 2nd iteration */
+
+        arg = "run";
+        gsflow_prms(ref arg, ref afr, ref Diversions[1]);
+
         MFRunYet = true;
 
         // reset the Adv_TabF flag
