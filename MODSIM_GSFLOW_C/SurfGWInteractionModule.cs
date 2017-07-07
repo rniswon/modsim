@@ -38,17 +38,17 @@ public static class SurfGWModule
     public static bool afr;
     public static int Model_mode;
     public static int[] startTime = new int[6];
-    public static string arg;
+    public static int Process_mode;
     public static string mappingFileName;
     public static string xyFileName;
 
     //Fortran DLL interface
 
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void gsflow_prms(ref string arg, ref bool afr, ref double Diversions);
+    public static extern void gsflow_prms(ref int Process_mode, ref bool afr, ref double Diversions);
 
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void gsflow_prmsSettings(ref int Numts, ref int Model_mode, ref string mappingFileName, ref int startTime, ref string xyFileName);
+    public static extern void gsflow_prmsSettings([In, Out] ref int Numts, ref int Model_mode, ref int startTime, ref string mappingFileName, ref string xyFileName);
 
     //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
     //public static extern void MFNWT_INIT();
@@ -76,37 +76,40 @@ public static class SurfGWModule
     {
         
         int Numts = 1;
-        arg = "setdims";
+        Process_mode = 4;  // setdims
         afr = true;
         /* pass 2 arrays with NSS values, first has Diversion flag, second has ResRelease flag */
         /* need to pass DIVS */
-        gsflow_prms(ref arg, ref afr, ref Diversions[0]);
-        
+        gsflow_prms(ref Process_mode, ref afr, ref Diversions[0]);
+
         /* need file name of mapping file, read from GSFLOW Control File
         file has link Name, iseg, diversion, ResRelease */
-        gsflow_prmsSettings(ref Numts, ref Model_mode, ref mappingFileName, ref startTime[0], ref xyFileName);
+        // ??? can't get strings to work
+        //mappingFileName = "                                ";
+        //xyFileName =      "                                ";
+        gsflow_prmsSettings(ref Numts, ref Model_mode, ref startTime[0], ref mappingFileName, ref xyFileName);
 
         // 0=GSFLOW; 1=PRMS; 2=MODFLOW; 11=MODSIM-GSFLOW; 12=MODSIM-PRMS; 13=MODSIM-MODFLOW; 14=MODSIM
         if (Model_mode < 13)
         {
-            arg = "decl";
-            gsflow_prms(ref arg, ref afr, ref Diversions[0]);
+            Process_mode = 1; // declare
+            gsflow_prms(ref Process_mode, ref afr, ref Diversions[0]);
 
-            arg = "init";
-            gsflow_prms(ref arg, ref afr, ref Diversions[0]);
+            Process_mode = 2; // initialize
+            gsflow_prms(ref Process_mode, ref afr, ref Diversions[0]);
         }
 
-        arg = "run";
+        Process_mode = 0; // run
 
         if (Model_mode < 11)
         {
             for (int i = 0; i < Numts; i++)
             {
-                gsflow_prms(ref arg, ref afr, ref Diversions[1]);
+                gsflow_prms(ref Process_mode, ref afr, ref Diversions[1]);
             }
 
-            arg = "clean";
-            gsflow_prms(ref arg, ref afr, ref Diversions[0]);
+            Process_mode = 4; // clean
+            gsflow_prms(ref Process_mode, ref afr, ref Diversions[0]);
         }
 
         else
@@ -544,7 +547,7 @@ public static class SurfGWModule
 
         if (Model_mode != 14) // not sure what to do with MODSIM-MODFLOW (13), maybe call MFNWT_RUN
         {
-            gsflow_prms(ref arg, ref afr, ref Diversions[1]);
+            gsflow_prms(ref Process_mode, ref afr, ref Diversions[1]); // run mode
         }
 
         MFRunYet = true;
