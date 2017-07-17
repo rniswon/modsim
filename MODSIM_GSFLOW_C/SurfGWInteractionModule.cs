@@ -48,7 +48,7 @@ public static class SurfGWModule
     public static extern void gsflow_prms(ref int Process_mode, ref bool afr, ref double Diversions);
 
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void gsflow_prmsSettings([In, Out] ref int Numts, ref int Model_mode, ref int startTime, ref string mappingFileName, ref string xyFileName);
+    public static extern void gsflow_prmsSettings([In, Out] ref int Numts, ref int Model_mode, ref int startTime, ref int File1_length, [In, Out] char[] FileName1, ref int File2_length, [In, Out] char[] FileName2);
 
     //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
     //public static extern void MFNWT_INIT();
@@ -76,6 +76,12 @@ public static class SurfGWModule
     {
         
         int Numts = 1;
+        int len_xyname, len_mapname;
+
+        xyFileName = new String(' ', 80);
+        mappingFileName = new String(' ', 80);
+        len_xyname = xyFileName.Length;
+        len_mapname = mappingFileName.Length;
 
         Process_mode = 4;  // setdims
         afr = true;
@@ -94,10 +100,20 @@ public static class SurfGWModule
 
             /* need file name of mapping file, read from GSFLOW Control File
                file has link Name, iseg, diversion, ResRelease */
-            // ??? can't get strings to work
-            //mappingFileName = "                                ";
-            //xyFileName =      "                                ";
-            gsflow_prmsSettings(ref Numts, ref Model_mode, ref startTime[0], ref mappingFileName, ref xyFileName);
+
+            // Convert string to Fortran array of characters.
+            char[] xyPathChars = xyFileName.ToCharacterArrayFortran(len_xyname);
+            char[] mapPathChars = mappingFileName.ToCharacterArrayFortran(len_mapname);
+
+            gsflow_prmsSettings(ref Numts, ref Model_mode, ref startTime[0], ref len_xyname, xyPathChars, ref len_mapname, mapPathChars);
+            string xy_FileName = new string(xyPathChars);
+            string map_FileName = new string(mapPathChars);
+            xy_FileName = xy_FileName.Trim();
+            map_FileName = map_FileName.Trim();
+            //Console.WriteLine(xy_FileName);
+            //Console.WriteLine(map_FileName);
+            xyFileName = xy_FileName;
+            mappingFileName = map_FileName;
         }
 
         Process_mode = 0; // run
@@ -115,8 +131,6 @@ public static class SurfGWModule
 
         else
         {
-            // need file names input some other way, possibly Control File
-            string FileName = xyFileName;
             myModel = new Model();
             myModel.Init += OnInitialize;
             myModel.IterBottom += OnIterationBottom;
@@ -127,12 +141,12 @@ public static class SurfGWModule
             myModel.OnModsimError += OnError;
             try
             {
-                XYFileReader.Read(myModel, FileName);
+                XYFileReader.Read(myModel, xyFileName);
                 PrepareMODSIMNetwork(Directory.GetCurrentDirectory() + "\\" + CmdArgs[1]);
-                XYFileWriter.Write(myModel, FileName.Replace(".xy", "MSGSF.xy"));
+                XYFileWriter.Write(myModel, xyFileName.Replace(".xy", "MSGSF.xy"));
                 Modsim.RunSolver(myModel);
                 //Copy output to the original file name - Custom Output carries the MF Dep/Acc
-                File.Copy(FileName.Replace(".xy", "MSGSFOUTPUT.mdb"), FileName.Replace(".xy", "OUTPUT.mdb"), true);
+                File.Copy(xyFileName.Replace(".xy", "MSGSFOUTPUT.mdb"), xyFileName.Replace(".xy", "OUTPUT.mdb"), true);
                 Console.WriteLine(" MF_MS Simulation Finished Succesfully");
 
             }
@@ -863,6 +877,19 @@ public static class SurfGWModule
     //    return converge;
     //}
 
+    public static char[] ToCharacterArrayFortran(this string source, int length)
+    {
+        var chars = new char[length];
+        int sourceLength = source.Length;
+        for (int i = 0; i < length; i++)
+        {
+            if (i < sourceLength)
+                chars[i] = source[i];
+            else
+                chars[i] = ' '; // Important that these are blank for Fortran compatibility.
+        }
+        return chars;
+    }
 
 }
 
