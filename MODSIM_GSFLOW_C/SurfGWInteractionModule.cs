@@ -88,7 +88,24 @@ public static class SurfGWModule
         /* pass 2 arrays with NSS values, first has Diversion flag, second has ResRelease flag */
         /* need to pass DIVS */
         gsflow_prms(ref Process_mode, ref afr, ref Diversions[0]);
-   
+
+        /* need file name of mapping file, read from GSFLOW Control File
+           file has link Name, iseg, diversion, ResRelease */
+
+        // Convert string to Fortran array of characters.
+        char[] xyPathChars = xyFileName.ToCharacterArrayFortran(len_xyname);
+        char[] mapPathChars = mappingFileName.ToCharacterArrayFortran(len_mapname);
+
+        gsflow_prmsSettings(ref Numts, ref Model_mode, ref startTime[0], ref len_xyname, xyPathChars, ref len_mapname, mapPathChars);
+        string xy_FileName = new string(xyPathChars);
+        string map_FileName = new string(mapPathChars);
+        xy_FileName = xy_FileName.Trim();
+        map_FileName = map_FileName.Trim();
+        //Console.WriteLine(xy_FileName);
+        //Console.WriteLine(map_FileName);
+        xyFileName = xy_FileName;
+        mappingFileName = map_FileName;
+
         // 0=GSFLOW; 1=PRMS; 2=MODFLOW; 10=MODSIM-GSFLOW; 11=MODSIM-PRMS; 12=MODSIM-MODFLOW; 13=MODSIM
         if (Model_mode < 12 | Model_mode > 20 )
         {
@@ -97,23 +114,6 @@ public static class SurfGWModule
 
             Process_mode = 2; // initialize
             gsflow_prms(ref Process_mode, ref afr, ref Diversions[0]);
-
-            /* need file name of mapping file, read from GSFLOW Control File
-               file has link Name, iseg, diversion, ResRelease */
-
-            // Convert string to Fortran array of characters.
-            char[] xyPathChars = xyFileName.ToCharacterArrayFortran(len_xyname);
-            char[] mapPathChars = mappingFileName.ToCharacterArrayFortran(len_mapname);
-
-            gsflow_prmsSettings(ref Numts, ref Model_mode, ref startTime[0], ref len_xyname, xyPathChars, ref len_mapname, mapPathChars);
-            string xy_FileName = new string(xyPathChars);
-            string map_FileName = new string(mapPathChars);
-            xy_FileName = xy_FileName.Trim();
-            map_FileName = map_FileName.Trim();
-            //Console.WriteLine(xy_FileName);
-            //Console.WriteLine(map_FileName);
-            xyFileName = xy_FileName;
-            mappingFileName = map_FileName;
         }
 
         Process_mode = 0; // run
