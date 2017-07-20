@@ -97,15 +97,11 @@ public static class SurfGWModule
         char[] mapPathChars = mappingFileName.ToCharacterArrayFortran(len_mapname);
 
         gsflow_prmsSettings(ref Numts, ref Model_mode, ref startTime[0], ref len_xyname, xyPathChars, ref len_mapname, mapPathChars);
-        string xy_FileName = new string(xyPathChars);
+        xyFileName = new string(xyPathChars);
         string map_FileName = new string(mapPathChars);
-        xy_FileName = xy_FileName.Trim();
-        map_FileName = map_FileName.Trim();
-        //Console.WriteLine(xy_FileName);
-        //Console.WriteLine(map_FileName);
-        xyFileName = xy_FileName;
-        mappingFileName = map_FileName;
-
+        map_FileName = GetFullPath(map_FileName);
+        xyFileName = GetFullPath(xyFileName);
+        
         // 0=GSFLOW; 1=PRMS; 2=MODFLOW; 10=MODSIM-GSFLOW; 11=MODSIM-PRMS; 12=MODSIM-MODFLOW; 13=MODSIM
         if (Model_mode < 12 | Model_mode > 20 )
         {
@@ -141,8 +137,8 @@ public static class SurfGWModule
             myModel.OnModsimError += OnError;
             try
             {
-                XYFileReader.Read(myModel, xyFileName);
-                PrepareMODSIMNetwork(Directory.GetCurrentDirectory() + "\\" + CmdArgs[1]);
+                XYFileReader.Read(myModel,xyFileName);
+                PrepareMODSIMNetwork(map_FileName);
                 XYFileWriter.Write(myModel, xyFileName.Replace(".xy", "MSGSF.xy"));
                 Modsim.RunSolver(myModel);
                 //Copy output to the original file name - Custom Output carries the MF Dep/Acc
@@ -163,7 +159,22 @@ public static class SurfGWModule
         }
     }
 
-    private static DataTable m_SyncTblSEG, m_SyncTblDIV;
+    private static string GetFullPath(string FileName)
+    {
+        FileName = FileName.Trim();
+        string fileDir= Directory.GetCurrentDirectory();
+        bool addPath = false;
+        if (FileName != Path.GetFullPath(FileName)) addPath = true;
+        while (FileName.StartsWith("..\\")) 
+        {
+            fileDir = Directory.GetParent(fileDir).FullName;
+            FileName = FileName.Substring(3);
+        }
+        if (addPath) FileName = fileDir + "\\" + FileName;
+        return FileName;
+        }
+
+    private static DataTable m_SyncTblSEG;//, m_SyncTblDIV;
     private static void PrepareMODSIMNetwork(string m_TblPath)
     {
         MWH.MWHUtils.GeneralUtils.MyDBUtils m_DBUtils = new MWH.MWHUtils.GeneralUtils.MyDBUtils(m_TblPath);
@@ -171,19 +182,20 @@ public static class SurfGWModule
         //m_SyncTbl.Columns.Add("Feature", System.Type.GetType("System.String"));
         //m_SyncTbl.Columns.Add("MF Iseg", System.Type.GetType("System.Int32"));
         //m_SyncTbl.Columns.Add("MODSIM", System.Type.GetType("System.String"));
-        string m_Sql = "SELECT Modsim_GSFlow_Sync.LnkName, Modsim_GSFlow_Sync.MF_iseg, Modsim_GSFlow_Sync.Diversion";
-        m_Sql += " FROM Modsim_GSFlow_Sync";
-        string m_Sql2 = m_Sql + " WHERE (((Modsim_GSFlow_Sync.MF_iseg) Is Not Null) AND ((Modsim_GSFlow_Sync.Diversion)=False))";
-        m_Sql2 += " ORDER BY Modsim_GSFlow_Sync.MF_iseg";
-        m_SyncTblSEG= m_DBUtils.GetTableFromDB(m_Sql2, "SegmentSync");//"SELECT Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name FROM Modsim_Streams WHERE (((Modsim_Streams.MF_iseg) Is Not Null)) GROUP BY Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name;", "Streams");
-        //PopulateSyncInfo(m_TblStreams);
-        m_Sql2 = m_Sql + " WHERE (((Modsim_GSFlow_Sync.MF_iseg) Is Not Null) AND ((Modsim_GSFlow_Sync.Diversion)=True))";
-        m_Sql2 += " ORDER BY Modsim_GSFlow_Sync.MF_iseg";
-        m_SyncTblDIV = m_DBUtils.GetTableFromDB(m_Sql2, "DiversionSync");//"SELECT Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name FROM Modsim_Streams WHERE (((Modsim_Streams.MF_iseg) Is Not Null)) GROUP BY Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name;", "Streams");
-        //m_TblStreams = m_DBUtils.GetTableFromDB("SELECT Modsim_Canals.MF_iseg, Modsim_Canals.MOD_Name FROM Modsim_Canals WHERE (((Modsim_Canals.MF_iseg) Is Not Null)) GROUP BY Modsim_Canals.MF_iseg, Modsim_Canals.MOD_Name;", "Canals");
-        //PopulateSyncInfo(m_TblStreams);
-        m_SyncTblDIV.Columns.Add("Flow", System.Type.GetType("System.Int32"));
-        m_SyncTblDIV.Columns.Add("PrevFlow", System.Type.GetType("System.Int32"));
+        //string m_Sql = "SELECT Modsim_GSFlow_Sync.LnkName, Modsim_GSFlow_Sync.MF_iseg, Modsim_GSFlow_Sync.Diversion";
+        //m_Sql += " FROM Modsim_GSFlow_Sync";
+        //string m_Sql2 = m_Sql + " WHERE (((Modsim_GSFlow_Sync.MF_iseg) Is Not Null) AND ((Modsim_GSFlow_Sync.Diversion)=False))";
+        //m_Sql2 += " ORDER BY Modsim_GSFlow_Sync.MF_iseg";
+        string m_Sql = "SELECT [MS-GSF_mapping_info].[Link Name], [MS-GSF_mapping_info].[iseg], [MS-GSF_mapping_info].[Diversion], [MS-GSF_mapping_info].ResRelease FROM [MS-GSF_mapping_info] ORDER BY [MS-GSF_mapping_info].iseg;";
+        m_SyncTblSEG= m_DBUtils.GetTableFromDB(m_Sql, "SegmentSync");//"SELECT Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name FROM Modsim_Streams WHERE (((Modsim_Streams.MF_iseg) Is Not Null)) GROUP BY Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name;", "Streams");
+        ////PopulateSyncInfo(m_TblStreams);
+        //m_Sql2 = m_Sql + " WHERE (((Modsim_GSFlow_Sync.MF_iseg) Is Not Null) AND ((Modsim_GSFlow_Sync.Diversion)=True))";
+        //m_Sql2 += " ORDER BY Modsim_GSFlow_Sync.MF_iseg";
+        //m_SyncTblDIV = m_DBUtils.GetTableFromDB(m_Sql2, "DiversionSync");//"SELECT Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name FROM Modsim_Streams WHERE (((Modsim_Streams.MF_iseg) Is Not Null)) GROUP BY Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name;", "Streams");
+        ////m_TblStreams = m_DBUtils.GetTableFromDB("SELECT Modsim_Canals.MF_iseg, Modsim_Canals.MOD_Name FROM Modsim_Canals WHERE (((Modsim_Canals.MF_iseg) Is Not Null)) GROUP BY Modsim_Canals.MF_iseg, Modsim_Canals.MOD_Name;", "Canals");
+        ////PopulateSyncInfo(m_TblStreams);
+        //m_SyncTblDIV.Columns.Add("Flow", System.Type.GetType("System.Int32"));
+        //m_SyncTblDIV.Columns.Add("PrevFlow", System.Type.GetType("System.Int32"));
 
         //Create Sink Node
         Node m_Sink = myModel.AddNewNode(true);
@@ -214,7 +226,7 @@ public static class SurfGWModule
         {
             try
             {
-                Link baseLink = myModel.FindLink((string)mrow["MODSIM"]);
+                Link baseLink = myModel.FindLink((string)mrow["Link Name"]);
                 if (baseLink != null)
                 {
                     //Depletions to a link simulated at the downstream node of the MODSIM link.
@@ -320,7 +332,7 @@ public static class SurfGWModule
         int i = 0;
         foreach (DataRow m_Row in m_SyncTblSEG.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
         {
-            MF_Acc_Dep_Identifier[i] = (double) m_Row["MF_Iseg"];
+            MF_Acc_Dep_Identifier[i] = (double) m_Row["iseg"];
             MF_Acc_Dep[i] = 0;
             i += 1;
         }
@@ -389,7 +401,7 @@ public static class SurfGWModule
         //Main_Ditches.Add(601);     
 
         //Initialize Demands  //WftS
-        //myDiversionsN = new SortedList();
+        myDiversionsN = new SortedList();
         //foreach (int d in Divs_List)
         //{
         //    m_Link = myModel.FindLink(d.ToString()); // Use .FindLink() instead
@@ -397,14 +409,18 @@ public static class SurfGWModule
         //}
 
         //Dimension arrays to the input table
-        Array.Resize<double>(ref MF_Segs_Converge_Prev, m_SyncTblDIV.Rows.Count);
-        Array.Resize<double>(ref MF_Segs_Converge, m_SyncTblDIV.Rows.Count);
+        Array.Resize<double>(ref MF_Segs_Converge_Prev, m_SyncTblSEG.Rows.Count);
+        Array.Resize<double>(ref MF_Segs_Converge, m_SyncTblSEG.Rows.Count);
 
         Link m_Link;
-        foreach (DataRow m_Row in m_SyncTblDIV.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
+        foreach (DataRow m_Row in m_SyncTblSEG.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
         {
-            m_Link = myModel.FindLink((string)m_Row["LnkName"]); // Use .FindLink() instead
-            myDiversionsN.Add(m_Link.name, m_Link);
+            if ((double)m_Row["Diversion"] == 1)
+            {
+                m_Link = myModel.FindLink((string)m_Row["Link Name"]); // Use .FindLink() instead
+                myDiversionsN.Add(m_Link.name, m_Link);
+            }
+            
         }
 
         //// Write a header row to the streamwriter for reading in later
@@ -456,8 +472,8 @@ public static class SurfGWModule
         //Asign accretions and depletions to the MODSIM network.
         foreach (DataRow mrow in m_SyncTblSEG.Rows)
         {
-            Link depLink = myModel.FindLink("MF_Dep_" + (string)mrow["LnkName"]);
-            Link accLink = myModel.FindLink("MF_Acc_" + (string)mrow["LnkName"]);
+            Link depLink = myModel.FindLink("MF_Dep_" + (string)mrow["Link Name"]);
+            Link accLink = myModel.FindLink("MF_Acc_" + (string)mrow["Link Name"]);
             double m_value = MF_Acc_Dep[(int)mrow["MF_iseg"] - 1];  // This sets the MF returned GW-SW acc/dep
                                                                        // Need the -1 to account for 0-based indexing in C#
 
@@ -487,7 +503,7 @@ public static class SurfGWModule
     }
 
     //Add MF output to the original link
-    private static void addLinkMFOutput(Link m_link , ref DataRow m_row )
+    private static void addLinkMFOutput(Link m_link ,  DataRow m_row )
     {
         Link m_MFLink = myModel.FindLink("MF_Dep_" + m_link.name);
         //TODO: check if the variable can replace the accuracy
@@ -496,11 +512,11 @@ public static class SurfGWModule
         if (m_MFLink != null) { m_row["MF_Accretion"] = m_MFLink.mlInfo.flow/1000; }
     }
 
-    static bool DeltaVolNeg;
+    //static bool DeltaVolNeg;
     static bool MFVolRecal;
-    static long DeltaVol=0;
-    static long volDiff=0;
-    static double MODF_LAK;         // MF Lake Vol
+    //static long DeltaVol=0;
+    //static long volDiff=0;
+    //static double MODF_LAK;         // MF Lake Vol
     static bool MFRunYet = false;   // Needed in MODFLOWComputeReturns
     static int TS_old = 0;
 
