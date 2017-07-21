@@ -23,16 +23,17 @@ public static class SurfGWModule
     public static Link m_releaseLnk;
     public static Node m_ResNode;
     public static double[] MF_LK_Vol = new double[1]; // this example has only one reservoir
-    public static double[] MF_Segs = new double[600];
+    //public static double[] MF_Segs = new double[600];
     public static double[] MF_ActDivs = new double[600];
     public static double[] MF_Acc_Dep_Identifier = new double[1000];
     public static double[] MF_Acc_Dep; //= new double[1000];
-    public static double[] Diversions = new double[1000];
+    public static double[] Diversions = new double[600];
+    public static int[] IDivert = new int[600];
     public static object RAD_list;
     public static DataTable m_table;
     public static DataTable map_table;
     public static StreamWriter sw = new StreamWriter(@"Iter_Output.txt");
-    public static double[] MF_Segs_Converge; //= new double[25];
+    public static double[] MF_Segs_Converge = new double[1];
     public static double[] MF_Segs_Converge_Prev; //= new double[25];
     public static List<int> Main_Ditches = new List<int>();
     public static bool afr;
@@ -45,7 +46,7 @@ public static class SurfGWModule
     //Fortran DLL interface
 
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void gsflow_prms(ref int Process_mode, ref bool afr, ref double Diversions);
+    public static extern void gsflow_prms(ref int Process_mode, ref bool afr, ref double[] Diversions, ref int[] IDivert);
 
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
     public static extern void gsflow_prmsSettings([In, Out] ref int Numts, ref int Model_mode, ref int startTime, ref int File1_length, [In, Out] char[] FileName1, ref int File2_length, [In, Out] char[] FileName2);
@@ -87,7 +88,7 @@ public static class SurfGWModule
         afr = true;
         /* pass 2 arrays with NSS values, first has Diversion flag, second has ResRelease flag */
         /* need to pass DIVS */
-        gsflow_prms(ref Process_mode, ref afr, ref Diversions[0]);
+        gsflow_prms(ref Process_mode, ref afr, ref Diversions, ref IDivert);
 
         /* need file name of mapping file, read from GSFLOW Control File
            file has link Name, iseg, diversion, ResRelease */
@@ -106,10 +107,10 @@ public static class SurfGWModule
         if (Model_mode < 12 | Model_mode > 20 )
         {
             Process_mode = 1; // declare
-            gsflow_prms(ref Process_mode, ref afr, ref Diversions[0]);
+            gsflow_prms(ref Process_mode, ref afr, ref Diversions, ref IDivert);
 
             Process_mode = 2; // initialize
-            gsflow_prms(ref Process_mode, ref afr, ref Diversions[0]);
+            gsflow_prms(ref Process_mode, ref afr, ref Diversions, ref IDivert);
         }
 
         Process_mode = 0; // run
@@ -118,11 +119,11 @@ public static class SurfGWModule
         {
             for (int i = 0; i < Numts; i++)
             {
-                gsflow_prms(ref Process_mode, ref afr, ref Diversions[1]);
+                gsflow_prms(ref Process_mode, ref afr, ref Diversions, ref IDivert);
             }
 
             Process_mode = 4; // clean
-            gsflow_prms(ref Process_mode, ref afr, ref Diversions[0]);
+            gsflow_prms(ref Process_mode, ref afr, ref Diversions, ref IDivert);
         }
 
         else
@@ -134,7 +135,7 @@ public static class SurfGWModule
             myModel.Converged += OnIterationConverge;
             myModel.End += OnFinished;
             myModel.OnMessage += OnMessage;
-            myModel.OnModsimError += OnError;
+            myModel.OnModsimError += OnError; 
             try
             {
                 XYFileReader.Read(myModel,xyFileName);
@@ -275,7 +276,7 @@ public static class SurfGWModule
         tsRow[1] = value;
         m_Tbl.Rows.Add(tsRow);
     }
-    
+
     //private static void PopulateSyncInfo(DataTable m_Tbl)
     //{
     //    foreach (DataRow mrow in m_Tbl.Rows)
@@ -287,6 +288,18 @@ public static class SurfGWModule
     //        m_SyncTbl.Rows.Add(m_SyncRow);
     //    }
     //}
+
+    private static Array ResizeArray(Array arr, int[] newSizes)
+    {
+        if (newSizes.Length != arr.Rank)
+            throw new ArgumentException("arr must have the same number of dimensions " +
+                                        "as there are elements in newSizes", "newSizes");
+
+        var temp = Array.CreateInstance(arr.GetType().GetElementType(), newSizes);
+        int length = arr.Length <= temp.Length ? arr.Length : temp.Length;
+        Array.ConstrainedCopy(arr, 0, temp, 0, length);
+        return temp;
+    }
 
     private static void OnInitialize()
     {
@@ -326,6 +339,11 @@ public static class SurfGWModule
         //Dimension arrays to the input table
         Array.Resize <double> (ref MF_Acc_Dep, m_SyncTblSEG.Rows.Count);
         Array.Resize<double>(ref MF_Acc_Dep_Identifier, m_SyncTblSEG.Rows.Count);
+        Array.Resize<double>(ref MF_Segs_Converge, m_SyncTblSEG.Rows.Count); 
+
+        // Redimension array "Diversions" to nseg
+        Diversions = (double[])ResizeArray(Diversions, new int[] { m_SyncTblSEG.Rows.Count });
+        IDivert = (int[])ResizeArray(IDivert, new int[] { m_SyncTblSEG.Rows.Count });
 
         // Also, initialize MF_Acc_Dep (accretion/depletion) variables
         // TODO: Is this needed - they should be zero
@@ -334,9 +352,11 @@ public static class SurfGWModule
         {
             MF_Acc_Dep_Identifier[i] = (double) m_Row["iseg"];
             MF_Acc_Dep[i] = 0;
+            IDivert[i] = (int) (double) m_Row["Diversion"];
             i += 1;
         }
 
+        
 
         //List<string> Divs_List = new List<string>();
         //i = 0;
@@ -445,7 +465,7 @@ public static class SurfGWModule
     private static void OnIterationTop()
     {
         //Before network gets primed for the solver
-        Adv_TabF = false;
+        afr = false;
         if (myModel.mInfo.Iteration == 0)
         {
             MF_TimeStep = myModel.mInfo.CurrentModelTimeStepIndex;
@@ -453,7 +473,7 @@ public static class SurfGWModule
             //MFNWT_RDSTRESS(ref MF_TimeStep);
             MFRunYet = false;
             //Set flag for GSFlow that models converge and need to advance time step
-            Adv_TabF = true;
+            afr = true;
         }
     }
 
@@ -474,8 +494,9 @@ public static class SurfGWModule
         {
             Link depLink = myModel.FindLink("MF_Dep_" + (string)mrow["Link Name"]);
             Link accLink = myModel.FindLink("MF_Acc_" + (string)mrow["Link Name"]);
-            double m_value = MF_Acc_Dep[(int)mrow["MF_iseg"] - 1];  // This sets the MF returned GW-SW acc/dep
+            double m_value = MF_Acc_Dep[(int)((double)mrow["iseg"] - 1)];  // This sets the MF returned GW-SW acc/dep
                                                                        // Need the -1 to account for 0-based indexing in C#
+
 
             //Value returned from MODFLOW in m3 and MODISM uses 1000m3, but using three decimal precision multiply by 1000 - No conversion needed
             if (depLink != null && accLink != null)
@@ -524,7 +545,7 @@ public static class SurfGWModule
     {
         bool MODFLOWConverge = false;
         int a = 0;
-        afr = false;
+        //afr = false;
 
         //extract the MODSIM calculated diversion values for inserting into an array that is passed to MF
         SortedList myDiversions = new SortedList();
@@ -541,20 +562,7 @@ public static class SurfGWModule
             a += 1;
             //}
         }
-
-        // This is an extra step, but makes it easier to pass values to Fortran via a 
-        // 2D array where the index locations are for known diversions on the MF side
-        // these are all demand nodes, MF_Segs overwrites WR level diversions in SFR
-        if (!MODFLOWConverge)
-        {
-            for (int i = 0; i < myDiversions.Count - 1; i++)
-            {
-                MF_Segs[i] = Convert.ToDouble(myDiversions.GetKey(i));
-                MF_ActDivs[i] = Convert.ToDouble(myDiversions.GetByIndex(i));
-            }
-            // for example: MF_Segs[1] = Convert.ToDouble(myDiversions["1"]);
-        }
-
+        
         // Because specified releases equal to 0 from LAKs are a flag in MF, need to set a MODSIM reservoir release
         // of 0.0 to a slightly non-zero value to avoid this flag. Example to follow if necessary
         //if (MF_Segs[4] == 0)
@@ -572,13 +580,13 @@ public static class SurfGWModule
         //}
         if (TS_old != MF_TimeStep) afr = true;
         //MFNWT_RUN(ref MF_TimeStep, ref MF_TimeStep, MF_Segs, MF_ActDivs, ref Adv_TabF);  //For now, MODSIM-MODFLOW requires one time step per stress period
-
+        gsflow_prms(ref Process_mode, ref afr, ref MF_Segs_Converge, ref IDivert);
         /* MODSIM calls each timestep and iteration */
         /* AFR is set to FALSE for 2nd iteration */
 
         if (Model_mode < 12) // not sure what to do with MODSIM-MODFLOW (13), maybe call MFNWT_RUN
         {
-            gsflow_prms(ref Process_mode, ref afr, ref Diversions[1]); // run mode
+            gsflow_prms(ref Process_mode, ref afr, ref MF_Segs_Converge, ref IDivert); // run mode
         }
 
         MFRunYet = true;
