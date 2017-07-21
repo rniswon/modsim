@@ -39,7 +39,7 @@ public static class SurfGWModule
     public static double[] MF_Segs_Converge_Prev; //= new double[25];
     public static List<int> Main_Ditches = new List<int>();
     public static bool afr;
-    public static int Model_mode, Nlakes;
+    public static int Model_mode, Nlakes, Nsegs, nsegshold, Nlakeshold;
     public static int[] startTime = new int[6];
     public static int Process_mode;
     public static string mappingFileName;
@@ -48,7 +48,7 @@ public static class SurfGWModule
     //Fortran DLL interface
 
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void gsflow_prms(ref int Process_mode, ref bool afr, ref int dim, ref int nlakes, [In, Out] double[] Diversions, [In, Out] int[] IDivert, [In, Out] double[] EXCHANGE, [In, Out] double[] DELTAVOL);
+    public static extern void gsflow_prms(ref int Process_mode, ref bool afr, ref int dim, ref int nlakes, ref int nsegs, ref int nsegshold, ref int nlakeshold, [In, Out] double[] Diversions, [In, Out] int[] IDivert, [In, Out] double[] EXCHANGE, [In, Out] double[] DELTAVOL);
 
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
     public static extern void gsflow_prmsSettings([In, Out] ref int Numts, ref int Model_mode, ref int startTime, ref int File1_length, [In, Out] char[] FileName1, ref int File2_length, [In, Out] char[] FileName2);
@@ -90,8 +90,9 @@ public static class SurfGWModule
         afr = true;
         /* pass 2 arrays with NSS values, first has Diversion flag, second has ResRelease flag */
         /* need to pass DIVS */
-        Nlakes = 0;  //initialize temporarily
-        gsflow_prms(ref Process_mode, ref afr, ref Process_mode, ref Nlakes, Diversions, IDivert, EXCHANGE, DELTAVOL);
+        Nlakes = 1;  //initialize temporarily
+        Nsegs = 1;  //initialize temporarily
+        gsflow_prms(ref Process_mode, ref afr, ref Process_mode, ref Nlakes, ref Nsegs, ref nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL);
 
         /* need file name of mapping file, read from GSFLOW Control File
            file has link Name, iseg, diversion, ResRelease */
@@ -110,23 +111,31 @@ public static class SurfGWModule
         if (Model_mode < 12 | Model_mode > 20 )
         {
             Process_mode = 1; // declare
-            gsflow_prms(ref Process_mode, ref afr, ref Process_mode, ref Nlakes, Diversions,  IDivert, EXCHANGE, DELTAVOL);
+            gsflow_prms(ref Process_mode, ref afr, ref Process_mode, ref Nlakes, ref Nsegs, ref nsegshold, ref Nlakeshold, Diversions,  IDivert, EXCHANGE, DELTAVOL);
 
             Process_mode = 2; // initialize
-            gsflow_prms(ref Process_mode, ref afr, ref Process_mode, ref Nlakes, Diversions,  IDivert, EXCHANGE, DELTAVOL);
+            gsflow_prms(ref Process_mode, ref afr, ref Process_mode, ref Nlakes, ref Nsegs, ref nsegshold, ref Nlakeshold, Diversions,  IDivert, EXCHANGE, DELTAVOL);
+            Nsegs = nsegshold;
+            Nlakes = Nlakeshold;
         }
 
         Process_mode = 0; // run
+
+        // Redimension array "Diversions" to nseg
+        Diversions = (double[])ResizeArray(Diversions, new int[] { Nsegs });
+        IDivert = (int[])ResizeArray(IDivert, new int[] { Nsegs });
+        EXCHANGE = (double[])ResizeArray(EXCHANGE, new int[] { Nsegs });
+        DELTAVOL = (double[])ResizeArray(DELTAVOL, new int[] { Nlakes });
 
         if (Model_mode < 10) // GSFLOW and PRMS-only
         {
             for (int i = 0; i < Numts; i++)
             {
-                gsflow_prms(ref Process_mode, ref afr, ref Process_mode, ref Nlakes, Diversions,  IDivert, EXCHANGE, DELTAVOL);
+                gsflow_prms(ref Process_mode, ref afr, ref Process_mode, ref Nlakes, ref Nsegs, ref nsegshold, ref Nlakeshold, Diversions,  IDivert, EXCHANGE, DELTAVOL);
             }
 
             Process_mode = 4; // clean
-            gsflow_prms(ref Process_mode, ref afr, ref Process_mode, ref Nlakes, Diversions,  IDivert, EXCHANGE, DELTAVOL);
+            gsflow_prms(ref Process_mode, ref afr, ref Process_mode, ref Nlakes, ref Nsegs, ref nsegshold, ref Nlakeshold, Diversions,  IDivert, EXCHANGE, DELTAVOL);
         }
 
         else
@@ -345,8 +354,8 @@ public static class SurfGWModule
         Array.Resize<double>(ref MF_Segs_Converge, m_SyncTblSEG.Rows.Count); 
 
         // Redimension array "Diversions" to nseg
-        Diversions = (double[])ResizeArray(Diversions, new int[] { m_SyncTblSEG.Rows.Count });
-        IDivert = (int[])ResizeArray(IDivert, new int[] { m_SyncTblSEG.Rows.Count });
+        //Diversions = (double[])ResizeArray(Diversions, new int[] { m_SyncTblSEG.Rows.Count });
+        //IDivert = (int[])ResizeArray(IDivert, new int[] { m_SyncTblSEG.Rows.Count });
 
         // Also, initialize MF_Acc_Dep (accretion/depletion) variables
         // TODO: Is this needed - they should be zero
@@ -584,13 +593,13 @@ public static class SurfGWModule
  
          //MFNWT_RUN(ref MF_TimeStep, ref MF_TimeStep, MF_Segs, MF_ActDivs, ref Adv_TabF);  //For now, MODSIM-MODFLOW requires one time step per stress period
          int dim = MF_Segs_Converge.Length;
-        gsflow_prms(ref Process_mode, ref afr, ref dim, ref Nlakes, MF_Segs_Converge,  IDivert, EXCHANGE, DELTAVOL);
+        gsflow_prms(ref Process_mode, ref afr, ref dim, ref Nlakes, ref Nsegs, ref nsegshold, ref Nlakeshold, MF_Segs_Converge,  IDivert, EXCHANGE, DELTAVOL);
         /* MODSIM calls each timestep and iteration */
         /* AFR is set to FALSE for 2nd iteration */
 
         if (Model_mode < 12) // not sure what to do with MODSIM-MODFLOW (13), maybe call MFNWT_RUN
         {
-            gsflow_prms(ref Process_mode, ref afr, ref dim, ref Nlakes, MF_Segs_Converge, IDivert, EXCHANGE, DELTAVOL); // run mode
+            gsflow_prms(ref Process_mode, ref afr, ref dim, ref Nlakes, ref Nsegs, ref nsegshold, ref Nlakeshold, MF_Segs_Converge, IDivert, EXCHANGE, DELTAVOL); // run mode
         }
 
         MFRunYet = true;
