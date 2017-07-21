@@ -45,6 +45,7 @@ public static class SurfGWModule
     public static int Process_mode;
     public static string mappingFileName;
     public static string xyFileName;
+    private static int accuracy;
 
     //Fortran DLL interface
 
@@ -152,6 +153,7 @@ public static class SurfGWModule
             try
             {
                 XYFileReader.Read(myModel,xyFileName);
+                accuracy = (int)Math.Pow(10.0, (double) myModel.accuracy);
                 PrepareMODSIMNetwork(map_FileName);
                 XYFileWriter.Write(myModel, xyFileName.Replace(".xy", "MSGSF.xy"));
                 Modsim.RunSolver(myModel);
@@ -480,7 +482,7 @@ public static class SurfGWModule
     private static void OnIterationTop()
     {
         //Before network gets primed for the solver
-        afr = false;
+        //afr = false;
         if (myModel.mInfo.Iteration == 0)
         {
             //MF_TimeStep = myModel.mInfo.CurrentModelTimeStepIndex;
@@ -488,7 +490,7 @@ public static class SurfGWModule
             //MFNWT_RDSTRESS(ref MF_TimeStep);
             MFRunYet = false;
             //Set flag for GSFlow that models converge and need to advance time step
-            afr = true;
+          //  afr = true;
         }
     }
 
@@ -509,7 +511,7 @@ public static class SurfGWModule
         {
             Link depLink = myModel.FindLink("MF_Dep_" + (string)mrow["Link Name"]);
             Link accLink = myModel.FindLink("MF_Acc_" + (string)mrow["Link Name"]);
-            double m_value = MF_Acc_Dep[(int)((double)mrow["iseg"] - 1)];  // This sets the MF returned GW-SW acc/dep
+            double m_value = EXCHANGE[(int)((double)mrow["iseg"] - 1)];  // This sets the MF returned GW-SW acc/dep
                                                                        // Need the -1 to account for 0-based indexing in C#
 
 
@@ -543,9 +545,9 @@ public static class SurfGWModule
     {
         Link m_MFLink = myModel.FindLink("MF_Dep_" + m_link.name);
         //TODO: check if the variable can replace the accuracy
-        if (m_MFLink != null) { m_row["MF_Depletion"] = m_MFLink.mlInfo.flow/myModel.accuracy; }
+        if (m_MFLink != null) { m_row["MF_Depletion"] = m_MFLink.mlInfo.flow/accuracy; }
         m_MFLink = myModel.FindLink("MF_Acc_" + m_link.name);
-        if (m_MFLink != null) { m_row["MF_Accretion"] = m_MFLink.mlInfo.flow/1000; }
+        if (m_MFLink != null) { m_row["MF_Accretion"] = m_MFLink.mlInfo.flow/ accuracy; }
     }
 
     //static bool DeltaVolNeg;
@@ -559,7 +561,7 @@ public static class SurfGWModule
     private static void OnIterationConverge()
     {
         bool MODFLOWConverge = false;
-        int a = 0;
+        //int a = 0;
         //afr = false;
 
         
@@ -614,13 +616,13 @@ public static class SurfGWModule
  
          //MFNWT_RUN(ref MF_TimeStep, ref MF_TimeStep, MF_Segs, MF_ActDivs, ref Adv_TabF);  //For now, MODSIM-MODFLOW requires one time step per stress period
          int dim = MF_Segs_Converge.Length;
-        gsflow_prms(ref Process_mode, ref afr, ref dim, ref Nlakes, ref Nsegs, ref nsegshold, ref Nlakeshold, MF_Segs_Converge,  IDivert, EXCHANGE, DELTAVOL);
+        // gsflow_prms(ref Process_mode, ref afr, ref dim, ref Nlakes, ref Nsegs, ref nsegshold, ref Nlakeshold, MF_Acc_Dep,  IDivert, EXCHANGE, DELTAVOL);
         /* MODSIM calls each timestep and iteration */
         /* AFR is set to FALSE for 2nd iteration */
 
         if (Model_mode < 12) // not sure what to do with MODSIM-MODFLOW (13), maybe call MFNWT_RUN
         {
-            gsflow_prms(ref Process_mode, ref afr, ref dim, ref Nlakes, ref Nsegs, ref nsegshold, ref Nlakeshold, MF_Segs_Converge, IDivert, EXCHANGE, DELTAVOL); // run mode
+            gsflow_prms(ref Process_mode, ref afr, ref dim, ref Nlakes, ref Nsegs, ref nsegshold, ref Nlakeshold, MF_Acc_Dep, IDivert, EXCHANGE, DELTAVOL); // run mode
         }
 
         MFRunYet = true;
@@ -665,11 +667,15 @@ public static class SurfGWModule
         ////    myModel.FindNode("19_5").mnInfo.infLink.mlInfo.hi += (long)(-volDiff);
         //}
 
-        MODFLOWConverge = Get_Div_Chng();  
+        MODFLOWConverge = Get_Div_Chng();
 
         if (!MODFLOWConverge)
         {
+            afr = false;
             //MODFLOWConverge = CheckOscillating(MF_Segs);
+        } else
+        {
+            afr = true;
         }
 
         //TODO: This could be controled by the setting in MODSIM
@@ -734,7 +740,7 @@ public static class SurfGWModule
         int a = 0;
         for (int i = 0; i < MF_Acc_Dep.Length; i++)
         {
-            converge = converge && (Math.Abs(MF_Acc_Dep[i]-MF_Acc_DepPREV[i]) < (MF_Acc_DepPREV[i] * percent_diff));
+            converge = converge && ((double)Math.Abs(MF_Acc_Dep[i]-MF_Acc_DepPREV[i]) <= (double)(MF_Acc_DepPREV[i] * percent_diff));
         }
         //foreach (DictionaryEntry de in myDiversionsN)
         //{
