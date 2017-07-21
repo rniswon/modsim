@@ -350,7 +350,7 @@ public static class SurfGWModule
 
         //Dimension arrays to the input table
         Array.Resize <double> (ref MF_Acc_Dep, m_SyncTblSEG.Rows.Count);
-        Array.Resize<double>(ref MF_Acc_Dep_Identifier, m_SyncTblSEG.Rows.Count);
+        //Array.Resize<double>(ref MF_Acc_Dep_Identifier, m_SyncTblSEG.Rows.Count);
         Array.Resize<double>(ref MF_Segs_Converge, m_SyncTblSEG.Rows.Count); 
 
         // Redimension array "Diversions" to nseg
@@ -362,7 +362,8 @@ public static class SurfGWModule
         int i = 0;
         foreach (DataRow m_Row in m_SyncTblSEG.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
         {
-            MF_Acc_Dep_Identifier[i] = (double) m_Row["iseg"];
+            //MF_Acc_Dep_Identifier[i] = (double) m_Row["iseg"];
+            if (i != (int)((double)m_Row["iseg"] - 1)) throw new Exception("Iseg doesn't match the index of the array");
             MF_Acc_Dep[i] = 0;
             IDivert[i] = (int) (double) m_Row["Diversion"];
             i += 1;
