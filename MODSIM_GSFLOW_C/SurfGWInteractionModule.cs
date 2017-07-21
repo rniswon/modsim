@@ -17,7 +17,7 @@ public static class SurfGWModule
     public static SortedList myDepletions;
     public static SortedList myAcretions;
     public static SortedList myDiversionsN;
-    public static int MF_TimeStep;
+    //public static int MF_TimeStep;
     //public static int TS_old = 0;
     public static bool Adv_TabF = false;
     public static Link m_releaseLnk;
@@ -27,6 +27,7 @@ public static class SurfGWModule
     public static double[] MF_ActDivs = new double[1];
     public static double[] MF_Acc_Dep_Identifier = new double[1000];
     public static double[] MF_Acc_Dep; //= new double[1000];
+    public static double[] MF_Acc_DepPREV;
     public static double[] Diversions = new double[1];
     public static int[] IDivert = new int[1];
     public static double[] EXCHANGE = new double[1];
@@ -341,6 +342,7 @@ public static class SurfGWModule
 
         //Dimension arrays to the input table
         Array.Resize <double> (ref MF_Acc_Dep, m_SyncTblSEG.Rows.Count);
+        Array.Resize<double>(ref MF_Acc_DepPREV, m_SyncTblSEG.Rows.Count);
         //Array.Resize<double>(ref MF_Acc_Dep_Identifier, m_SyncTblSEG.Rows.Count);
         Array.Resize<double>(ref MF_Segs_Converge, m_SyncTblSEG.Rows.Count); 
 
@@ -472,8 +474,8 @@ public static class SurfGWModule
         afr = false;
         if (myModel.mInfo.Iteration == 0)
         {
-            MF_TimeStep = myModel.mInfo.CurrentModelTimeStepIndex;
-            MF_TimeStep += 1;
+            //MF_TimeStep = myModel.mInfo.CurrentModelTimeStepIndex;
+            //MF_TimeStep += 1;
             //MFNWT_RDSTRESS(ref MF_TimeStep);
             MFRunYet = false;
             //Set flag for GSFlow that models converge and need to advance time step
@@ -551,21 +553,39 @@ public static class SurfGWModule
         int a = 0;
         //afr = false;
 
+        
         //extract the MODSIM calculated diversion values for inserting into an array that is passed to MF
-        SortedList myDiversions = new SortedList();
-        foreach (DictionaryEntry de in myDiversionsN)
+        //TO DO: This could be done using just the a loop on the array index and using IDivert as a flag for diversion.
+        foreach (DataRow mrow in m_SyncTblSEG.Rows)
         {
-            //Node m_DEMnode = (Node)de.Value;
-            Link m_Link = (Link)de.Value; 
-            myDiversions.Add(m_Link.name, m_Link.mlInfo.flow);  // Remember that "myDiversions" traces back to .divarr2 (all isegs requiring diversion overwrite)
-
-            //// Set initial divertions for later check of MS-MF convergence.
-            //if (Main_Ditches.Contains(Convert.ToInt32(m_Link.name)))
-            //{
-            MF_Segs_Converge[a] = m_Link.mlInfo.flow;
-            a += 1;
-            //}
+            double m_value = 0;
+            double m_PrevValue = 0;
+            if ((double)mrow["Diversion"] == 1)
+            {
+                Link m_Link = myModel.FindLink((string)mrow["Link Name"]);
+                m_value = m_Link.mlInfo.flow;
+                m_PrevValue = MF_Acc_Dep[(int)((double)mrow["iseg"] - 1)];
+            }
+            //Save the previous diversion values in an array for convergence
+            MF_Acc_DepPREV[(int)((double)mrow["iseg"] - 1)] = m_PrevValue;
+            //Asign values only to the diversion iseg
+            MF_Acc_Dep[(int)((double)mrow["iseg"] - 1)] = m_value;
         }
+      
+        //SortedList myDiversions = new SortedList();
+        //foreach (DictionaryEntry de in myDiversionsN)
+        //{
+        //    //Node m_DEMnode = (Node)de.Value;
+        //    Link m_Link = (Link)de.Value; 
+        //    myDiversions.Add(m_Link.name, m_Link.mlInfo.flow);  // Remember that "myDiversions" traces back to .divarr2 (all isegs requiring diversion overwrite)
+
+        //    //// Set initial divertions for later check of MS-MF convergence.
+        //    //if (Main_Ditches.Contains(Convert.ToInt32(m_Link.name)))
+        //    //{
+        //    MF_Segs_Converge[a] = m_Link.mlInfo.flow;
+        //    a += 1;
+        //    //}
+        //}
         
         // Because specified releases equal to 0 from LAKs are a flag in MF, need to set a MODSIM reservoir release
         // of 0.0 to a slightly non-zero value to avoid this flag. Example to follow if necessary
@@ -574,8 +594,8 @@ public static class SurfGWModule
         //    MF_Segs[4] = 0.01;
         //}
 
-        MF_TimeStep = myModel.mInfo.CurrentModelTimeStepIndex;
-        MF_TimeStep += 1;                             //remember that MODSIM is 0-based whereas MODFLOW is 1-based
+        //MF_TimeStep = myModel.mInfo.CurrentModelTimeStepIndex;
+        //MF_TimeStep += 1;                             //remember that MODSIM is 0-based whereas MODFLOW is 1-based
         //if (MF_TimeStep >= 7987)
         //{
         //    //a debug breakpoint
@@ -585,13 +605,13 @@ public static class SurfGWModule
  
          //MFNWT_RUN(ref MF_TimeStep, ref MF_TimeStep, MF_Segs, MF_ActDivs, ref Adv_TabF);  //For now, MODSIM-MODFLOW requires one time step per stress period
          int dim = MF_Segs_Converge.Length;
-        gsflow_prms(ref Process_mode, ref afr, ref dim, ref Nlakes, MF_Segs_Converge,  IDivert, EXCHANGE, DELTAVOL);
+        gsflow_prms(ref Process_mode, ref afr, ref dim, ref Nlakes, MF_Acc_Dep,  IDivert, EXCHANGE, DELTAVOL);
         /* MODSIM calls each timestep and iteration */
         /* AFR is set to FALSE for 2nd iteration */
 
         if (Model_mode < 12) // not sure what to do with MODSIM-MODFLOW (13), maybe call MFNWT_RUN
         {
-            gsflow_prms(ref Process_mode, ref afr, ref dim, ref Nlakes, MF_Segs_Converge, IDivert, EXCHANGE, DELTAVOL); // run mode
+            gsflow_prms(ref Process_mode, ref afr, ref dim, ref Nlakes, MF_Acc_Dep, IDivert, EXCHANGE, DELTAVOL); // run mode
         }
 
         MFRunYet = true;
@@ -636,7 +656,7 @@ public static class SurfGWModule
         ////    myModel.FindNode("19_5").mnInfo.infLink.mlInfo.hi += (long)(-volDiff);
         //}
 
-        MODFLOWConverge = Get_Div_Chng(myDiversions);  
+        MODFLOWConverge = Get_Div_Chng();  
 
         if (!MODFLOWConverge)
         {
@@ -644,7 +664,7 @@ public static class SurfGWModule
         }
 
         //TODO: This could be controled by the setting in MODSIM
-        if (myModel.mInfo.Iteration > 98)
+        if (myModel.mInfo.Iteration > myModel.maxit)//98)
         {
             MODFLOWConverge = true;
         }
@@ -653,39 +673,39 @@ public static class SurfGWModule
         //if MODFLOWConverge == FALSE, MODSIM will loop again.
         myModel.mInfo.convg = MODFLOWConverge;
 
-        // if between-code conversion achieved, run MF Budget
-        if (MODFLOWConverge)
-        {
-            //Some debug code, can be removed
-            //Console.WriteLine("MODSIM Res: " + String.Format("{0:#,###}", resStorage) + "   MODFLOW Res: " + String.Format("{0:#,###}", MODF_LAK));
+        //// if between-code conversion achieved, run MF Budget
+        //if (MODFLOWConverge)
+        //{
+        //    //Some debug code, can be removed
+        //    //Console.WriteLine("MODSIM Res: " + String.Format("{0:#,###}", resStorage) + "   MODFLOW Res: " + String.Format("{0:#,###}", MODF_LAK));
 
-            //MFNWT_OCBUDGET(ref MF_TimeStep, ref MF_TimeStep, MF_Segs, MF_ActDivs);
+        //    //MFNWT_OCBUDGET(ref MF_TimeStep, ref MF_TimeStep, MF_Segs, MF_ActDivs);
 
-            //MFNWT_WRITERAS(ref MF_TimeStep);
+        //    //MFNWT_WRITERAS(ref MF_TimeStep);
 
-            // reset oscillation indexer
-            osc = -1;
+        //    // reset oscillation indexer
+        //    osc = -1;
 
-            //some debug code
-            if (myModel.mInfo.CurrentModelTimeStepIndex == 364)
-            {
-                string msg = "start debugging here";
-            }
-        }
-        else
-        {
-            a = 0;
-            foreach (DictionaryEntry de in myDiversionsN)
-            {
-                MF_Segs_Converge_Prev[a] = MF_Segs_Converge[a];
-                a += 1;
-            }
-            //    for (int x = 0; x < 25; x++)
-            //{
-            //    MF_Segs_Converge_Prev[x] = MF_Segs_Converge[x];
-            //}
+        //    //some debug code
+        //    if (myModel.mInfo.CurrentModelTimeStepIndex == 364)
+        //    {
+        //        string msg = "start debugging here";
+        //    }
+        //}
+        //else
+        //{
+        //    a = 0;
+        //    foreach (DictionaryEntry de in myDiversionsN)
+        //    {
+        //        MF_Segs_Converge_Prev[a] = MF_Segs_Converge[a];
+        //        a += 1;
+        //    }
+        //    //    for (int x = 0; x < 25; x++)
+        //    //{
+        //    //    MF_Segs_Converge_Prev[x] = MF_Segs_Converge[x];
+        //    //}
            
-        }
+        //}
     }
 
     private static void OnFinished()
@@ -695,7 +715,7 @@ public static class SurfGWModule
 
    
 
-    private static Boolean Get_Div_Chng(SortedList myDiversions)
+    private static Boolean Get_Div_Chng()//SortedList myDiversions)
     {
         bool converge = true;
         //double val;
@@ -703,11 +723,15 @@ public static class SurfGWModule
         //string name;
         double percent_diff = 0.005;
         int a = 0;
-        foreach (DictionaryEntry de in myDiversionsN)
+        for (int i = 0; i < MF_Acc_Dep.Length; i++)
         {
-            converge = converge && (Convert.ToDouble(MF_Segs_Converge[a]) <= MF_Segs_Converge_Prev[a] + (MF_Segs_Converge_Prev[a] * percent_diff));
-            a += 1;
+            converge = converge && (Math.Abs(MF_Acc_Dep[i]-MF_Acc_DepPREV[i]) < (MF_Acc_DepPREV[i] * percent_diff));
         }
+        //foreach (DictionaryEntry de in myDiversionsN)
+        //{
+        //    converge = converge && (Convert.ToDouble(MF_Segs_Converge[a]) <= MF_Segs_Converge_Prev[a] + (MF_Segs_Converge_Prev[a] * percent_diff));
+        //    a += 1;
+        //}
 
         //if (((Convert.ToDouble(MF_Segs_Converge[0]) <= MF_Segs_Converge_Prev[0] + (MF_Segs_Converge_Prev[0] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[0]) >= MF_Segs_Converge_Prev[0] - (MF_Segs_Converge_Prev[0] * percent_diff)) &&
         //     (Convert.ToDouble(MF_Segs_Converge[1]) <= MF_Segs_Converge_Prev[1] + (MF_Segs_Converge_Prev[1] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[1]) >= MF_Segs_Converge_Prev[1] - (MF_Segs_Converge_Prev[1] * percent_diff)) &&
