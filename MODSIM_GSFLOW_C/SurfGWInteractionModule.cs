@@ -152,6 +152,10 @@ public static class SurfGWModule
             myModel.OnModsimError += OnError; 
             try
             {
+            if (Model_mode == 11) // MODSIM-PRMS
+              {
+                  gsflow_prms(ref Process_mode, ref afr, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL);
+              }
                 XYFileReader.Read(myModel,xyFileName);
                 accuracy = (int)Math.Pow(10.0, (double) myModel.accuracy);
                 PrepareMODSIMNetwork(map_FileName);
