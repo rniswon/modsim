@@ -509,7 +509,7 @@ public static class SurfGWModule
 
     private static void OnMessage(string message)
     {
-        Console.Write(message);
+        Console.Write(message + "\n");
     }
 
     private static void OnError(string message)
@@ -687,8 +687,9 @@ public static class SurfGWModule
         //}
 
         MODFLOWConverge = Get_Div_Chng();
+        MODFLOWConverge = MODFLOWConverge && MFRunYet;
 
-        if (!MODFLOWConverge && MFRunYet)
+        if (!MODFLOWConverge )
         {
             afr = false;
             MFRunYet = true;
