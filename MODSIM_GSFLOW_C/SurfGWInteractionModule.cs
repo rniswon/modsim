@@ -131,6 +131,7 @@ public static class SurfGWModule
         EXCHANGE = (double[])ResizeArray(EXCHANGE, new int[] { Nsegshold });
         EXCHANGEPREV = (double[])ResizeArray(EXCHANGEPREV, new int[] { Nsegshold });
         DELTAVOL = (double[])ResizeArray(DELTAVOL, new int[] { Nlakeshold });
+        LAKESTAGE = (double[])ResizeArray(LAKESTAGE, new int[] { Nlakeshold });
 
         if (Model_mode < 10) // GSFLOW and PRMS-only
         {
@@ -563,7 +564,7 @@ public static class SurfGWModule
     }
 
     //static bool DeltaVolNeg;
-    static bool MFVolRecal;
+    //static bool MFVolRecal;
     //static long DeltaVol=0;
     //static long volDiff=0;
     //static double MODF_LAK;         // MF Lake Vol
@@ -645,8 +646,6 @@ public static class SurfGWModule
             gsflow_prms(ref Process_mode, ref afr, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE,DELTAVOL, LAKESTAGE); // run mode
         }
 
-        MFRunYet = true;
-
         // reset the Adv_TabF flag
         //Adv_TabF = false;
         // store the current time step value for evaluating the status of the next MODSIM-MF iteration\
@@ -664,7 +663,7 @@ public static class SurfGWModule
         //long resStorage = m_ResNode.mnInfo.stend;
         //m_ResNode.mnInfo.evapLink.mlInfo.hi = (long) (m_ResNode.mnInfo.stend -MODF_LAK);
         //volDiff = (long)(m_ResNode.mnInfo.stend - Math.Max(m_ResNode.m.min_volume, MF_LK_Vol[0]));
-        MFVolRecal = true;
+        //MFVolRecal = true;
 
 
         //if (myModel.FindLink("MF_Dep_" + m_ResNode.name).mlInfo.hi == 0 && DeltaVol == 0)
@@ -689,9 +688,10 @@ public static class SurfGWModule
 
         MODFLOWConverge = Get_Div_Chng();
 
-        if (!MODFLOWConverge)
+        if (!MODFLOWConverge && MFRunYet)
         {
             afr = false;
+            MFRunYet = true;
             //MODFLOWConverge = CheckOscillating(MF_Segs);
         } else
         {
