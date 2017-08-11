@@ -16,7 +16,8 @@ public static class SurfGWModule
     //private static SortedList myStreamNodes;
     public static SortedList myDepletions;
     public static SortedList myAcretions;
-    public static SortedList myDiversionsN;
+    //public static SortedList myDiversionsN;
+    public static Link[] MS_Links;
     //public static int MF_TimeStep;
     //public static int TS_old = 0;
     public static bool Adv_TabF = false;
@@ -26,8 +27,8 @@ public static class SurfGWModule
     //public static double[] MF_Segs = new double[600];
     public static double[] MF_ActDivs = new double[1];
     public static double[] MF_Acc_Dep_Identifier = new double[1000];
-    public static double[] MF_Acc_Dep; //= new double[1000];
-    public static double[] MF_Acc_DepPREV;
+    public static double[] MS_Flows; //= new double[1000];
+    public static double[] MS_FlowsPREV;
     public static double[] Diversions = new double[1];
     public static int[] IDivert = new int[1];
     public static double[] EXCHANGE = new double[1];
@@ -36,8 +37,8 @@ public static class SurfGWModule
     public static DataTable m_table;
     public static DataTable map_table;
     public static StreamWriter sw = new StreamWriter(@"Iter_Output.txt");
-    public static double[] MF_Segs_Converge = new double[1];
-    public static double[] MF_Segs_Converge_Prev; //= new double[25];
+    //public static double[] MF_Segs_Converge = new double[1];
+    //public static double[] MF_Segs_Converge_Prev; //= new double[25];
     public static List<int> Main_Ditches = new List<int>();
     public static bool afr;
     public static int Model_mode, Nsegshold, Nlakeshold;
@@ -356,10 +357,11 @@ public static class SurfGWModule
         //map_table.Columns.Add("iseg");
 
         //Dimension arrays to the input table
-        Array.Resize <double> (ref MF_Acc_Dep, m_SyncTblSEG.Rows.Count);
-        Array.Resize<double>(ref MF_Acc_DepPREV, m_SyncTblSEG.Rows.Count);
+        Array.Resize <double> (ref MS_Flows, m_SyncTblSEG.Rows.Count);
+        Array.Resize<double>(ref MS_FlowsPREV, m_SyncTblSEG.Rows.Count);
+        Array.Resize<Link>(ref MS_Links, m_SyncTblSEG.Rows.Count);
         //Array.Resize<double>(ref MF_Acc_Dep_Identifier, m_SyncTblSEG.Rows.Count);
-        Array.Resize<double>(ref MF_Segs_Converge, m_SyncTblSEG.Rows.Count); 
+        //Array.Resize<double>(ref MF_Segs_Converge, m_SyncTblSEG.Rows.Count); 
 
         // Redimension array "Diversions" to nseg
         //Diversions = (double[])ResizeArray(Diversions, new int[] { m_SyncTblSEG.Rows.Count });
@@ -368,12 +370,15 @@ public static class SurfGWModule
         // Also, initialize MF_Acc_Dep (accretion/depletion) variables
         // TODO: Is this needed - they should be zero
         int i = 0;
+        Link m_Link;
         foreach (DataRow m_Row in m_SyncTblSEG.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
         {
             //MF_Acc_Dep_Identifier[i] = (double) m_Row["iseg"];
             if (i != (int)((double)m_Row["iseg"] - 1)) throw new Exception("Iseg doesn't match the index of the array");
-            MF_Acc_Dep[i] = 0;
+            MS_Flows[i] = 0;
             IDivert[i] = (int) (double) m_Row["Diversion"];
+            m_Link = myModel.FindLink((string)m_Row["Link Name"]); // Use .FindLink() instead
+            MS_Links[i] = m_Link;
             i += 1;
         }
 
@@ -442,7 +447,7 @@ public static class SurfGWModule
         //Main_Ditches.Add(601);     
 
         //Initialize Demands  //WftS
-        myDiversionsN = new SortedList();
+        //myDiversionsN = new SortedList();
         //foreach (int d in Divs_List)
         //{
         //    m_Link = myModel.FindLink(d.ToString()); // Use .FindLink() instead
@@ -450,19 +455,19 @@ public static class SurfGWModule
         //}
 
         //Dimension arrays to the input table
-        Array.Resize<double>(ref MF_Segs_Converge_Prev, m_SyncTblSEG.Rows.Count);
-        Array.Resize<double>(ref MF_Segs_Converge, m_SyncTblSEG.Rows.Count);
+        //Array.Resize<double>(ref MF_Segs_Converge_Prev, m_SyncTblSEG.Rows.Count);
+        //Array.Resize<double>(ref MF_Segs_Converge, m_SyncTblSEG.Rows.Count);
 
-        Link m_Link;
-        foreach (DataRow m_Row in m_SyncTblSEG.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
-        {
-            if ((double)m_Row["Diversion"] == 1)
-            {
-                m_Link = myModel.FindLink((string)m_Row["Link Name"]); // Use .FindLink() instead
-                myDiversionsN.Add(m_Link.name, m_Link);
-            }
+        //Link m_Link;
+        //foreach (DataRow m_Row in m_SyncTblSEG.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
+        //{
+        //    if ((double)m_Row["Diversion"] == 1)
+        //    {
+        //        m_Link = myModel.FindLink((string)m_Row["Link Name"]); // Use .FindLink() instead
+        //        myDiversionsN.Add(m_Link.name, m_Link);
+        //    }
             
-        }
+        //}
 
         //// Write a header row to the streamwriter for reading in later
         //sw.WriteLine("Flux TS Iter OldVal NewVal Node DivAmt");
@@ -500,6 +505,7 @@ public static class SurfGWModule
 
     private static void OnMessage(string message)
     {
+        Console.Write(message);
     }
 
     private static void OnError(string message)
@@ -568,24 +574,31 @@ public static class SurfGWModule
         //int a = 0;
         //afr = false;
 
-        
+
         //extract the MODSIM calculated diversion values for inserting into an array that is passed to MF
         //TO DO: This could be done using just the a loop on the array index and using IDivert as a flag for diversion.
-        foreach (DataRow mrow in m_SyncTblSEG.Rows)
+        for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
         {
-            double m_value = 0;
-            double m_PrevValue = 0;
-            if ((double)mrow["Diversion"] == 1)
-            {
-                Link m_Link = myModel.FindLink((string)mrow["Link Name"]);
-                m_value = m_Link.mlInfo.flow;
-                m_PrevValue = MF_Acc_Dep[(int)((double)mrow["iseg"] - 1)];
-            }
-            //Save the previous diversion values in an array for convergence
-            MF_Acc_DepPREV[(int)((double)mrow["iseg"] - 1)] = m_PrevValue;
-            //Asign values only to the diversion iseg
-            MF_Acc_Dep[(int)((double)mrow["iseg"] - 1)] = m_value;
+            MS_FlowsPREV[i] = MS_Flows[i];
+            MS_Flows[i] = MS_Links[i].mlInfo.flow;
         }
+        //foreach (DataRow mrow in m_SyncTblSEG.Rows)
+        //{
+        //    double m_value = 0;
+        //    double m_PrevValue = 0;
+        //    m_value = MS_Links[i].mlInfo.flow;
+
+        //    if ((double)mrow["Diversion"] == 1)
+        //    {
+        //        Link m_Link = myModel.FindLink((string)mrow["Link Name"]);
+        //        m_value = m_Link.mlInfo.flow;
+        //        m_PrevValue = MS_Flows[(int)((double)mrow["iseg"] - 1)];
+        //    }
+        //    //Save the previous diversion values in an array for convergence
+        //    MF_Acc_DepPREV[(int)((double)mrow["iseg"] - 1)] = m_PrevValue;
+        //    //Asign values only to the diversion iseg
+        //    MF_Acc_Dep[(int)((double)mrow["iseg"] - 1)] = m_value;
+        //}
       
         //SortedList myDiversions = new SortedList();
         //foreach (DictionaryEntry de in myDiversionsN)
@@ -619,14 +632,14 @@ public static class SurfGWModule
         //}
  
          //MFNWT_RUN(ref MF_TimeStep, ref MF_TimeStep, MF_Segs, MF_ActDivs, ref Adv_TabF);  //For now, MODSIM-MODFLOW requires one time step per stress period
-         int dim = MF_Segs_Converge.Length;
+         //int dim = MF_Segs_Converge.Length;
         // gsflow_prms(ref Process_mode, ref afr, ref Nsegshold, ref Nlakeshold, MF_Acc_Dep,  IDivert, EXCHANGE, DELTAVOL);
         /* MODSIM calls each timestep and iteration */
         /* AFR is set to FALSE for 2nd iteration */
 
         if (Model_mode < 12) // not sure what to do with MODSIM-MODFLOW (13), maybe call MFNWT_RUN
         {
-            gsflow_prms(ref Process_mode, ref afr, ref Nsegshold, ref Nlakeshold, MF_Acc_Dep, IDivert, EXCHANGE, DELTAVOL); // run mode
+            gsflow_prms(ref Process_mode, ref afr, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL); // run mode
         }
 
         MFRunYet = true;
@@ -742,9 +755,9 @@ public static class SurfGWModule
         //string name;
         double percent_diff = 0.005;
         int a = 0;
-        for (int i = 0; i < MF_Acc_Dep.Length; i++)
+        for (int i = 0; i < MS_Flows.Length; i++)
         {
-            converge = converge && ((double)Math.Abs(MF_Acc_Dep[i]-MF_Acc_DepPREV[i]) <= (double)(MF_Acc_DepPREV[i] * percent_diff));
+            converge = converge && ((double)Math.Abs(MS_Flows[i]- MS_FlowsPREV[i]) <= (double)(MS_FlowsPREV[i] * percent_diff));
         }
         //foreach (DictionaryEntry de in myDiversionsN)
         //{
