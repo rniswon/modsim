@@ -18,6 +18,7 @@ public static class SurfGWModule
     public static SortedList myAcretions;
     //public static SortedList myDiversionsN;
     public static Link[] MS_Links;
+    public static Node[] MS_Reservoirs;
     //public static int MF_TimeStep;
     //public static int TS_old = 0;
     public static bool Adv_TabF = false;
@@ -199,7 +200,7 @@ public static class SurfGWModule
         return FileName;
         }
 
-    private static DataTable m_SyncTblSEG;//, m_SyncTblDIV;
+    private static DataTable m_SyncTblSEG, m_SyncTblRES;//, m_SyncTblDIV;
     private static void PrepareMODSIMNetwork(string m_TblPath)
     {
         MWH.MWHUtils.GeneralUtils.MyDBUtils m_DBUtils = new MWH.MWHUtils.GeneralUtils.MyDBUtils(m_TblPath);
@@ -213,6 +214,9 @@ public static class SurfGWModule
         //m_Sql2 += " ORDER BY Modsim_GSFlow_Sync.MF_iseg";
         string m_Sql = "SELECT [MS-GSF_mapping_info].[Link Name], [MS-GSF_mapping_info].[iseg], [MS-GSF_mapping_info].[Diversion], [MS-GSF_mapping_info].ResRelease FROM [MS-GSF_mapping_info] ORDER BY [MS-GSF_mapping_info].iseg;";
         m_SyncTblSEG= m_DBUtils.GetTableFromDB(m_Sql, "SegmentSync");//"SELECT Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name FROM Modsim_Streams WHERE (((Modsim_Streams.MF_iseg) Is Not Null)) GROUP BY Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name;", "Streams");
+        //Get Reservoir mapping talbe 
+        m_Sql = "SELECT * FROM [MS-GSF_Lake_Mapping_Info] ORDER BY [MS-GSF_Lake_Mapping_Info].GSF_LAK_ID;";
+        m_SyncTblRES = m_DBUtils.GetTableFromDB(m_Sql, "ReservoirSync");
         ////PopulateSyncInfo(m_TblStreams);
         //m_Sql2 = m_Sql + " WHERE (((Modsim_GSFlow_Sync.MF_iseg) Is Not Null) AND ((Modsim_GSFlow_Sync.Diversion)=True))";
         //m_Sql2 += " ORDER BY Modsim_GSFlow_Sync.MF_iseg";
@@ -364,6 +368,7 @@ public static class SurfGWModule
         Array.Resize <double> (ref MS_Flows, m_SyncTblSEG.Rows.Count);
         Array.Resize<double>(ref MS_FlowsPREV, m_SyncTblSEG.Rows.Count);
         Array.Resize<Link>(ref MS_Links, m_SyncTblSEG.Rows.Count);
+        Array.Resize<Node>(ref MS_Reservoirs, m_SyncTblRES.Rows.Count);
         //Array.Resize<double>(ref MF_Acc_Dep_Identifier, m_SyncTblSEG.Rows.Count);
         //Array.Resize<double>(ref MF_Segs_Converge, m_SyncTblSEG.Rows.Count); 
 
@@ -386,7 +391,17 @@ public static class SurfGWModule
             i += 1;
         }
 
-        
+        //Initialize Reservoir arrays
+        Node m_Res;
+        i = 0;
+        foreach (DataRow m_Row in m_SyncTblRES.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
+        {
+            if (i != (int)((double)m_Row["GSF_LAK_ID"] - 1)) throw new Exception("Iseg doesn't match the index of the array");
+            m_Res = myModel.FindNode((string)m_Row["MODSIM_Name"]); 
+            MS_Reservoirs[i] = m_Res;
+            i += 1;
+        }
+
 
         //List<string> Divs_List = new List<string>();
         //i = 0;
@@ -470,7 +485,7 @@ public static class SurfGWModule
         //        m_Link = myModel.FindLink((string)m_Row["Link Name"]); // Use .FindLink() instead
         //        myDiversionsN.Add(m_Link.name, m_Link);
         //    }
-            
+
         //}
 
         //// Write a header row to the streamwriter for reading in later
@@ -521,38 +536,49 @@ public static class SurfGWModule
         //Network primed, ready for solver, upper bounds and lower bounds set
 
         //Asign accretions and depletions to the MODSIM network.
-        foreach (DataRow mrow in m_SyncTblSEG.Rows)
+        for (int i = 0; i < MS_Links.Length; i++)
         {
-            Link depLink = myModel.FindLink("MF_Dep_" + (string)mrow["Link Name"]);
-            Link accLink = myModel.FindLink("MF_Acc_" + (string)mrow["Link Name"]);
-            double m_value = EXCHANGE[(int)((double)mrow["iseg"] - 1)];  // This sets the MF returned GW-SW acc/dep
-                                                                       // Need the -1 to account for 0-based indexing in C#
+            double m_value = EXCHANGE[i] * accuracy;  // This sets the MF returned GW-SW acc/dep
+                                                      // Need the -1 to account for 0-based indexing in C#
+            assignDepAcc(MS_Links[i].name, m_value);
+        }
+        
+        //Implement Reservoir accretions/depletions
+        for (int i = 0;i<MS_Reservoirs.Length;i++)
+        {
+            double m_value = DELTAVOL[i]*accuracy;  // This sets the MF returned GW-SW acc/dep
+                                           // Need the -1 to account for 0-based indexing in C#
+            assignDepAcc(MS_Reservoirs[i].name, m_value);
+        }
+    }
 
-            //Value returned from MODFLOW in m3 and MODISM uses 1000m3, but using three decimal precision multiply by 1000 - No conversion needed
-            if (depLink != null && accLink != null)
+    private static void assignDepAcc (String m_Name, double m_Value)
+    {
+        //Value returned from MODFLOW in m3 and MODISM uses 1000m3, but using three decimal precision multiply by 1000 - No conversion needed
+        Link depLink = myModel.FindLink("MF_Dep_" + m_Name );
+        Link accLink = myModel.FindLink("MF_Acc_" + m_Name);
+        
+        if (depLink != null && accLink != null)
+        {
+            if (m_Value > 0)
             {
-                if (m_value > 0)
-                {
-                    //Acretions
-                    depLink.mlInfo.hi = 0;
-                    accLink.mlInfo.hi = Convert.ToInt32(m_value);
-                }
-                else
-                {
-                    //Depletions
-                    //set Depletions to the stream network as upper bounds in the high priority links
-                    depLink.mlInfo.hi = Convert.ToInt32(-m_value);
-                    accLink.mlInfo.hi = 0;
-                }
+                //Acretions
+                depLink.mlInfo.hi = 0;
+                accLink.mlInfo.hi = Convert.ToInt32(m_Value);
             }
             else
             {
-                Console.WriteLine("Missing Link" + mrow["MODSIM"]);
+                //Depletions
+                //set Depletions to the stream network as upper bounds in the high priority links
+                depLink.mlInfo.hi = Convert.ToInt32(-m_Value);
+                accLink.mlInfo.hi = 0;
             }
         }
-
+        else
+        {
+            Console.WriteLine("ERROR !!!  Missing Acc/Dep Links for " + m_Name);
+        }
     }
-
     //Add MF output to the original link
     private static void addLinkMFOutput(Link m_link ,  DataRow m_row )
     {
@@ -569,7 +595,7 @@ public static class SurfGWModule
     //static long volDiff=0;
     //static double MODF_LAK;         // MF Lake Vol
     static bool MFRunYet = false;   // Needed in MODFLOWComputeReturns
-    static int TS_old = 0;
+    //static int TS_old = 0;
 
     private static void OnIterationConverge()
     {
@@ -758,7 +784,7 @@ public static class SurfGWModule
         //double divAmt;
         //string name;
         double percent_diff = 0.005;
-        int a = 0;
+        //int a = 0;
         for (int i = 0; i < MS_Flows.Length; i++)
         {
             converge = converge && ((double)Math.Abs(MS_Flows[i]- MS_FlowsPREV[i]) <= (double)(MS_FlowsPREV[i] * percent_diff));
