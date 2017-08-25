@@ -4,3 +4,7 @@ MODSIM_GSFLOW_C/bin/x86/Debug/GSFLOW_MODSIM.dll
 MODSIM_GSFLOW_C/bin/Debug/MODSIM_GSFLOW_C.vshost.exe.manifest
 MODSIM_GSFLOW_C/bin/Debug/MODSIM_GSFLOW_C.vshost.exe.config
 MODSIM_GSFLOW_C/bin/Debug/GSFLOW_MODSIM.dll
+/MODSIM_GSFLOW/bin/Debug
+/MODSIM_GSFLOW_C/bin
+/MODSIM_GSFLOW_C/obj
+/MODSIM_GSFLOW_C/SurfGWInteractionModule - Copy2.txt

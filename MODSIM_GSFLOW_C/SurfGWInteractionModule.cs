@@ -396,7 +396,7 @@ public static class SurfGWModule
         i = 0;
         foreach (DataRow m_Row in m_SyncTblRES.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
         {
-            if (i != (int)((double)m_Row["GSF_LAK_ID"] - 1)) throw new Exception("Iseg doesn't match the index of the array");
+            if (i != ((short)m_Row["GSF_LAK_ID"]) - 1) throw new Exception("Iseg doesn't match the index of the array");
             m_Res = myModel.FindNode((string)m_Row["MODSIM_Name"]); 
             MS_Reservoirs[i] = m_Res;
             i += 1;
@@ -605,11 +605,11 @@ public static class SurfGWModule
 
 
         //extract the MODSIM calculated diversion values for inserting into an array that is passed to MF
-        //TO DO: This could be done using just the a loop on the array index and using IDivert as a flag for diversion.
         for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
         {
             MS_FlowsPREV[i] = MS_Flows[i];
-            MS_Flows[i] = MS_Links[i].mlInfo.flow;
+            //Only add flows for diversion links.
+            if (IDivert[i] > 0 ) MS_Flows[i] = MS_Links[i].mlInfo.flow;
             EXCHANGEPREV[i] = EXCHANGE[i];
         }
         //foreach (DataRow mrow in m_SyncTblSEG.Rows)
@@ -728,6 +728,7 @@ public static class SurfGWModule
         //TODO: This could be controled by the setting in MODSIM
         if (myModel.mInfo.Iteration > myModel.maxit)//98)
         {
+            Console.WriteLine("Ran into maximum number of iterations - Warning !!! models have not converged.");
             MODFLOWConverge = true;
         }
 
@@ -787,8 +788,15 @@ public static class SurfGWModule
         //int a = 0;
         for (int i = 0; i < MS_Flows.Length; i++)
         {
+            // Check for changes in the MODSIM flows in the diversion links.
             converge = converge && ((double)Math.Abs(MS_Flows[i]- MS_FlowsPREV[i]) <= (double)(MS_FlowsPREV[i] * percent_diff));
             converge = converge && ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) <= (double)(EXCHANGEPREV[i] * percent_diff));
+        }
+        for (int i = 0; i < LAKEVOL.Length; i++)
+        {
+            //TO DO: Add reservoir volume convergence.
+            // Needs to compare MODSIM end storage with MODFLOW LAKEVOL
+            
         }
         //foreach (DictionaryEntry de in myDiversionsN)
         //{
@@ -847,7 +855,7 @@ public static class SurfGWModule
         //      (Convert.ToDouble(MF_Segs_Converge[22]) == 0 && MF_Segs_Converge_Prev[22] == 0) &&
         //      (Convert.ToDouble(MF_Segs_Converge[23]) == 0 && MF_Segs_Converge_Prev[23] == 0) &&
         //      (Convert.ToDouble(MF_Segs_Converge[24]) == 0 && MF_Segs_Converge_Prev[24] == 0)))
-   
+
         //{
         //    converge = true;
         //}
