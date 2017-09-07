@@ -329,6 +329,7 @@ public static class SurfGWModule
         return temp;
     }
 
+    private static double uConvToMODFLOW;
     private static void OnInitialize()
     {
         //MFNWT_INIT();
@@ -505,6 +506,20 @@ public static class SurfGWModule
         m_OutputSupport.AddUserDefinedOutputVariable(myModel, "MF_Accretion",true, false, "Flow");
         m_OutputSupport.AddCurrentUserLinkOutput += addLinkMFOutput;
 
+        //Setting units conversion factor
+        if (myModel.UseMetricUnits)
+        {
+            //1000m3 is the default units for MODSIM in metric mode
+            //MODFLOW assumed to run in m3.
+            uConvToMODFLOW = 1000;
+        }
+        else
+        {
+            //the default units for MODSIM in english mode at run time is acre-ft
+            //MODFLOW assumed to run in ft3.
+            uConvToMODFLOW = 43559.9;
+        }
+        
     }
 
     private static void OnIterationTop()
@@ -538,7 +553,8 @@ public static class SurfGWModule
         //Asign accretions and depletions to the MODSIM network.
         for (int i = 0; i < MS_Links.Length; i++)
         {
-            double m_value = EXCHANGE[i] * accuracy;  // This sets the MF returned GW-SW acc/dep
+            double m_value = EXCHANGE[i] * accuracy / uConvToMODFLOW;  // This sets the MF returned GW-SW acc/dep
+                                                      // units conversion to MODSIM is required
                                                       // Need the -1 to account for 0-based indexing in C#
             assignDepAcc(MS_Links[i].name, m_value);
         }
@@ -546,7 +562,7 @@ public static class SurfGWModule
         //Implement Reservoir accretions/depletions
         for (int i = 0;i<MS_Reservoirs.Length;i++)
         {
-            double m_value = DELTAVOL[i]*accuracy;  // This sets the MF returned GW-SW acc/dep
+            double m_value = DELTAVOL[i] * accuracy / uConvToMODFLOW;  // This sets the MF returned GW-SW acc/dep
                                            // Need the -1 to account for 0-based indexing in C#
             assignDepAcc(MS_Reservoirs[i].name, m_value);
         }
@@ -609,7 +625,7 @@ public static class SurfGWModule
         {
             MS_FlowsPREV[i] = MS_Flows[i];
             //Only add flows for diversion links.
-            if (IDivert[i] > 0 ) MS_Flows[i] = MS_Links[i].mlInfo.flow;
+            if (IDivert[i] > 0 ) MS_Flows[i] = MS_Links[i].mlInfo.flow / accuracy * uConvToMODFLOW; //flow values converted to MODFLOW units
             EXCHANGEPREV[i] = EXCHANGE[i];
         }
         //foreach (DataRow mrow in m_SyncTblSEG.Rows)
@@ -789,8 +805,11 @@ public static class SurfGWModule
         for (int i = 0; i < MS_Flows.Length; i++)
         {
             // Check for changes in the MODSIM flows in the diversion links.
-            converge = converge && ((double)Math.Abs(MS_Flows[i]- MS_FlowsPREV[i]) <= (double)(MS_FlowsPREV[i] * percent_diff));
-            converge = converge && ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) <= (double)(EXCHANGEPREV[i] * percent_diff));
+            // Convergence checked in MODFLOW units.
+            converge = converge && ((double)Math.Abs(MS_Flows[i]- MS_FlowsPREV[i]) <= (double)(Math.Abs(MS_FlowsPREV[i]) * percent_diff));
+            //converge = converge && ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) <= (double)(Math.Abs(EXCHANGEPREV[i]) * percent_diff));
+            if (Math.Abs(MS_Flows[i] - MS_FlowsPREV[i])>0) Console.WriteLine("Diver:" + i + ":" + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
+            //if (Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > 0) Console.WriteLine("Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
         }
         for (int i = 0; i < LAKEVOL.Length; i++)
         {
