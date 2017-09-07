@@ -13,19 +13,14 @@ using MWH.MWHUtils.GeneralUtils;
 public static class SurfGWModule
 {
     public static Model myModel = new Model();
-    //private static SortedList myStreamNodes;
     public static SortedList myDepletions;
     public static SortedList myAcretions;
-    //public static SortedList myDiversionsN;
     public static Link[] MS_Links;
     public static Node[] MS_Reservoirs;
-    //public static int MF_TimeStep;
-    //public static int TS_old = 0;
     public static bool Adv_TabF = false;
     public static Link m_releaseLnk;
     public static Node m_ResNode;
     public static double[] MF_LK_Vol = new double[1]; // this example has only one reservoir
-    //public static double[] MF_Segs = new double[600];
     public static double[] MF_ActDivs = new double[1];
     public static double[] MF_Acc_Dep_Identifier = new double[1000];
     public static double[] MS_Flows; //= new double[1000];
@@ -40,8 +35,6 @@ public static class SurfGWModule
     public static DataTable m_table;
     public static DataTable map_table;
     public static StreamWriter sw = new StreamWriter(@"Iter_Output.txt");
-    //public static double[] MF_Segs_Converge = new double[1];
-    //public static double[] MF_Segs_Converge_Prev; //= new double[25];
     public static List<int> Main_Ditches = new List<int>();
     public static bool afr;
     public static int Model_mode, Nsegshold, Nlakeshold;
@@ -58,28 +51,6 @@ public static class SurfGWModule
 
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
     public static extern void gsflow_prmsSettings([In, Out] ref int Numts, ref int Model_mode, ref int startTime, ref int File1_length, [In, Out] char[] FileName1, ref int File2_length, [In, Out] char[] FileName2);
-
-    //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
-    //public static extern void MFNWT_INIT();
-
-    //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
-    //public static extern void MFNWT_RDSTRESS(ref int a);
-
-    //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
-    //public static extern void MFNWT_RUN(ref int a, ref int b, [In, Out] double[] Segs, [In, Out] double[] RealDiv_Amt, ref bool AdvFlwRdr);  
-
-    //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
-    ////public static extern void COMPUTE_EXCHG([In, Out] double[] Exchng, [In, Out] double[] LKVol, ref int a);
-    //public static extern void COMPUTE_EXCHG([In, Out] double[] Exchng_Ident, [In, Out] double[] Exchng_Amt, ref int a);
-
-    //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
-    //public static extern void MFNWT_OCBUDGET(ref int a, ref int b, [In, Out] double[] Segs, [In, Out] double[] RealDiv_Amt);
-
-    //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
-    //public static extern void MFNWT_WRITERAS(ref int a);
-
-    //[DllImport("MF_DLL_CV.dll", CallingConvention = CallingConvention.Cdecl)]
-    //public static extern void MFNWT_CLEAN();
 
     public static void Main(string[] CmdArgs)
     {
@@ -204,28 +175,12 @@ public static class SurfGWModule
     private static void PrepareMODSIMNetwork(string m_TblPath)
     {
         MWH.MWHUtils.GeneralUtils.MyDBUtils m_DBUtils = new MWH.MWHUtils.GeneralUtils.MyDBUtils(m_TblPath);
-        //m_SyncTbl = new DataTable();
-        //m_SyncTbl.Columns.Add("Feature", System.Type.GetType("System.String"));
-        //m_SyncTbl.Columns.Add("MF Iseg", System.Type.GetType("System.Int32"));
-        //m_SyncTbl.Columns.Add("MODSIM", System.Type.GetType("System.String"));
-        //string m_Sql = "SELECT Modsim_GSFlow_Sync.LnkName, Modsim_GSFlow_Sync.MF_iseg, Modsim_GSFlow_Sync.Diversion";
-        //m_Sql += " FROM Modsim_GSFlow_Sync";
-        //string m_Sql2 = m_Sql + " WHERE (((Modsim_GSFlow_Sync.MF_iseg) Is Not Null) AND ((Modsim_GSFlow_Sync.Diversion)=False))";
-        //m_Sql2 += " ORDER BY Modsim_GSFlow_Sync.MF_iseg";
         string m_Sql = "SELECT [MS-GSF_mapping_info].[Link Name], [MS-GSF_mapping_info].[iseg], [MS-GSF_mapping_info].[Diversion], [MS-GSF_mapping_info].ResRelease FROM [MS-GSF_mapping_info] ORDER BY [MS-GSF_mapping_info].iseg;";
         m_SyncTblSEG= m_DBUtils.GetTableFromDB(m_Sql, "SegmentSync");//"SELECT Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name FROM Modsim_Streams WHERE (((Modsim_Streams.MF_iseg) Is Not Null)) GROUP BY Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name;", "Streams");
         //Get Reservoir mapping talbe 
         m_Sql = "SELECT * FROM [MS-GSF_Lake_Mapping_Info] ORDER BY [MS-GSF_Lake_Mapping_Info].GSF_LAK_ID;";
         m_SyncTblRES = m_DBUtils.GetTableFromDB(m_Sql, "ReservoirSync");
-        ////PopulateSyncInfo(m_TblStreams);
-        //m_Sql2 = m_Sql + " WHERE (((Modsim_GSFlow_Sync.MF_iseg) Is Not Null) AND ((Modsim_GSFlow_Sync.Diversion)=True))";
-        //m_Sql2 += " ORDER BY Modsim_GSFlow_Sync.MF_iseg";
-        //m_SyncTblDIV = m_DBUtils.GetTableFromDB(m_Sql2, "DiversionSync");//"SELECT Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name FROM Modsim_Streams WHERE (((Modsim_Streams.MF_iseg) Is Not Null)) GROUP BY Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name;", "Streams");
-        ////m_TblStreams = m_DBUtils.GetTableFromDB("SELECT Modsim_Canals.MF_iseg, Modsim_Canals.MOD_Name FROM Modsim_Canals WHERE (((Modsim_Canals.MF_iseg) Is Not Null)) GROUP BY Modsim_Canals.MF_iseg, Modsim_Canals.MOD_Name;", "Canals");
-        ////PopulateSyncInfo(m_TblStreams);
-        //m_SyncTblDIV.Columns.Add("Flow", System.Type.GetType("System.Int32"));
-        //m_SyncTblDIV.Columns.Add("PrevFlow", System.Type.GetType("System.Int32"));
-
+        
         //Create Sink Node
         Node m_Sink = myModel.AddNewNode(true);
         m_Sink.nodeType = NodeType.Sink;
@@ -305,18 +260,6 @@ public static class SurfGWModule
         m_Tbl.Rows.Add(tsRow);
     }
 
-    //private static void PopulateSyncInfo(DataTable m_Tbl)
-    //{
-    //    foreach (DataRow mrow in m_Tbl.Rows)
-    //    {
-    //        DataRow m_SyncRow = m_SyncTbl.NewRow();
-    //        m_SyncRow["Feature"] = m_Tbl.TableName;
-    //        m_SyncRow["MF Iseg"] = mrow["MF_iseg"];
-    //        m_SyncRow["MODSIM"] = mrow["MOD_Name"];
-    //        m_SyncTbl.Rows.Add(m_SyncRow);
-    //    }
-    //}
-
     private static Array ResizeArray(Array arr, int[] newSizes)
     {
         if (newSizes.Length != arr.Rank)
@@ -332,51 +275,12 @@ public static class SurfGWModule
     private static double uConvToMODFLOW;
     private static void OnInitialize()
     {
-        //MFNWT_INIT();
-
-        //Link m_Link;
-        //List<int> Divs_List = new List<int>();
-
-        //// Read in a file that contains only the farm-level and main ditch-level diversions
-        //using (StreamReader reader = File.OpenText("./various_debris/CV-wes-7915trans.divarr"))
-        //{
-        //    string input;
-        //    int div;
-        //    int i = 0;
-        //    while ((input = reader.ReadLine()) != null)
-        //    {
-        //        while (input[0]=='#')  // ignore commented lines
-        //        {
-        //            input = reader.ReadLine();
-        //        }
-
-        //        div = Convert.ToInt32(input);
-        //        Divs_List.Add(div);
-
-        //        // Store in an array that is passable to MF.
-        //        MF_ActDivs[i] = Convert.ToDouble(div);
-        //        i++;
-        //    }
-        //}
-
-        ////Read in a file that contains all the links (iseg's) that require GW-SW interactions
-        //DataTable map_table = new DataTable();
-        //map_table.Columns.Add("linkname");
-        //map_table.Columns.Add("linknum");
-        //map_table.Columns.Add("iseg");
-
         //Dimension arrays to the input table
         Array.Resize <double> (ref MS_Flows, m_SyncTblSEG.Rows.Count);
         Array.Resize<double>(ref MS_FlowsPREV, m_SyncTblSEG.Rows.Count);
         Array.Resize<Link>(ref MS_Links, m_SyncTblSEG.Rows.Count);
         Array.Resize<Node>(ref MS_Reservoirs, m_SyncTblRES.Rows.Count);
-        //Array.Resize<double>(ref MF_Acc_Dep_Identifier, m_SyncTblSEG.Rows.Count);
-        //Array.Resize<double>(ref MF_Segs_Converge, m_SyncTblSEG.Rows.Count); 
-
-        // Redimension array "Diversions" to nseg
-        //Diversions = (double[])ResizeArray(Diversions, new int[] { m_SyncTblSEG.Rows.Count });
-        //IDivert = (int[])ResizeArray(IDivert, new int[] { m_SyncTblSEG.Rows.Count });
-
+       
         // Also, initialize MF_Acc_Dep (accretion/depletion) variables
         // TODO: Is this needed - they should be zero
         int i = 0;
@@ -404,102 +308,6 @@ public static class SurfGWModule
         }
 
 
-        //List<string> Divs_List = new List<string>();
-        //i = 0;
-        //foreach (DataRow m_Row in m_SyncTblDIV.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
-        //{
-        //    Divs_List.Add((string) m_Row["LnkName"]);
-        //    i += 1;
-        //}
-
-        //using (StreamReader reader = File.OpenText("./various_debris/CV-wes-7915trans.nlst"))
-        //{
-        //    string input;
-        //    int div;
-        //    int i = 0;
-        //    while ((input = reader.ReadLine()) != null)
-        //    {
-        //        while (input[0] == '#')  // ignore commented lines
-        //        {
-        //            input = reader.ReadLine();
-        //        }
-
-        //        string[] m_arr = input.Split(new char[] {' ', '\t'}, StringSplitOptions.RemoveEmptyEntries);
-
-        //        // Set up a new row
-        //        DataRow mapping_info = map_table.NewRow();
-        //        mapping_info["linkname"] = m_arr[0];
-        //        mapping_info["linknum"] = m_arr[1];
-        //        mapping_info["iseg"] = m_arr[2];
-
-        //        // Need to store only those isegs that require GW-SW interaction because there are so many 'ghost'
-        //        // links in the network...i.e., links that don't have corresponding isegs
-        //        MF_Acc_Dep_Identifier[i] = Convert.ToDouble(m_arr[2]);
-        //        i += 1;
-        //    }
-        //}
-
-        //// Set up a list of the main ditch diversions for checking convergence
-        //Main_Ditches.Add(161);
-        //Main_Ditches.Add(191);
-        //Main_Ditches.Add(227);
-        //Main_Ditches.Add(251);
-        //Main_Ditches.Add(282);
-        //Main_Ditches.Add(283);
-        //Main_Ditches.Add(290);
-        //Main_Ditches.Add(308);
-        //Main_Ditches.Add(332);
-        //Main_Ditches.Add(337);
-        //Main_Ditches.Add(348);
-        //Main_Ditches.Add(366);
-        //Main_Ditches.Add(392);
-        //Main_Ditches.Add(396);
-        //Main_Ditches.Add(397);
-        //Main_Ditches.Add(418);
-        //Main_Ditches.Add(438);
-        //Main_Ditches.Add(442);
-        //Main_Ditches.Add(443);
-        //Main_Ditches.Add(445);
-        //Main_Ditches.Add(454);
-        //Main_Ditches.Add(465);
-        //Main_Ditches.Add(525);
-        //Main_Ditches.Add(553);
-        //Main_Ditches.Add(601);     
-
-        //Initialize Demands  //WftS
-        //myDiversionsN = new SortedList();
-        //foreach (int d in Divs_List)
-        //{
-        //    m_Link = myModel.FindLink(d.ToString()); // Use .FindLink() instead
-        //    myDiversionsN.Add(m_Link.name, m_Link);
-        //}
-
-        //Dimension arrays to the input table
-        //Array.Resize<double>(ref MF_Segs_Converge_Prev, m_SyncTblSEG.Rows.Count);
-        //Array.Resize<double>(ref MF_Segs_Converge, m_SyncTblSEG.Rows.Count);
-
-        //Link m_Link;
-        //foreach (DataRow m_Row in m_SyncTblSEG.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
-        //{
-        //    if ((double)m_Row["Diversion"] == 1)
-        //    {
-        //        m_Link = myModel.FindLink((string)m_Row["Link Name"]); // Use .FindLink() instead
-        //        myDiversionsN.Add(m_Link.name, m_Link);
-        //    }
-
-        //}
-
-        //// Write a header row to the streamwriter for reading in later
-        //sw.WriteLine("Flux TS Iter OldVal NewVal Node DivAmt");
-
-        //Set initial values for testing of convergence among the 25 main diversions
-
-        //for (int i=0; i < 25; i++)
-        //{
-        //    MF_Segs_Converge_Prev[i] = 0;
-        //}
-
-
         //initialize custom output variables
         Csu.Modsim.NetworkUtils.ModelOutputSupport m_OutputSupport = (Csu.Modsim.NetworkUtils.ModelOutputSupport) myModel.OutputSupportClass;
         m_OutputSupport.AddUserDefinedOutputVariable(myModel, "MF_Depletion",true, false, "Flow");
@@ -524,17 +332,7 @@ public static class SurfGWModule
 
     private static void OnIterationTop()
     {
-        //Before network gets primed for the solver
-        //afr = false;
-        if (myModel.mInfo.Iteration == 0)
-        {
-            //MF_TimeStep = myModel.mInfo.CurrentModelTimeStepIndex;
-            //MF_TimeStep += 1;
-            //MFNWT_RDSTRESS(ref MF_TimeStep);
-            MFRunYet = false;
-            //Set flag for GSFlow that models converge and need to advance time step
-          //  afr = true;
-        }
+        if (myModel.mInfo.Iteration == 0) MFRunYet = false;  
     }
 
     private static void OnMessage(string message)
@@ -548,8 +346,6 @@ public static class SurfGWModule
 
     private static void OnIterationBottom()
     {
-        //Network primed, ready for solver, upper bounds and lower bounds set
-
         //Asign accretions and depletions to the MODSIM network.
         for (int i = 0; i < MS_Links.Length; i++)
         {
@@ -605,21 +401,12 @@ public static class SurfGWModule
         if (m_MFLink != null) { m_row["MF_Accretion"] = m_MFLink.mlInfo.flow/ accuracy; }
     }
 
-    //static bool DeltaVolNeg;
-    //static bool MFVolRecal;
-    //static long DeltaVol=0;
-    //static long volDiff=0;
-    //static double MODF_LAK;         // MF Lake Vol
     static bool MFRunYet = false;   // Needed in MODFLOWComputeReturns
-    //static int TS_old = 0;
-
+    
     private static void OnIterationConverge()
     {
         bool MODFLOWConverge = false;
-        //int a = 0;
-        //afr = false;
-
-
+        
         //extract the MODSIM calculated diversion values for inserting into an array that is passed to MF
         for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
         {
@@ -628,106 +415,13 @@ public static class SurfGWModule
             if (IDivert[i] > 0 ) MS_Flows[i] = MS_Links[i].mlInfo.flow / accuracy * uConvToMODFLOW; //flow values converted to MODFLOW units
             EXCHANGEPREV[i] = EXCHANGE[i];
         }
-        //foreach (DataRow mrow in m_SyncTblSEG.Rows)
-        //{
-        //    double m_value = 0;
-        //    double m_PrevValue = 0;
-        //    m_value = MS_Links[i].mlInfo.flow;
-
-        //    if ((double)mrow["Diversion"] == 1)
-        //    {
-        //        Link m_Link = myModel.FindLink((string)mrow["Link Name"]);
-        //        m_value = m_Link.mlInfo.flow;
-        //        m_PrevValue = MS_Flows[(int)((double)mrow["iseg"] - 1)];
-        //    }
-        //    //Save the previous diversion values in an array for convergence
-        //    MF_Acc_DepPREV[(int)((double)mrow["iseg"] - 1)] = m_PrevValue;
-        //    //Asign values only to the diversion iseg
-        //    MF_Acc_Dep[(int)((double)mrow["iseg"] - 1)] = m_value;
-        //}
-      
-        //SortedList myDiversions = new SortedList();
-        //foreach (DictionaryEntry de in myDiversionsN)
-        //{
-        //    //Node m_DEMnode = (Node)de.Value;
-        //    Link m_Link = (Link)de.Value; 
-        //    myDiversions.Add(m_Link.name, m_Link.mlInfo.flow);  // Remember that "myDiversions" traces back to .divarr2 (all isegs requiring diversion overwrite)
-
-        //    //// Set initial divertions for later check of MS-MF convergence.
-        //    //if (Main_Ditches.Contains(Convert.ToInt32(m_Link.name)))
-        //    //{
-        //    MF_Segs_Converge[a] = m_Link.mlInfo.flow;
-        //    a += 1;
-        //    //}
-        //}
         
-        // Because specified releases equal to 0 from LAKs are a flag in MF, need to set a MODSIM reservoir release
-        // of 0.0 to a slightly non-zero value to avoid this flag. Example to follow if necessary
-        //if (MF_Segs[4] == 0)
-        //{
-        //    MF_Segs[4] = 0.01;
-        //}
-
-        //MF_TimeStep = myModel.mInfo.CurrentModelTimeStepIndex;
-        //MF_TimeStep += 1;                             //remember that MODSIM is 0-based whereas MODFLOW is 1-based
-        //if (MF_TimeStep >= 7987)
-        //{
-        //    //a debug breakpoint
-        //    MF_TimeStep = myModel.mInfo.CurrentModelTimeStepIndex;
-        //    MF_TimeStep += 1;
-        //}
- 
-         //MFNWT_RUN(ref MF_TimeStep, ref MF_TimeStep, MF_Segs, MF_ActDivs, ref Adv_TabF);  //For now, MODSIM-MODFLOW requires one time step per stress period
-         //int dim = MF_Segs_Converge.Length;
-        // gsflow_prms(ref Process_mode, ref afr, ref Nsegshold, ref Nlakeshold, MF_Acc_Dep,  IDivert, EXCHANGE,DELTAVOL, LAKEVOL);
-        /* MODSIM calls each timestep and iteration */
-        /* AFR is set to FALSE for 2nd iteration */
-
         if (Model_mode < 12) // not sure what to do with MODSIM-MODFLOW (13), maybe call MFNWT_RUN
         {
             gsflow_prms(ref Process_mode, ref afr, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE,DELTAVOL, LAKEVOL); // run mode
         }
 
-        // reset the Adv_TabF flag
-        //Adv_TabF = false;
-        // store the current time step value for evaluating the status of the next MODSIM-MF iteration\
-        //TS_old = MF_TimeStep;
-
-        //bool MODFLOWConverge = SendDiversionToMODFLOW(myModel.mInfo.CurrentModelTimeStepIndex, myDiversions);
-
-        //bool MODFLOWConverge = GetMODFLOW_Acc_Dep(myDiversions, m_ResNode.mnInfo.stend);
-
-        // For this type of example problem, needed to add a new convergence criteria that is only
-        // based on the diversions (and res release).  Accretions/depletions too unstable.
-        // MODFLOWConverge = Get_Div_Chng(myDiversions, m_ResNode.mnInfo.stend);
-
-        //MODF_LAK = MF_LK_Vol[0];
-        //long resStorage = m_ResNode.mnInfo.stend;
-        //m_ResNode.mnInfo.evapLink.mlInfo.hi = (long) (m_ResNode.mnInfo.stend -MODF_LAK);
-        //volDiff = (long)(m_ResNode.mnInfo.stend - Math.Max(m_ResNode.m.min_volume, MF_LK_Vol[0]));
-        //MFVolRecal = true;
-
-
-        //if (myModel.FindLink("MF_Dep_" + m_ResNode.name).mlInfo.hi == 0 && DeltaVol == 0)
-        //{
-        //    if (volDiff < 0)
-        //    {
-        //        DeltaVolNeg = false;
-        //    }
-        //    else
-        //    {
-        //        DeltaVolNeg = true;
-        //    }
-        //}
-        //if (DeltaVolNeg)
-        //{
-        //    myModel.FindLink("MF_Dep_" + m_ResNode.name).mlInfo.hi += (long)(volDiff);
-        ////}
-        ////else
-        ////{
-        ////    myModel.FindNode("19_5").mnInfo.infLink.mlInfo.hi += (long)(-volDiff);
-        //}
-
+        //Check for convergence between MODSIM and MODFLOW
         MODFLOWConverge = Get_Div_Chng();
         MODFLOWConverge = MODFLOWConverge && MFRunYet;
 
@@ -741,67 +435,24 @@ public static class SurfGWModule
             afr = true;
         }
 
-        //TODO: This could be controled by the setting in MODSIM
-        if (myModel.mInfo.Iteration > myModel.maxit)//98)
+        if (myModel.mInfo.Iteration > myModel.maxit)
         {
             Console.WriteLine("Ran into maximum number of iterations - Warning !!! models have not converged.");
             MODFLOWConverge = true;
         }
-
-
-        //if MODFLOWConverge == FALSE, MODSIM will loop again.
         myModel.mInfo.convg = MODFLOWConverge;
-
-        //// if between-code conversion achieved, run MF Budget
-        //if (MODFLOWConverge)
-        //{
-        //    //Some debug code, can be removed
-        //    //Console.WriteLine("MODSIM Res: " + String.Format("{0:#,###}", resStorage) + "   MODFLOW Res: " + String.Format("{0:#,###}", MODF_LAK));
-
-        //    //MFNWT_OCBUDGET(ref MF_TimeStep, ref MF_TimeStep, MF_Segs, MF_ActDivs);
-
-        //    //MFNWT_WRITERAS(ref MF_TimeStep);
-
-        //    // reset oscillation indexer
-        //    osc = -1;
-
-        //    //some debug code
-        //    if (myModel.mInfo.CurrentModelTimeStepIndex == 364)
-        //    {
-        //        string msg = "start debugging here";
-        //    }
-        //}
-        //else
-        //{
-        //    a = 0;
-        //    foreach (DictionaryEntry de in myDiversionsN)
-        //    {
-        //        MF_Segs_Converge_Prev[a] = MF_Segs_Converge[a];
-        //        a += 1;
-        //    }
-        //    //    for (int x = 0; x < 25; x++)
-        //    //{
-        //    //    MF_Segs_Converge_Prev[x] = MF_Segs_Converge[x];
-        //    //}
-           
-        //}
     }
 
     private static void OnFinished()
     {
+        //TO DO: Do we need to do something here?
         //MFNWT_CLEAN();
     }
-
-   
-
+ 
     private static Boolean Get_Div_Chng()//SortedList myDiversions)
     {
         bool converge = true;
-        //double val;
-        //double divAmt;
-        //string name;
         double percent_diff = 0.005;
-        //int a = 0;
         for (int i = 0; i < MS_Flows.Length; i++)
         {
             // Check for changes in the MODSIM flows in the diversion links.
@@ -817,105 +468,6 @@ public static class SurfGWModule
             // Needs to compare MODSIM end storage with MODFLOW LAKEVOL
             
         }
-        //foreach (DictionaryEntry de in myDiversionsN)
-        //{
-        //    converge = converge && (Convert.ToDouble(MF_Segs_Converge[a]) <= MF_Segs_Converge_Prev[a] + (MF_Segs_Converge_Prev[a] * percent_diff));
-        //    a += 1;
-        //}
-
-        //if (((Convert.ToDouble(MF_Segs_Converge[0]) <= MF_Segs_Converge_Prev[0] + (MF_Segs_Converge_Prev[0] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[0]) >= MF_Segs_Converge_Prev[0] - (MF_Segs_Converge_Prev[0] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[1]) <= MF_Segs_Converge_Prev[1] + (MF_Segs_Converge_Prev[1] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[1]) >= MF_Segs_Converge_Prev[1] - (MF_Segs_Converge_Prev[1] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[2]) <= MF_Segs_Converge_Prev[2] + (MF_Segs_Converge_Prev[2] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[2]) >= MF_Segs_Converge_Prev[2] - (MF_Segs_Converge_Prev[2] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[3]) <= MF_Segs_Converge_Prev[3] + (MF_Segs_Converge_Prev[3] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[3]) >= MF_Segs_Converge_Prev[3] - (MF_Segs_Converge_Prev[3] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[4]) <= MF_Segs_Converge_Prev[4] + (MF_Segs_Converge_Prev[4] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[4]) >= MF_Segs_Converge_Prev[4] - (MF_Segs_Converge_Prev[4] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[5]) <= MF_Segs_Converge_Prev[5] + (MF_Segs_Converge_Prev[5] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[5]) >= MF_Segs_Converge_Prev[5] - (MF_Segs_Converge_Prev[5] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[6]) <= MF_Segs_Converge_Prev[6] + (MF_Segs_Converge_Prev[6] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[6]) >= MF_Segs_Converge_Prev[6] - (MF_Segs_Converge_Prev[6] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[7]) <= MF_Segs_Converge_Prev[7] + (MF_Segs_Converge_Prev[7] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[7]) >= MF_Segs_Converge_Prev[7] - (MF_Segs_Converge_Prev[7] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[8]) <= MF_Segs_Converge_Prev[8] + (MF_Segs_Converge_Prev[8] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[8]) >= MF_Segs_Converge_Prev[8] - (MF_Segs_Converge_Prev[8] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[9]) <= MF_Segs_Converge_Prev[9] + (MF_Segs_Converge_Prev[9] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[9]) >= MF_Segs_Converge_Prev[9] - (MF_Segs_Converge_Prev[9] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[10]) <= MF_Segs_Converge_Prev[10] + (MF_Segs_Converge_Prev[10] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[10]) >= MF_Segs_Converge_Prev[10] - (MF_Segs_Converge_Prev[10] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[11]) <= MF_Segs_Converge_Prev[11] + (MF_Segs_Converge_Prev[11] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[11]) >= MF_Segs_Converge_Prev[11] - (MF_Segs_Converge_Prev[11] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[12]) <= MF_Segs_Converge_Prev[12] + (MF_Segs_Converge_Prev[12] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[12]) >= MF_Segs_Converge_Prev[12] - (MF_Segs_Converge_Prev[12] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[13]) <= MF_Segs_Converge_Prev[13] + (MF_Segs_Converge_Prev[13] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[13]) >= MF_Segs_Converge_Prev[13] - (MF_Segs_Converge_Prev[13] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[14]) <= MF_Segs_Converge_Prev[14] + (MF_Segs_Converge_Prev[14] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[14]) >= MF_Segs_Converge_Prev[14] - (MF_Segs_Converge_Prev[14] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[15]) <= MF_Segs_Converge_Prev[15] + (MF_Segs_Converge_Prev[15] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[15]) >= MF_Segs_Converge_Prev[15] - (MF_Segs_Converge_Prev[15] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[16]) <= MF_Segs_Converge_Prev[16] + (MF_Segs_Converge_Prev[16] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[16]) >= MF_Segs_Converge_Prev[16] - (MF_Segs_Converge_Prev[16] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[17]) <= MF_Segs_Converge_Prev[17] + (MF_Segs_Converge_Prev[17] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[17]) >= MF_Segs_Converge_Prev[17] - (MF_Segs_Converge_Prev[17] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[18]) <= MF_Segs_Converge_Prev[18] + (MF_Segs_Converge_Prev[18] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[18]) >= MF_Segs_Converge_Prev[18] - (MF_Segs_Converge_Prev[18] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[19]) <= MF_Segs_Converge_Prev[19] + (MF_Segs_Converge_Prev[19] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[19]) >= MF_Segs_Converge_Prev[19] - (MF_Segs_Converge_Prev[19] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[20]) <= MF_Segs_Converge_Prev[20] + (MF_Segs_Converge_Prev[20] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[20]) >= MF_Segs_Converge_Prev[20] - (MF_Segs_Converge_Prev[20] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[21]) <= MF_Segs_Converge_Prev[21] + (MF_Segs_Converge_Prev[21] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[21]) >= MF_Segs_Converge_Prev[21] - (MF_Segs_Converge_Prev[21] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[22]) <= MF_Segs_Converge_Prev[22] + (MF_Segs_Converge_Prev[22] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[22]) >= MF_Segs_Converge_Prev[22] - (MF_Segs_Converge_Prev[22] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[23]) <= MF_Segs_Converge_Prev[23] + (MF_Segs_Converge_Prev[23] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[23]) >= MF_Segs_Converge_Prev[23] - (MF_Segs_Converge_Prev[23] * percent_diff)) &&
-        //     (Convert.ToDouble(MF_Segs_Converge[24]) <= MF_Segs_Converge_Prev[24] + (MF_Segs_Converge_Prev[24] * percent_diff) && Convert.ToDouble(MF_Segs_Converge[24]) >= MF_Segs_Converge_Prev[24] - (MF_Segs_Converge_Prev[24] * percent_diff)))
-        //     |
-        //     ((Convert.ToDouble(MF_Segs_Converge[0]) == 0 && MF_Segs_Converge_Prev[0] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[1]) == 0 && MF_Segs_Converge_Prev[1] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[2]) == 0 && MF_Segs_Converge_Prev[2] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[3]) == 0 && MF_Segs_Converge_Prev[3] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[4]) == 0 && MF_Segs_Converge_Prev[4] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[5]) == 0 && MF_Segs_Converge_Prev[5] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[6]) == 0 && MF_Segs_Converge_Prev[6] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[7]) == 0 && MF_Segs_Converge_Prev[7] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[8]) == 0 && MF_Segs_Converge_Prev[8] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[9]) == 0 && MF_Segs_Converge_Prev[9] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[10]) == 0 && MF_Segs_Converge_Prev[10] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[11]) == 0 && MF_Segs_Converge_Prev[11] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[12]) == 0 && MF_Segs_Converge_Prev[12] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[13]) == 0 && MF_Segs_Converge_Prev[13] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[14]) == 0 && MF_Segs_Converge_Prev[14] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[15]) == 0 && MF_Segs_Converge_Prev[15] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[16]) == 0 && MF_Segs_Converge_Prev[16] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[17]) == 0 && MF_Segs_Converge_Prev[17] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[18]) == 0 && MF_Segs_Converge_Prev[18] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[19]) == 0 && MF_Segs_Converge_Prev[19] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[20]) == 0 && MF_Segs_Converge_Prev[20] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[21]) == 0 && MF_Segs_Converge_Prev[21] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[22]) == 0 && MF_Segs_Converge_Prev[22] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[23]) == 0 && MF_Segs_Converge_Prev[23] == 0) &&
-        //      (Convert.ToDouble(MF_Segs_Converge[24]) == 0 && MF_Segs_Converge_Prev[24] == 0)))
-
-        //{
-        //    converge = true;
-        //}
-
-        //COMPUTE_EXCHG(MF_Acc_Dep_Identifier, MF_Acc_Dep, ref MF_TimeStep);
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // Some Debug code that can be commented out later.  Copied and pasted from "GetMODFLOW_Acc_Dep" above
-        //for (int i = 0; i < MF_Acc_Dep.GetLength(0); i++)
-        //{
-        //    name = Convert.ToString(m_table.Select("Modnum = " + MF_Acc_Dep[i, 0])[0][0]);
-        //    val = Convert.ToDouble(myAcretions[m_table.Select("Modnum = " + MF_Acc_Dep[i, 0])[0][0]]);
-
-        //    // retrieve the diverted amount to see if these values are changnig around with in the 
-        //    // interation which would suggest that accretions/depletions are impacting diverted
-        //    // amounts.  
-        //    if (name == "CA1" || name == "CA2" || name == "CA3" || name == "CA4")
-        //    {
-        //        divAmt = Convert.ToDouble(myDiversions[m_table.Select("Modnum = " + MF_Acc_Dep[i, 0])[0][0]]);
-        //    }
-        //    else
-        //    {
-        //        if (name == "NonStorage1")
-        //        {
-        //            divAmt = Convert.ToDouble(myDiversions["13_1_19_4"]);
-        //        }
-        //        else divAmt = 0.0;
-        //    }
-
-        //    sw.WriteLine("Acc " + Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex) + " " + Convert.ToInt32(myModel.mInfo.Iteration) + " " + Convert.ToSingle(val) + " " + Convert.ToSingle(MF_Acc_Dep[i, 1]) + " " + name + " " + divAmt);
-
-        //    val = Convert.ToDouble(myDepletions[m_table.Select("Modnum = " + MF_Acc_Dep[i, 0])[0][0]]);
-        //    sw.WriteLine("Dep " + Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex) + " " + Convert.ToInt32(myModel.mInfo.Iteration) + " " + Convert.ToSingle(val) + " " + Convert.ToSingle(MF_Acc_Dep[i, 2]) + " " + name + " " + divAmt);
-        //}
-
-        //only one lake, so output the values held by MODSIM/MODFLOW for comparison in the output file. 
-        //sw.WriteLine("LAKVol " + Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex) + " " + Convert.ToInt32(myModel.mInfo.Iteration) + " " + MF_LK_Vol[0] + " " + (long)(MODSIM_LK) + " " + "Reservoir " + Convert.ToDouble(myDiversions["13_1_19_4"]));
-
-        //sw.Flush();
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
         return converge;
     }
 
@@ -991,34 +543,6 @@ public static class SurfGWModule
 
         return converge;
     }
-
-
-    //private static int countRedo;
-    //private static Boolean SendDiversionToMODFLOW(int timeStep, SortedList diversions)
-    //{
-    //    bool converge = false;
-    //    //implement the MODISM diversions for the current time step in MODFLOW
-
-
-    //    //need to make an array that stores the old diversions for comparison to the new
-
-
-    //    //for testing assume three iterations where convergence in MODSIM is overwritten and set to false
-    //    countRedo += 1;
-    //    if (countRedo > 3)
-    //    {
-    //        countRedo = 0;
-    //        converge = true;
-    //        Console.WriteLine("TS:\t{0}", timeStep);
-    //        Console.WriteLine("\t-KEY-\t-VALUE-");
-    //        for (int i = 0; i < diversions.Count; i++)
-    //        {
-    //            Console.WriteLine("\t{0}:\t{1}", diversions.GetKey(i), diversions.GetByIndex(i));
-    //        }
-    //    }
-    //    // return convergence flag
-    //    return converge;
-    //}
 
     public static char[] ToCharacterArrayFortran(this string source, int length)
     {
