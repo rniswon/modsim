@@ -328,7 +328,9 @@ public static class SurfGWModule
             //MODFLOW assumed to run in ft3.
             uConvToMODFLOW = 43559.9;
         }
-        
+
+        // Write a header row to the streamwriter for evaluating convergence with R
+        sw.WriteLine("TS iseg Exchange_Prev Exchange");
     }
 
     private static void OnIterationTop()
@@ -462,10 +464,16 @@ public static class SurfGWModule
             // Check for changes in the MODSIM flows in the diversion links.
             // Convergence checked in MODFLOW units.
             converge = converge && ((double)Math.Abs(MS_Flows[i]- MS_FlowsPREV[i]) <= (double)(Math.Abs(MS_FlowsPREV[i]) * percent_diff));
-            //converge = converge && ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) <= (double)(Math.Abs(EXCHANGEPREV[i]) * percent_diff));
+            converge = converge && ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) <= (double)(Math.Abs(EXCHANGEPREV[i]) * percent_diff));
             if (Math.Abs(MS_Flows[i] - MS_FlowsPREV[i])>0) Console.WriteLine("Diver:" + i + ":" + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
-            //if (Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > 0) Console.WriteLine("Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
+            if (Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > 0) Console.WriteLine("Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
+            // myModel.mInfo.CurrentModelTimeStepIndex
+
+            //Here is what the header looks like: sw.WriteLine("TS iseg Exchange_Prev Exchange");
+            sw.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + Convert.ToInt32(i + 1) + " " + Convert.ToSingle(EXCHANGEPREV[i]) + " " + Convert.ToSingle(EXCHANGE[i]));
+            sw.Flush();
         }
+
         for (int i = 0; i < LAKEVOL.Length; i++)
         {
             //TO DO: Add reservoir volume convergence.
