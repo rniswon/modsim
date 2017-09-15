@@ -63,7 +63,7 @@ public static class SurfGWModule
         len_xyname = xyFileName.Length;
         len_mapname = mappingFileName.Length;
 
-// Process_mode: 0 = run, 1 = delcare; 2 = initialize; 3 = clean; 4 = setdims
+        // Process_mode: 0 = run, 1 = delcare; 2 = initialize; 3 = clean; 4 = setdims
         Process_mode = 4;  // setdims
         afr = true;
         MS_GSF_converge = false;
@@ -408,7 +408,7 @@ public static class SurfGWModule
     
     private static void OnIterationConverge()
     {
-        bool MODFLOWConverge = false;
+        bool MS_GSF_converge = false;
         
         //extract the MODSIM calculated diversion values for inserting into an array that is passed to MF
         for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
@@ -425,28 +425,26 @@ public static class SurfGWModule
         }
 
         //Check for convergence between MODSIM and MODFLOW
-        MODFLOWConverge = Get_Div_Chng();
-        MODFLOWConverge = MODFLOWConverge && MFRunYet;
+        MS_GSF_converge = Get_Div_Chng();
+        MS_GSF_converge = MS_GSF_converge && MFRunYet;
 
-        if (!MODFLOWConverge )
+        if (!MS_GSF_converge)
         {
             afr = false;
             MFRunYet = true;
             //MODFLOWConverge = CheckOscillating(MF_Segs);
         } else
         {
-            MS_GSF_converge = true;
             gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL); // converged mode
             afr = true;
-            MS_GSF_converge = false;
         }
 
         if (myModel.mInfo.Iteration > myModel.maxit)
         {
             Console.WriteLine("Ran into maximum number of iterations - Warning !!! models have not converged.");
-            MODFLOWConverge = true;
+            MS_GSF_converge = true;
         }
-        myModel.mInfo.convg = MODFLOWConverge;
+        myModel.mInfo.convg = MS_GSF_converge;
     }
 
     private static void OnFinished()
