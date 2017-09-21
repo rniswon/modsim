@@ -30,6 +30,7 @@ public static class SurfGWModule
     public static double[] EXCHANGE = new double[1];
     public static double[] EXCHANGEPREV = new double[1];
     public static double[] DELTAVOL = new double[1];
+    public static double[] DELTAVOLPREV = new double[1];
     public static double[] LAKEVOL = new double[1];
     public static object RAD_list;
     public static DataTable m_table;
@@ -104,6 +105,7 @@ public static class SurfGWModule
         EXCHANGE = (double[])ResizeArray(EXCHANGE, new int[] { Nsegshold });
         EXCHANGEPREV = (double[])ResizeArray(EXCHANGEPREV, new int[] { Nsegshold });
         DELTAVOL = (double[])ResizeArray(DELTAVOL, new int[] { Nlakeshold });
+        DELTAVOLPREV = (double[])ResizeArray(DELTAVOLPREV, new int[] { Nlakeshold });
         LAKEVOL = (double[])ResizeArray(LAKEVOL, new int[] { Nlakeshold });
 
         if (Model_mode < 10) // GSFLOW and PRMS-only
@@ -416,13 +418,29 @@ public static class SurfGWModule
             MS_FlowsPREV[i] = MS_Flows[i];
             //Only add flows for diversion links.
             if (IDivert[i] > 0 ) MS_Flows[i] = MS_Links[i].mlInfo.flow / accuracy * uConvToMODFLOW; //flow values converted to MODFLOW units
-            EXCHANGEPREV[i] = EXCHANGE[i];
+            EXCHANGEPREV[i] = EXCHANGE[i];            
         }
-        
+        //Implement Reservoir accretions/depletions
+        for (int i = 0; i < MS_Reservoirs.Length; i++) DELTAVOLPREV[i] = DELTAVOL[i];
+
+        //Need to know the value of LAKEVOL for the first (SS)
+        // If first iteration of first time step, overide MODSIM Lake volumes
+        if (!MFRunYet && (myModel.mInfo.CurrentModelTimeStepIndex == 0))
+        {
+            //gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL); // run mode
+            // Easiest way forward might be to expose LAK2MODSIM in the DLL so it is callable both by GSFLOW and by MODSIM (this may have implications for MODSIM-PRMS mode)
+            for (int i = 0; i < LAKEVOL.Length; i++)
+            {
+                MS_Reservoirs[i].m.starting_volume = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
+                MS_Reservoirs[i].mnInfo.start = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
+            } 
+        }
+
         if (Model_mode < 12) // not sure what to do with MODSIM-MODFLOW (13), maybe call MFNWT_RUN
         {
             gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE,DELTAVOL, LAKEVOL); // run mode
         }
+             
 
         //Check for convergence between MODSIM and MODFLOW
         MS_GSF_converge = Get_Div_Chng();
@@ -463,8 +481,8 @@ public static class SurfGWModule
             // Convergence checked in MODFLOW units.
             converge = converge && ((double)Math.Abs(MS_Flows[i]- MS_FlowsPREV[i]) <= (double)(Math.Abs(MS_FlowsPREV[i]) * percent_diff));
             converge = converge && ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) <= (double)(Math.Abs(EXCHANGEPREV[i]) * percent_diff));
-            if (Math.Abs(MS_Flows[i] - MS_FlowsPREV[i])>0) Console.WriteLine("Diver:" + i + ":" + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
-            if (Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > 0) Console.WriteLine("Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
+            //if (Math.Abs(MS_Flows[i] - MS_FlowsPREV[i])>0) Console.WriteLine("Diver:" + i + ":" + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
+            //if (Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > 0) Console.WriteLine("Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
             // myModel.mInfo.CurrentModelTimeStepIndex
 
             //Here is what the header looks like: sw.WriteLine("TS iseg Exchange_Prev Exchange");
@@ -472,11 +490,16 @@ public static class SurfGWModule
             sw.Flush();
         }
 
-        for (int i = 0; i < LAKEVOL.Length; i++)
+        for (int i = 0; i < DELTAVOL.Length; i++)
         {
             //TO DO: Add reservoir volume convergence.
             // Needs to compare MODSIM end storage with MODFLOW LAKEVOL
-            
+            // Convergence checked in MODFLOW units.
+            converge = converge && ((double)Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) <= (double)(Math.Abs(DELTAVOLPREV[i]) * percent_diff));
+            //if (Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) > 0) Console.WriteLine("Res:" + i + ":" + Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]));
+            //Check for convergence on the Reservoir Volumes
+            converge = converge && ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend - LAKEVOL[i]) <= (double)(Math.Abs(MS_Reservoirs[i].mnInfo.stend) * percent_diff));
+            Console.WriteLine("Res. Converge: MS:" + MS_Reservoirs[i].mnInfo.stend + " MF: " + LAKEVOL[i]);
         }
         return converge;
     }
