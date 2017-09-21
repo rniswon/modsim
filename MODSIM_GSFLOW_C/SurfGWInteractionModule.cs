@@ -53,6 +53,9 @@ public static class SurfGWModule
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
     public static extern void gsflow_prmsSettings([In, Out] ref int Numts, ref int Model_mode, ref int startTime, ref int File1_length, [In, Out] char[] FileName1, ref int File2_length, [In, Out] char[] FileName2);
 
+    [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
+    public static extern void LAK2MODSIM_InitLakes([In, Out] double[] DELTAVOL, [In, Out] double[] LAKEVOL);
+
     public static void Main(string[] CmdArgs)
     {
         
@@ -427,8 +430,8 @@ public static class SurfGWModule
         // If first iteration of first time step, overide MODSIM Lake volumes
         if (!MFRunYet && (myModel.mInfo.CurrentModelTimeStepIndex == 0))
         {
-            //gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL); // run mode
             // Easiest way forward might be to expose LAK2MODSIM in the DLL so it is callable both by GSFLOW and by MODSIM (this may have implications for MODSIM-PRMS mode)
+            LAK2MODSIM_InitLakes(DELTAVOL, LAKEVOL);
             for (int i = 0; i < LAKEVOL.Length; i++)
             {
                 MS_Reservoirs[i].m.starting_volume = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
