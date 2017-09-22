@@ -456,11 +456,10 @@ public static class SurfGWModule
 
         if (Model_mode < 12) // not sure what to do with MODSIM-MODFLOW (13), maybe call MFNWT_RUN
         {
-            gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE,DELTAVOL, LAKEVOL); // run mode
+            if(!VOLSync) gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE,DELTAVOL, LAKEVOL); // run mode
         }
-             
 
-        //Check for convergence between MODSIM and MODFLOW
+       //Check for convergence between MODSIM and MODFLOW
         MS_GSF_converge = Get_Div_Chng();
         MS_GSF_converge = MS_GSF_converge && MFRunYet;
         Console.Write(".");
@@ -474,6 +473,7 @@ public static class SurfGWModule
         {
             gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL); // converged mode
             afr = true;
+            VOLSync = false;
         }
 
         if (myModel.mInfo.Iteration > myModel.maxit)
@@ -489,20 +489,22 @@ public static class SurfGWModule
         //TO DO: Do we need to do something here?
         //MFNWT_CLEAN();
     }
- 
+
+    private static bool VOLSync = false;
     private static Boolean Get_Div_Chng()//SortedList myDiversions)
     {
         bool converge = true;
         double percent_diff = 0.005;
-        double LAKEVol_Tolerance = 10; //in m3
+        double EXCHNGVol_Tolerance = 1; //in m3
+        double LAKEVol_Tolerance = 10;//in m3
         for (int i = 0; i < MS_Flows.Length; i++)
         {
             // Check for changes in the MODSIM flows in the diversion links.
             // Convergence checked in MODFLOW units.
-            converge = converge && ((double)Math.Abs(MS_Flows[i]- MS_FlowsPREV[i]) <= (double)(Math.Abs(MS_FlowsPREV[i]) * percent_diff));
-            converge = converge && ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) <= (double)(Math.Abs(EXCHANGEPREV[i]) * percent_diff));
-            //if (Math.Abs(MS_Flows[i] - MS_FlowsPREV[i])>0) Console.WriteLine("Diver:" + i + ":" + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
-            //if (Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > 0) Console.WriteLine("Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
+            converge = converge && ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) <= EXCHNGVol_Tolerance);  // (double)(Math.Abs(MS_FlowsPREV[i]) * percent_diff));
+            converge = converge && ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) <= EXCHNGVol_Tolerance); // (double)(Math.Abs(EXCHANGEPREV[i]) * percent_diff));
+            //if ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) > EXCHNGVol_Tolerance) Console.WriteLine("Diver:" + i + ":" + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
+            //if ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > EXCHNGVol_Tolerance) Console.WriteLine("Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
             // myModel.mInfo.CurrentModelTimeStepIndex
 
             //Here is what the header looks like: sw.WriteLine("TS iseg Exchange_Prev Exchange");
@@ -516,10 +518,21 @@ public static class SurfGWModule
             // Needs to compare MODSIM end storage with MODFLOW LAKEVOL
             // Convergence checked in MODFLOW units.
             converge = converge && ((double)Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) <= (double)(Math.Abs(DELTAVOLPREV[i]) * percent_diff));
-            //if (Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) > 0) Console.WriteLine("Res:" + i + ":" + Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]));
+            //if ((double)Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) > (double)(Math.Abs(DELTAVOLPREV[i]) * percent_diff)) Console.WriteLine("Res:" + i + ":" + Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]));
             //Check for convergence on the Reservoir Volumes
-            converge = converge && ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend - LAKEVOL[i]) <= LAKEVol_Tolerance);
-            if ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend - LAKEVOL[i]) > LAKEVol_Tolerance) Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend + " MF: " + LAKEVOL[i]);
+            converge = converge && ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i]) <= LAKEVol_Tolerance);
+            //if ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i]) > LAKEVol_Tolerance) Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
+        }
+        if (converge)
+        {
+            //Trying to correct the end Volume convergence
+            for (int i = 0; i < MS_Reservoirs.Length; i++)
+            {
+                //DELTAVOL[i] += -((MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW) - LAKEVOL[i]);
+                //VOLSync = true;
+                //converge = false;
+                Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
+            }
         }
         return converge;
     }
