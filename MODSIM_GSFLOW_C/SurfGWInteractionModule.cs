@@ -27,6 +27,7 @@ public static class SurfGWModule
     public static double[] MS_FlowsPREV;
     public static double[] Diversions = new double[1];
     public static int[] IDivert = new int[1];
+    public static int[] IRelease = new int[1];
     public static double[] EXCHANGE = new double[1];
     public static double[] EXCHANGEPREV = new double[1];
     public static double[] DELTAVOL = new double[1];
@@ -105,6 +106,7 @@ public static class SurfGWModule
         // Redimension arrays to equal number of segments and lakes
         Diversions = (double[])ResizeArray(Diversions, new int[] { Nsegshold });
         IDivert = (int[])ResizeArray(IDivert, new int[] { Nsegshold });
+        IRelease = (int[])ResizeArray(IRelease, new int[] { Nsegshold });
         EXCHANGE = (double[])ResizeArray(EXCHANGE, new int[] { Nsegshold });
         EXCHANGEPREV = (double[])ResizeArray(EXCHANGEPREV, new int[] { Nsegshold });
         DELTAVOL = (double[])ResizeArray(DELTAVOL, new int[] { Nlakeshold });
@@ -297,6 +299,7 @@ public static class SurfGWModule
             if (i != (int)((double)m_Row["iseg"] - 1)) throw new Exception("Iseg doesn't match the index of the array");
             MS_Flows[i] = 0;
             IDivert[i] = (int) (double) m_Row["Diversion"];
+            IRelease[i] = (int)(double)m_Row["ResRelease"];
             m_Link = myModel.FindLink((string)m_Row["Link Name"]); // Use .FindLink() instead
             MS_Links[i] = m_Link;
             i += 1;
@@ -420,7 +423,18 @@ public static class SurfGWModule
         {
             MS_FlowsPREV[i] = MS_Flows[i];
             //Only add flows for diversion links.
-            if (IDivert[i] > 0 ) MS_Flows[i] = MS_Links[i].mlInfo.flow / accuracy * uConvToMODFLOW; //flow values converted to MODFLOW units
+            if (IDivert[i] > 0)
+            {
+                MS_Flows[i] = MS_Links[i].mlInfo.flow / accuracy * uConvToMODFLOW; //flow values converted to MODFLOW units
+
+                // MODFLOW interprets a specified release from a lake of 0.0 as a flag, specifically a flag
+                // telling MODFLOW to calculate the natural outflow from the based on the outlet's bed elevation
+                // this prevents that flag from being tripped.
+                if (IRelease[i] > 0 && MS_Flows[i] ==0)
+                {
+                    MS_Flows[i] = 0.0001;
+                }
+            }
             EXCHANGEPREV[i] = EXCHANGE[i];            
         }
         //Implement Reservoir accretions/depletions
@@ -448,6 +462,7 @@ public static class SurfGWModule
         //Check for convergence between MODSIM and MODFLOW
         MS_GSF_converge = Get_Div_Chng();
         MS_GSF_converge = MS_GSF_converge && MFRunYet;
+        Console.Write(".");
 
         if (!MS_GSF_converge)
         {
@@ -502,7 +517,7 @@ public static class SurfGWModule
             //if (Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) > 0) Console.WriteLine("Res:" + i + ":" + Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]));
             //Check for convergence on the Reservoir Volumes
             converge = converge && ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend - LAKEVOL[i]) <= (double)(Math.Abs(MS_Reservoirs[i].mnInfo.stend) * percent_diff));
-            Console.WriteLine("Res. Converge: MS:" + MS_Reservoirs[i].mnInfo.stend + " MF: " + LAKEVOL[i]);
+            if ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend - LAKEVOL[i]) <= (double)(Math.Abs(MS_Reservoirs[i].mnInfo.stend) * percent_diff)) Console.WriteLine("Res. Converge: MS:" + MS_Reservoirs[i].mnInfo.stend + " MF: " + LAKEVOL[i]);
         }
         return converge;
     }
