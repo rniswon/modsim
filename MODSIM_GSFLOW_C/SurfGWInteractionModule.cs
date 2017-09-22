@@ -33,6 +33,7 @@ public static class SurfGWModule
     public static double[] DELTAVOL = new double[1];
     public static double[] DELTAVOLPREV = new double[1];
     public static double[] LAKEVOL = new double[1];
+    public static double[] STARTLAKEVOL = new double[1];
     public static object RAD_list;
     public static DataTable m_table;
     public static DataTable map_table;
@@ -112,6 +113,7 @@ public static class SurfGWModule
         DELTAVOL = (double[])ResizeArray(DELTAVOL, new int[] { Nlakeshold });
         DELTAVOLPREV = (double[])ResizeArray(DELTAVOLPREV, new int[] { Nlakeshold });
         LAKEVOL = (double[])ResizeArray(LAKEVOL, new int[] { Nlakeshold });
+        STARTLAKEVOL = (double[])ResizeArray(STARTLAKEVOL, new int[] { Nlakeshold });
 
         if (Model_mode < 10) // GSFLOW and PRMS-only
         {
@@ -372,6 +374,8 @@ public static class SurfGWModule
             double m_value = DELTAVOL[i] * accuracy / uConvToMODFLOW;  // This sets the MF returned GW-SW acc/dep
                                            // Need the -1 to account for 0-based indexing in C#
             assignDepAcc(MS_Reservoirs[i].name, m_value);
+            //reset starting volume to the last converged MODFLOW reservoir volumes
+            if (MFRunYet) MS_Reservoirs[i].mnInfo.start = (long)(STARTLAKEVOL[i] * accuracy / uConvToMODFLOW);
         }
     }
 
@@ -451,12 +455,13 @@ public static class SurfGWModule
             {
                 MS_Reservoirs[i].m.starting_volume = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
                 MS_Reservoirs[i].mnInfo.start = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
+                STARTLAKEVOL[i] = LAKEVOL[i];
             } 
         }
 
         if (Model_mode < 12) // not sure what to do with MODSIM-MODFLOW (13), maybe call MFNWT_RUN
         {
-            if(!VOLSync) gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE,DELTAVOL, LAKEVOL); // run mode
+            gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE,DELTAVOL, LAKEVOL); // run mode
         }
 
        //Check for convergence between MODSIM and MODFLOW
@@ -472,8 +477,7 @@ public static class SurfGWModule
         } else
         {
             gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL); // converged mode
-            afr = true;
-            VOLSync = false;
+            afr = true;   
         }
 
         if (myModel.mInfo.Iteration > myModel.maxit)
@@ -490,13 +494,12 @@ public static class SurfGWModule
         //MFNWT_CLEAN();
     }
 
-    private static bool VOLSync = false;
     private static Boolean Get_Div_Chng()//SortedList myDiversions)
     {
         bool converge = true;
         double percent_diff = 0.005;
         double EXCHNGVol_Tolerance = 1; //in m3
-        double LAKEVol_Tolerance = 10;//in m3
+        double LAKEVol_Tolerance = 1;//in m3
         for (int i = 0; i < MS_Flows.Length; i++)
         {
             // Check for changes in the MODSIM flows in the diversion links.
@@ -532,6 +535,7 @@ public static class SurfGWModule
                 //VOLSync = true;
                 //converge = false;
                 Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
+                STARTLAKEVOL[i] = LAKEVOL[i];
             }
         }
         return converge;
