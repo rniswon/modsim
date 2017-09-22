@@ -25,7 +25,7 @@ public static class SurfGWModule
     public static double[] MF_Acc_Dep_Identifier = new double[1000];
     public static double[] MS_Flows; //= new double[1000];
     public static double[] MS_FlowsPREV;
-    public static double[] Diversions = new double[1];
+    public static double[] Diversions = new double[23];
     public static int[] IDivert = new int[1];
     public static int[] IRelease = new int[1];
     public static double[] EXCHANGE = new double[1];
@@ -44,7 +44,7 @@ public static class SurfGWModule
     public static int Process_mode;
     public static string mappingFileName;
     public static string xyFileName;
-    private static int accuracy;
+    private static double accuracy;
 
     //Fortran DLL interface
 
@@ -55,7 +55,7 @@ public static class SurfGWModule
     public static extern void gsflow_prmsSettings([In, Out] ref int Numts, ref int Model_mode, ref int startTime, ref int File1_length, [In, Out] char[] FileName1, ref int File2_length, [In, Out] char[] FileName2);
 
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void LAK2MODSIM_InitLakes([In, Out] double[] DELTAVOL, [In, Out] double[] LAKEVOL);
+    public static extern void LAK2MODSIM_InitLakes([In, Out] double[] DELTAVOL, [In, Out] double[] LAKEVOL, [In, Out] ref int kiter);
 
     public static void Main(string[] CmdArgs)
     {
@@ -142,7 +142,7 @@ public static class SurfGWModule
                   gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE,DELTAVOL, LAKEVOL);
               }
                 XYFileReader.Read(myModel,xyFileName);
-                accuracy = (int)Math.Pow(10.0, (double) myModel.accuracy);
+                accuracy = Math.Pow(10.0, (double) myModel.accuracy);
                 PrepareMODSIMNetwork(map_FileName);
                 XYFileWriter.Write(myModel, xyFileName.Replace(".xy", "MSGSF.xy"));
                 Modsim.RunSolver(myModel);
@@ -407,9 +407,9 @@ public static class SurfGWModule
     {
         Link m_MFLink = myModel.FindLink("MF_Dep_" + m_link.name);
         //TODO: check if the variable can replace the accuracy
-        if (m_MFLink != null) { m_row["MF_Depletion"] = m_MFLink.mlInfo.flow/accuracy; }
+        if (m_MFLink != null) { m_row["MF_Depletion"] = (double)m_MFLink.mlInfo.flow/accuracy; }
         m_MFLink = myModel.FindLink("MF_Acc_" + m_link.name);
-        if (m_MFLink != null) { m_row["MF_Accretion"] = m_MFLink.mlInfo.flow/ accuracy; }
+        if (m_MFLink != null) { m_row["MF_Accretion"] = (double)m_MFLink.mlInfo.flow/ accuracy; }
     }
 
     static bool MFRunYet = false;   // Needed in MODFLOWComputeReturns
@@ -417,6 +417,7 @@ public static class SurfGWModule
     private static void OnIterationConverge()
     {
         bool MS_GSF_converge = false;
+        int dummy = 0;
         
         //extract the MODSIM calculated diversion values for inserting into an array that is passed to MF
         for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
@@ -425,7 +426,7 @@ public static class SurfGWModule
             //Only add flows for diversion links.
             if (IDivert[i] > 0)
             {
-                MS_Flows[i] = MS_Links[i].mlInfo.flow / accuracy * uConvToMODFLOW; //flow values converted to MODFLOW units
+                MS_Flows[i] = (double)MS_Links[i].mlInfo.flow / accuracy * uConvToMODFLOW; //flow values converted to MODFLOW units
 
                 // MODFLOW interprets a specified release from a lake of 0.0 as a flag, specifically a flag
                 // telling MODFLOW to calculate the natural outflow from the based on the outlet's bed elevation
@@ -445,7 +446,7 @@ public static class SurfGWModule
         if (!MFRunYet && (myModel.mInfo.CurrentModelTimeStepIndex == 0))
         {
             // Easiest way forward might be to expose LAK2MODSIM in the DLL so it is callable both by GSFLOW and by MODSIM (this may have implications for MODSIM-PRMS mode)
-            LAK2MODSIM_InitLakes(DELTAVOL, LAKEVOL);
+            LAK2MODSIM_InitLakes(DELTAVOL, LAKEVOL, ref dummy);
             for (int i = 0; i < LAKEVOL.Length; i++)
             {
                 MS_Reservoirs[i].m.starting_volume = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
@@ -493,6 +494,7 @@ public static class SurfGWModule
     {
         bool converge = true;
         double percent_diff = 0.005;
+        double LAKEVol_Tolerance = 10; //in m3
         for (int i = 0; i < MS_Flows.Length; i++)
         {
             // Check for changes in the MODSIM flows in the diversion links.
@@ -516,8 +518,8 @@ public static class SurfGWModule
             converge = converge && ((double)Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) <= (double)(Math.Abs(DELTAVOLPREV[i]) * percent_diff));
             //if (Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) > 0) Console.WriteLine("Res:" + i + ":" + Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]));
             //Check for convergence on the Reservoir Volumes
-            converge = converge && ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend - LAKEVOL[i]) <= (double)(Math.Abs(MS_Reservoirs[i].mnInfo.stend) * percent_diff));
-            if ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend - LAKEVOL[i]) <= (double)(Math.Abs(MS_Reservoirs[i].mnInfo.stend) * percent_diff)) Console.WriteLine("Res. Converge: MS:" + MS_Reservoirs[i].mnInfo.stend + " MF: " + LAKEVOL[i]);
+            converge = converge && ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend - LAKEVOL[i]) <= LAKEVol_Tolerance);
+            if ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend - LAKEVOL[i]) > LAKEVol_Tolerance) Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend + " MF: " + LAKEVOL[i]);
         }
         return converge;
     }
