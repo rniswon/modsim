@@ -256,7 +256,7 @@ public static class SurfGWModule
         Utils.ConnectFromNode(m_AccLink, m_Source);
         Utils.ConnectToNode(m_AccLink, m_Node);
         m_AccLink.name = "MF_Acc_" + baseName;
-        m_AccLink.m.cost = -5 - count;
+        m_AccLink.m.cost = -300000 - count;
         m_TSTbl = m_AccLink.m.maxVariable.dataTable;
         SetDefaultTableValue(ref m_TSTbl, 0);
         count++;
@@ -360,23 +360,26 @@ public static class SurfGWModule
     private static void OnIterationBottom()
     {
         //Asign accretions and depletions to the MODSIM network.
-        for (int i = 0; i < MS_Links.Length; i++)
-        {
-            double m_value = EXCHANGE[i] * accuracy / uConvToMODFLOW;  // This sets the MF returned GW-SW acc/dep
-                                                      // units conversion to MODSIM is required
-                                                      // Need the -1 to account for 0-based indexing in C#
-            assignDepAcc(MS_Links[i].name, m_value);
-        }
-        
-        //Implement Reservoir accretions/depletions
-        for (int i = 0;i<MS_Reservoirs.Length;i++)
-        {
-            double m_value = DELTAVOL[i] * accuracy / uConvToMODFLOW;  // This sets the MF returned GW-SW acc/dep
-                                           // Need the -1 to account for 0-based indexing in C#
-            assignDepAcc(MS_Reservoirs[i].name, m_value);
-            //reset starting volume to the last converged MODFLOW reservoir volumes
-            if (MFRunYet) MS_Reservoirs[i].mnInfo.start = (long)(STARTLAKEVOL[i] * accuracy / uConvToMODFLOW);
-        }
+        //if (MFRunYet)
+        //{
+            for (int i = 0; i < MS_Links.Length; i++)
+            {
+                double m_value = EXCHANGE[i] * accuracy / uConvToMODFLOW;  // This sets the MF returned GW-SW acc/dep
+                                                                           // units conversion to MODSIM is required
+                                                                           // Need the -1 to account for 0-based indexing in C#
+                assignDepAcc(MS_Links[i].name, m_value);
+            }
+
+            //Implement Reservoir accretions/depletions
+            for (int i = 0; i < MS_Reservoirs.Length; i++)
+            {
+                double m_value = DELTAVOL[i] * accuracy / uConvToMODFLOW;  // This sets the MF returned GW-SW acc/dep
+                                                                           // Need the -1 to account for 0-based indexing in C#
+                assignDepAcc(MS_Reservoirs[i].name, m_value);
+                //reset starting volume to the last converged MODFLOW reservoir volumes
+                if (MFRunYet) MS_Reservoirs[i].mnInfo.start = (long)(STARTLAKEVOL[i] * accuracy / uConvToMODFLOW);
+            }
+        //}
     }
 
     private static void assignDepAcc (String m_Name, double m_Value)
@@ -507,6 +510,7 @@ public static class SurfGWModule
             converge = converge && ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) <= EXCHNGVol_Tolerance);  // (double)(Math.Abs(MS_FlowsPREV[i]) * percent_diff));
             converge = converge && ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) <= EXCHNGVol_Tolerance); // (double)(Math.Abs(EXCHANGEPREV[i]) * percent_diff));
             //if ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) > EXCHNGVol_Tolerance) Console.WriteLine("Diver:" + i + ":" + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
+            //if ((i == 18 || i == 19) && myModel.mInfo.CurrentModelTimeStepIndex >= 364) Console.WriteLine("Diver:" + i + ":" + MS_Flows[i] + "Exch: " + EXCHANGE[i]);
             //if ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > EXCHNGVol_Tolerance) Console.WriteLine("Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
             // myModel.mInfo.CurrentModelTimeStepIndex
 
@@ -520,10 +524,11 @@ public static class SurfGWModule
             //TO DO: Add reservoir volume convergence.
             // Needs to compare MODSIM end storage with MODFLOW LAKEVOL
             // Convergence checked in MODFLOW units.
-            converge = converge && ((double)Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) <= (double)(Math.Abs(DELTAVOLPREV[i]) * percent_diff));
+            converge = converge && ((double)Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) <= LAKEVol_Tolerance);
             //if ((double)Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) > (double)(Math.Abs(DELTAVOLPREV[i]) * percent_diff)) Console.WriteLine("Res:" + i + ":" + Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]));
             //Check for convergence on the Reservoir Volumes
             converge = converge && ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i]) <= LAKEVol_Tolerance);
+            //if (i == 2 && myModel.mInfo.CurrentModelTimeStepIndex >= 364) Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
             //if ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i]) > LAKEVol_Tolerance) Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
         }
         if (converge)
