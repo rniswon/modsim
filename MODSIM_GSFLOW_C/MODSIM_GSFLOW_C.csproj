@@ -146,8 +146,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>COPY /Y  "$(SolutionDir)\Debug\GSFLOW_MODSIM.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
-COPY /Y  "$(SolutionDir)\Debug\GSFLOW_MODSIM.dll" "$(TargetDir)\..\..\..\GSFlowLibraries\GSFLOW_MODSIM.dll"
+    <PreBuildEvent>COPY /Y  "$(SolutionDir)\$(Configuration)\GSFLOW_MODSIM.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
+COPY /Y  "$(SolutionDir)\$(Configuration)\GSFLOW_MODSIM.dll" "$(TargetDir)\..\..\..\GSFlowLibraries\GSFLOW_MODSIM.dll"
 REM COPY /Y  "$(SolutionDir)\GSFlowLibraries\GSFLOW_MODSIM.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
 </PreBuildEvent>
   </PropertyGroup>
