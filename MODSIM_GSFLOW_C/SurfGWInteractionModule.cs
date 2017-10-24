@@ -156,7 +156,6 @@ public static class SurfGWModule
             catch (Exception ex)
             {
                 Console.Write(ex.Message);
-
             }
             finally
             {
@@ -181,7 +180,8 @@ public static class SurfGWModule
         return FileName;
         }
 
-    private static DataTable m_SyncTblSEG, m_SyncTblRES;//, m_SyncTblDIV;
+    private static DataTable m_SyncTblSEG, m_SyncTblRES, m_SyncTblSettings; //, m_SyncTblDIV;
+    private static Int32 maxNoIterations,iterCount; 
     private static void PrepareMODSIMNetwork(string m_TblPath)
     {
         MWH.MWHUtils.GeneralUtils.MyDBUtils m_DBUtils = new MWH.MWHUtils.GeneralUtils.MyDBUtils(m_TblPath);
@@ -190,7 +190,17 @@ public static class SurfGWModule
         //Get Reservoir mapping talbe 
         m_Sql = "SELECT * FROM [MS-GSF_Lake_Mapping_Info] ORDER BY [MS-GSF_Lake_Mapping_Info].GSF_LAK_ID;";
         m_SyncTblRES = m_DBUtils.GetTableFromDB(m_Sql, "ReservoirSync");
-        
+        //Get the settings from the database
+        m_Sql = "SELECT * FROM [Settings];";
+        m_SyncTblSettings = m_DBUtils.GetTableFromDB(m_Sql, "Settings");
+        //Assign settings
+        foreach (DataRow mrow in m_SyncTblSettings.Rows)
+        {
+            if ((string)mrow["Key"] == "MaxIter") { maxNoIterations = (Int32)mrow["Value"]; iterCount = 0; }
+            if ((string)mrow["Key"] == "FLowTolerance") { EXCHNGVol_Tolerance = Convert.ToDouble( mrow["Value"] ); }
+            if ((string)mrow["Key"] == "VolumeTolerance") { LAKEVol_Tolerance = Convert.ToDouble( mrow["Value"] ); }
+        }
+
         //Create Sink Node
         Node m_Sink = myModel.AddNewNode(true);
         m_Sink.nodeType = NodeType.Sink;
@@ -341,11 +351,14 @@ public static class SurfGWModule
 
         // Write a header row to the streamwriter for evaluating convergence with R
         sw.WriteLine("TS iseg Exchange_Prev Exchange");
+
+        //Initialize variable to iterate between MODSIM and GSFLOW
+        MFRunYet = false;
     }
 
     private static void OnIterationTop()
     {
-        if (myModel.mInfo.Iteration == 0) MFRunYet = false;  
+          
     }
 
     private static void OnMessage(string message)
@@ -471,23 +484,36 @@ public static class SurfGWModule
         MS_GSF_converge = Get_Div_Chng();
         MS_GSF_converge = MS_GSF_converge && MFRunYet;
         Console.Write(".");
+        iterCount += 1;
+
+        if (iterCount >= maxNoIterations)//(myModel.mInfo.Iteration > myModel.maxit)
+        {
+            Console.WriteLine("\r\n MODSIM & GSFLOW Ran into maximum number of iterations - Warning !!! models have not converged.");
+            MS_GSF_converge = true;
+        }
+        if (myModel.mInfo.Iteration > myModel.maxit)
+        {
+            Console.WriteLine("\r\n MODSIM ran into maximum number of iterations - Warning !!! models have not converged.");
+            MS_GSF_converge = true;
+        }
 
         if (!MS_GSF_converge)
         {
             afr = false;
             MFRunYet = true;
             //MODFLOWConverge = CheckOscillating(MF_Segs);
+            //MODSIM converged but we are sending it back to iterate with MODFLOW values.
+            //     Reset the interal MODSIM iterations
+            myModel.mInfo.Iteration = 0;
         } else
         {
             gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL); // converged mode
-            afr = true;   
+            afr = true;
+            Console.WriteLine("           MS_GSF Last Iteration: " + iterCount);
+            iterCount = 0;
+            MFRunYet = false;
         }
 
-        if (myModel.mInfo.Iteration > myModel.maxit)
-        {
-            Console.WriteLine("Ran into maximum number of iterations - Warning !!! models have not converged.");
-            MS_GSF_converge = true;
-        }
         myModel.mInfo.convg = MS_GSF_converge;
     }
 
@@ -497,12 +523,14 @@ public static class SurfGWModule
         //MFNWT_CLEAN();
     }
 
+    private static double EXCHNGVol_Tolerance ; //in m3
+    private static double LAKEVol_Tolerance;//in m3
+
     private static Boolean Get_Div_Chng()//SortedList myDiversions)
     {
         bool converge = true;
         // double percent_diff = 0.005;
-        double EXCHNGVol_Tolerance = 1; //in m3
-        double LAKEVol_Tolerance = 1;//in m3
+       
         for (int i = 0; i < MS_Flows.Length; i++)
         {
             // Check for changes in the MODSIM flows in the diversion links.
@@ -533,6 +561,7 @@ public static class SurfGWModule
         }
         if (converge)
         {
+            Console.WriteLine("");
             //Trying to correct the end Volume convergence
             for (int i = 0; i < MS_Reservoirs.Length; i++)
             {
