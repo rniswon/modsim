@@ -351,11 +351,14 @@ public static class SurfGWModule
 
         // Write a header row to the streamwriter for evaluating convergence with R
         sw.WriteLine("TS iseg Exchange_Prev Exchange");
+
+        //Initialize variable to iterate between MODSIM and GSFLOW
+        MFRunYet = false;
     }
 
     private static void OnIterationTop()
     {
-        if (myModel.mInfo.Iteration == 0) MFRunYet = false;  
+          
     }
 
     private static void OnMessage(string message)
@@ -483,23 +486,34 @@ public static class SurfGWModule
         Console.Write(".");
         iterCount += 1;
 
+        if (iterCount >= maxNoIterations)//(myModel.mInfo.Iteration > myModel.maxit)
+        {
+            Console.WriteLine("\r\n MODSIM & GSFLOW Ran into maximum number of iterations - Warning !!! models have not converged.");
+            MS_GSF_converge = true;
+        }
+        if (myModel.mInfo.Iteration > myModel.maxit)
+        {
+            Console.WriteLine("\r\n MODSIM ran into maximum number of iterations - Warning !!! models have not converged.");
+            MS_GSF_converge = true;
+        }
+
         if (!MS_GSF_converge)
         {
             afr = false;
             MFRunYet = true;
             //MODFLOWConverge = CheckOscillating(MF_Segs);
+            //MODSIM converged but we are sending it back to iterate with MODFLOW values.
+            //     Reset the interal MODSIM iterations
+            myModel.mInfo.Iteration = 0;
         } else
         {
             gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL); // converged mode
             afr = true;
+            Console.WriteLine("           MS_GSF Last Iteration: " + iterCount);
             iterCount = 0;
+            MFRunYet = false;
         }
 
-        if (iterCount>=maxNoIterations)//(myModel.mInfo.Iteration > myModel.maxit)
-        {
-            Console.WriteLine("Ran into maximum number of iterations - Warning !!! models have not converged.");
-            MS_GSF_converge = true;
-        }
         myModel.mInfo.convg = MS_GSF_converge;
     }
 
@@ -547,6 +561,7 @@ public static class SurfGWModule
         }
         if (converge)
         {
+            Console.WriteLine("");
             //Trying to correct the end Volume convergence
             for (int i = 0; i < MS_Reservoirs.Length; i++)
             {
