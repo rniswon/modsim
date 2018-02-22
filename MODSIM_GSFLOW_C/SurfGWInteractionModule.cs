@@ -341,18 +341,20 @@ public static class SurfGWModule
             m_OutputSupport.AddCurrentUserLinkOutput += addLinkMFOutput;
 
             //Setting units conversion factor
+            //NOTE: All MODSIM internal variables are strictly volumes (per time step)
+            //      There are NO rates anywhere in the custom variables
             if (myModel.UseMetricUnits)
             {
-                //1000m3 is the default units for MODSIM in metric mode
-                //MODFLOW assumed to run in m3.
+                // 1000m3 is the default units for MODSIM in metric mode
+                // MODFLOW assumed to run in m3.
                 uConvToMODFLOW = 1000;
             }
             else
             {
-                //the default units for MODSIM in english mode at run time is acre-ft
-                //MODFLOW assumed to run in ft3.
-                uConvToMODFLOW = 43560.0001;
-
+                // the default units for MODSIM in english mode at run time is 
+                // total acre-ft for the entirety of the time step
+                // MODFLOW assumed to run in ft3.
+                uConvToMODFLOW = 43560.0001 / 7;
             }
 
             // Write a header row to the streamwriter for evaluating convergence with R
