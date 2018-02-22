@@ -139,13 +139,16 @@ public static class SurfGWModule
             myModel.OnModsimError += OnError; 
             try
             {
-            if (Model_mode == 11) // MODSIM-PRMS
-              {
+                if (Model_mode == 11) // MODSIM-PRMS
+                {
                   gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE,DELTAVOL, LAKEVOL);
-              }
+                }
                 XYFileReader.Read(myModel,xyFileName);
                 accuracy = Math.Pow(10.0, (double) myModel.accuracy);
-                PrepareMODSIMNetwork(map_FileName);
+                if (Model_mode != 13)  // MODSIM-only mode
+                {
+                    PrepareMODSIMNetwork(map_FileName);
+                }
                 XYFileWriter.Write(myModel, xyFileName.Replace(".xy", "MSGSF.xy"));
                 Modsim.RunSolver(myModel);
                 //Copy output to the original file name - Custom Output carries the MF Dep/Acc
@@ -295,65 +298,69 @@ public static class SurfGWModule
     private static double uConvToMODFLOW;
     private static void OnInitialize()
     {
-        //Dimension arrays to the input table
-        Array.Resize <double> (ref MS_Flows, m_SyncTblSEG.Rows.Count);
-        Array.Resize<double>(ref MS_FlowsPREV, m_SyncTblSEG.Rows.Count);
-        Array.Resize<Link>(ref MS_Links, m_SyncTblSEG.Rows.Count);
-        Array.Resize<Node>(ref MS_Reservoirs, m_SyncTblRES.Rows.Count);
-       
-        // Also, initialize MF_Acc_Dep (accretion/depletion) variables
-        // TODO: Is this needed - they should be zero
-        int i = 0;
-        Link m_Link;
-        foreach (DataRow m_Row in m_SyncTblSEG.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
+        if (Model_mode != 13)  // Model_mode = 13: MODSIM-only
         {
-            //MF_Acc_Dep_Identifier[i] = (double) m_Row["iseg"];
-            if (i != (int)((double)m_Row["iseg"] - 1)) throw new Exception("Iseg doesn't match the index of the array");
-            MS_Flows[i] = 0;
-            IDivert[i] = (int) (double) m_Row["Diversion"];
-            IRelease[i] = (int)(double)m_Row["ResRelease"];
-            m_Link = myModel.FindLink((string)m_Row["Link Name"]); // Use .FindLink() instead
-            MS_Links[i] = m_Link;
-            i += 1;
+            //Dimension arrays to the input table
+            Array.Resize<double>(ref MS_Flows, m_SyncTblSEG.Rows.Count);
+            Array.Resize<double>(ref MS_FlowsPREV, m_SyncTblSEG.Rows.Count);
+            Array.Resize<Link>(ref MS_Links, m_SyncTblSEG.Rows.Count);
+            Array.Resize<Node>(ref MS_Reservoirs, m_SyncTblRES.Rows.Count);
+
+            // Also, initialize MF_Acc_Dep (accretion/depletion) variables
+            // TODO: Is this needed - they should be zero
+            int i = 0;
+            Link m_Link;
+            foreach (DataRow m_Row in m_SyncTblSEG.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
+            {
+                //MF_Acc_Dep_Identifier[i] = (double) m_Row["iseg"];
+                if (i != (int)((double)m_Row["iseg"] - 1)) throw new Exception("Iseg doesn't match the index of the array");
+                MS_Flows[i] = 0;
+                IDivert[i] = (int)(double)m_Row["Diversion"];
+                IRelease[i] = (int)(double)m_Row["ResRelease"];
+                m_Link = myModel.FindLink((string)m_Row["Link Name"]); // Use .FindLink() instead
+                MS_Links[i] = m_Link;
+                i += 1;
+            }
+
+            //Initialize Reservoir arrays
+            Node m_Res;
+            i = 0;
+            foreach (DataRow m_Row in m_SyncTblRES.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
+            {
+                if (i != ((short)m_Row["GSF_LAK_ID"]) - 1) throw new Exception("Iseg doesn't match the index of the array");
+                m_Res = myModel.FindNode((string)m_Row["MODSIM_Name"]);
+                MS_Reservoirs[i] = m_Res;
+                i += 1;
+            }
+
+
+            //initialize custom output variables
+            Csu.Modsim.NetworkUtils.ModelOutputSupport m_OutputSupport = (Csu.Modsim.NetworkUtils.ModelOutputSupport)myModel.OutputSupportClass;
+            m_OutputSupport.AddUserDefinedOutputVariable(myModel, "MF_Depletion", true, false, "Flow");
+            m_OutputSupport.AddUserDefinedOutputVariable(myModel, "MF_Accretion", true, false, "Flow");
+            m_OutputSupport.AddCurrentUserLinkOutput += addLinkMFOutput;
+
+            //Setting units conversion factor
+            if (myModel.UseMetricUnits)
+            {
+                //1000m3 is the default units for MODSIM in metric mode
+                //MODFLOW assumed to run in m3.
+                uConvToMODFLOW = 1000;
+            }
+            else
+            {
+                //the default units for MODSIM in english mode at run time is acre-ft
+                //MODFLOW assumed to run in ft3.
+                uConvToMODFLOW = 43560.0001;
+
+            }
+
+            // Write a header row to the streamwriter for evaluating convergence with R
+            sw.WriteLine("TS iseg Exchange_Prev Exchange");
+
+            //Initialize variable to iterate between MODSIM and GSFLOW
+            MFRunYet = false;
         }
-
-        //Initialize Reservoir arrays
-        Node m_Res;
-        i = 0;
-        foreach (DataRow m_Row in m_SyncTblRES.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
-        {
-            if (i != ((short)m_Row["GSF_LAK_ID"]) - 1) throw new Exception("Iseg doesn't match the index of the array");
-            m_Res = myModel.FindNode((string)m_Row["MODSIM_Name"]); 
-            MS_Reservoirs[i] = m_Res;
-            i += 1;
-        }
-
-
-        //initialize custom output variables
-        Csu.Modsim.NetworkUtils.ModelOutputSupport m_OutputSupport = (Csu.Modsim.NetworkUtils.ModelOutputSupport) myModel.OutputSupportClass;
-        m_OutputSupport.AddUserDefinedOutputVariable(myModel, "MF_Depletion",true, false, "Flow");
-        m_OutputSupport.AddUserDefinedOutputVariable(myModel, "MF_Accretion",true, false, "Flow");
-        m_OutputSupport.AddCurrentUserLinkOutput += addLinkMFOutput;
-
-        //Setting units conversion factor
-        if (myModel.UseMetricUnits)
-        {
-            //1000m3 is the default units for MODSIM in metric mode
-            //MODFLOW assumed to run in m3.
-            uConvToMODFLOW = 1000;
-        }
-        else
-        {
-            //the default units for MODSIM in english mode at run time is acre-ft
-            //MODFLOW assumed to run in ft3.
-            uConvToMODFLOW = 43559.9;
-        }
-
-        // Write a header row to the streamwriter for evaluating convergence with R
-        sw.WriteLine("TS iseg Exchange_Prev Exchange");
-
-        //Initialize variable to iterate between MODSIM and GSFLOW
-        MFRunYet = false;
     }
 
     private static void OnIterationTop()
@@ -363,24 +370,34 @@ public static class SurfGWModule
 
     private static void OnMessage(string message)
     {
-        Console.Write(message + "\n");
+        //Console.Write(message + "\n");
     }
 
     private static void OnError(string message)
     {
+        Console.Write(message + "\n");
     }
 
     private static void OnIterationBottom()
     {
-        //Asign accretions and depletions to the MODSIM network.
-        //if (MFRunYet)
-        //{
+        if (Model_mode != 13)  // MODSIM-only mode
+        {
+            //Asign accretions and depletions to the MODSIM network.
+            //if (MFRunYet)
+            //{
             for (int i = 0; i < MS_Links.Length; i++)
             {
                 double m_value = EXCHANGE[i] * accuracy / uConvToMODFLOW;  // This sets the MF returned GW-SW acc/dep
                                                                            // units conversion to MODSIM is required
                                                                            // Need the -1 to account for 0-based indexing in C#
-                assignDepAcc(MS_Links[i].name, m_value);
+                try
+                {
+                    assignDepAcc(MS_Links[i].name, m_value);
+                }
+                catch (NullReferenceException ex)
+                {
+                    continue;
+                }
             }
 
             //Implement Reservoir accretions/depletions
@@ -388,11 +405,20 @@ public static class SurfGWModule
             {
                 double m_value = DELTAVOL[i] * accuracy / uConvToMODFLOW;  // This sets the MF returned GW-SW acc/dep
                                                                            // Need the -1 to account for 0-based indexing in C#
-                assignDepAcc(MS_Reservoirs[i].name, m_value);
+                try
+                {
+                    assignDepAcc(MS_Reservoirs[i].name, m_value);
+                }
+                catch (NullReferenceException ex)
+                {
+                    continue;
+                }
+
                 //reset starting volume to the last converged MODFLOW reservoir volumes
                 if (MFRunYet) MS_Reservoirs[i].mnInfo.start = (long)(STARTLAKEVOL[i] * accuracy / uConvToMODFLOW);
             }
-        //}
+            //}
+        }
     }
 
     private static void assignDepAcc (String m_Name, double m_Value)
@@ -427,94 +453,103 @@ public static class SurfGWModule
     {
         Link m_MFLink = myModel.FindLink("MF_Dep_" + m_link.name);
         //TODO: check if the variable can replace the accuracy
-        if (m_MFLink != null) { m_row["MF_Depletion"] = (double)m_MFLink.mlInfo.flow/accuracy; }
+        if (m_MFLink != null) { m_row["MF_Depletion"] = (double)m_MFLink.mlInfo.flow / accuracy; }
         m_MFLink = myModel.FindLink("MF_Acc_" + m_link.name);
-        if (m_MFLink != null) { m_row["MF_Accretion"] = (double)m_MFLink.mlInfo.flow/ accuracy; }
+        if (m_MFLink != null) { m_row["MF_Accretion"] = (double)m_MFLink.mlInfo.flow / accuracy; }
     }
 
     static bool MFRunYet = false;   // Needed in MODFLOWComputeReturns
     
     private static void OnIterationConverge()
     {
-        bool MS_GSF_converge = false;
-        
-        
-        //extract the MODSIM calculated diversion values for inserting into an array that is passed to MF
-        for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
+        if (Model_mode != 13)
         {
-            MS_FlowsPREV[i] = MS_Flows[i];
-            //Only add flows for diversion links.
-            if (IDivert[i] > 0)
+            bool MS_GSF_converge = false;
+        
+            //extract the MODSIM calculated diversion values for inserting into an array that is passed to MF
+            for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
             {
-                MS_Flows[i] = (double)MS_Links[i].mlInfo.flow / accuracy * uConvToMODFLOW; //flow values converted to MODFLOW units
-
-                // MODFLOW interprets a specified release from a lake of 0.0 as a flag, specifically a flag
-                // telling MODFLOW to calculate the natural outflow from the based on the outlet's bed elevation
-                // this prevents that flag from being tripped.
-                if (IRelease[i] > 0 && MS_Flows[i] ==0)
+                MS_FlowsPREV[i] = MS_Flows[i];
+                //Only add flows for diversion links.
+                if (IDivert[i] > 0)
                 {
-                    MS_Flows[i] = 0.0001;
+                    MS_Flows[i] = (double)MS_Links[i].mlInfo.flow / accuracy * uConvToMODFLOW; //flow values converted to MODFLOW units
+
+                    // MODFLOW interprets a specified release from a lake of 0.0 as a flag, specifically a flag
+                    // telling MODFLOW to calculate the natural outflow from the based on the outlet's bed elevation
+                    // this prevents that flag from being tripped.
+                    if (IRelease[i] > 0 && MS_Flows[i] ==0)
+                    {
+                        MS_Flows[i] = 0.0001;
+                    }
                 }
+                EXCHANGEPREV[i] = EXCHANGE[i];            
             }
-            EXCHANGEPREV[i] = EXCHANGE[i];            
-        }
-        //Implement Reservoir accretions/depletions
-        for (int i = 0; i < MS_Reservoirs.Length; i++) DELTAVOLPREV[i] = DELTAVOL[i];
+            //Implement Reservoir accretions/depletions
+            for (int i = 0; i < MS_Reservoirs.Length; i++) DELTAVOLPREV[i] = DELTAVOL[i];
 
-        //Need to know the value of LAKEVOL for the first (SS)
-        // If first iteration of first time step, overide MODSIM Lake volumes
-        if (!MFRunYet && (myModel.mInfo.CurrentModelTimeStepIndex == 0))
-        {
-            // Easiest way forward might be to expose LAK2MODSIM in the DLL so it is callable both by GSFLOW and by MODSIM (this may have implications for MODSIM-PRMS mode)
-            LAK2MODSIM_InitLakes(DELTAVOL, LAKEVOL);
-            for (int i = 0; i < LAKEVOL.Length; i++)
+            //Need to know the value of LAKEVOL for the first (SS)
+            // If first iteration of first time step, overide MODSIM Lake volumes
+            if (!MFRunYet && (myModel.mInfo.CurrentModelTimeStepIndex == 0))
             {
-                MS_Reservoirs[i].m.starting_volume = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
-                MS_Reservoirs[i].mnInfo.start = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
-                STARTLAKEVOL[i] = LAKEVOL[i];
-            } 
-        }
+                // Easiest way forward might be to expose LAK2MODSIM in the DLL so it is callable both by GSFLOW and by MODSIM (this may have implications for MODSIM-PRMS mode)
+                LAK2MODSIM_InitLakes(DELTAVOL, LAKEVOL);
+                for (int i = 0; i < LAKEVOL.Length; i++)
+                {
+                    if (MS_Reservoirs[i] != null)
+                    {
+                        MS_Reservoirs[i].m.starting_volume = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
+                        MS_Reservoirs[i].mnInfo.start = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
+                        STARTLAKEVOL[i] = LAKEVOL[i];
+                    }
+                } 
+            }
 
-        if (Model_mode < 12) // not sure what to do with MODSIM-MODFLOW (13), maybe call MFNWT_RUN
-        {
-            gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE,DELTAVOL, LAKEVOL); // run mode
-        }
+            if (Model_mode <= 12) // not sure what to do with MODSIM-MODFLOW (13), maybe call MFNWT_RUN
+            {
+                gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE,DELTAVOL, LAKEVOL); // run mode
+            }
 
-       //Check for convergence between MODSIM and MODFLOW
-        MS_GSF_converge = Get_Div_Chng();
-        MS_GSF_converge = MS_GSF_converge && MFRunYet;
-        Console.Write(".");
-        iterCount += 1;
+           //Check for convergence between MODSIM and MODFLOW
+            MS_GSF_converge = Get_Div_Chng();
+            MS_GSF_converge = MS_GSF_converge && MFRunYet;
+            if(Model_mode != 12)   //Different flow of console output in MODSIM-MODFLOW mode, don't want the '.' in this case 
+            {
+                Console.Write(".");
+            }
+        
+            iterCount += 1;
 
-        if (iterCount >= maxNoIterations)//(myModel.mInfo.Iteration > myModel.maxit)
-        {
-            Console.WriteLine("\r\n MODSIM & GSFLOW Ran into maximum number of iterations - Warning !!! models have not converged.");
-            MS_GSF_converge = true;
-        }
-        if (myModel.mInfo.Iteration > myModel.maxit)
-        {
-            Console.WriteLine("\r\n MODSIM ran into maximum number of iterations - Warning !!! models have not converged.");
-            MS_GSF_converge = true;
-        }
+            if (iterCount >= maxNoIterations)//(myModel.mInfo.Iteration > myModel.maxit)
+            {
+                Console.WriteLine("\r\n MODSIM & GSFLOW Ran into maximum number of iterations - Warning !!! models have not converged.");
+                MS_GSF_converge = true;
+            }
+            if (myModel.mInfo.Iteration > myModel.maxit)
+            {
+                Console.WriteLine("\r\n MODSIM ran into maximum number of iterations - Warning !!! models have not converged.");
+                MS_GSF_converge = true;
+            }
 
-        if (!MS_GSF_converge)
-        {
-            afr = false;
-            MFRunYet = true;
-            //MODFLOWConverge = CheckOscillating(MF_Segs);
-            //MODSIM converged but we are sending it back to iterate with MODFLOW values.
-            //     Reset the interal MODSIM iterations
-            myModel.mInfo.Iteration = 0;
-        } else
-        {
-            gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL); // converged mode
-            afr = true;
-            Console.WriteLine("           MS_GSF Last Iteration: " + iterCount);
-            iterCount = 0;
-            MFRunYet = false;
-        }
+            if (!MS_GSF_converge)
+            {
+                afr = false;
+                MFRunYet = true;
+                //MODFLOWConverge = CheckOscillating(MF_Segs);
+                //MODSIM converged but we are sending it back to iterate with MODFLOW values.
+                //     Reset the interal MODSIM iterations
+                myModel.mInfo.Iteration = 0;
+            } else
+            {
+                gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL); // converged mode
+                afr = true;
+                Console.WriteLine("           MS_GSF Last Iteration: " + iterCount);
+                iterCount = 0;
+                MFRunYet = false;
+            }
 
-        myModel.mInfo.convg = MS_GSF_converge;
+            myModel.mInfo.convg = MS_GSF_converge;
+        }
     }
 
     private static void OnFinished()
@@ -537,9 +572,9 @@ public static class SurfGWModule
             // Convergence checked in MODFLOW units.
             converge = converge && ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) <= EXCHNGVol_Tolerance);  // (double)(Math.Abs(MS_FlowsPREV[i]) * percent_diff));
             converge = converge && ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) <= EXCHNGVol_Tolerance); // (double)(Math.Abs(EXCHANGEPREV[i]) * percent_diff));
-            //if ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) > EXCHNGVol_Tolerance) Console.WriteLine("Diver:" + i + ":" + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
+            if ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) > EXCHNGVol_Tolerance) Console.WriteLine("Diver:" + i + ":" + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
             //if ((i == 18 || i == 19) && myModel.mInfo.CurrentModelTimeStepIndex >= 364) Console.WriteLine("Diver:" + i + ":" + MS_Flows[i] + "Exch: " + EXCHANGE[i]);
-            //if ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > EXCHNGVol_Tolerance) Console.WriteLine("Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
+            if ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > EXCHNGVol_Tolerance) Console.WriteLine("GW-SW Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
             // myModel.mInfo.CurrentModelTimeStepIndex
 
             //Here is what the header looks like: sw.WriteLine("TS iseg Exchange_Prev Exchange");
@@ -557,7 +592,10 @@ public static class SurfGWModule
             //Check for convergence on the Reservoir Volumes
             converge = converge && ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i]) <= LAKEVol_Tolerance);
             //if (i == 2 && myModel.mInfo.CurrentModelTimeStepIndex >= 364) Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
-            //if ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i]) > LAKEVol_Tolerance) Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
+            if (MS_Reservoirs[i] != null)
+            {
+                if ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i]) > LAKEVol_Tolerance) Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
+            }
         }
         if (converge)
         {
