@@ -451,11 +451,19 @@ public static class SurfGWModule
     //Add MF output to the original link
     private static void addLinkMFOutput(Link m_link ,  DataRow m_row )
     {
-        Link m_MFLink = myModel.FindLink("MF_Dep_" + m_link.name);
-        //TODO: check if the variable can replace the accuracy
-        if (m_MFLink != null) { m_row["MF_Depletion"] = (double)m_MFLink.mlInfo.flow / accuracy; }
-        m_MFLink = myModel.FindLink("MF_Acc_" + m_link.name);
-        if (m_MFLink != null) { m_row["MF_Accretion"] = (double)m_MFLink.mlInfo.flow / accuracy; }
+        try
+        {
+            if (myModel.LinkNameExists("MF_Dep_" + m_link.name,true))
+            {
+                Link m_MFLink = myModel.FindLink("MF_Dep_" + m_link.name);
+                //TODO: check if the variable can replace the accuracy
+                if (m_MFLink != null) { m_row["MF_Depletion"] = (double)m_MFLink.mlInfo.flow / accuracy; }
+                m_MFLink = myModel.FindLink("MF_Acc_" + m_link.name);
+                if (m_MFLink != null) { m_row["MF_Accretion"] = (double)m_MFLink.mlInfo.flow / accuracy; }
+            }
+        }
+        catch { }
+        
     }
 
     static bool MFRunYet = false;   // Needed in MODFLOWComputeReturns
