@@ -354,7 +354,7 @@ public static class SurfGWModule
                 // the default units for MODSIM in english mode at run time is 
                 // total acre-ft for the entirety of the time step
                 // MODFLOW assumed to run in ft3.
-                uConvToMODFLOW = 43560.0001 / 7;
+                uConvToMODFLOW = 43560.0001;
             }
 
             // Write a header row to the streamwriter for evaluating convergence with R
@@ -407,6 +407,7 @@ public static class SurfGWModule
             {
                 double m_value = DELTAVOL[i] * accuracy / uConvToMODFLOW;  // This sets the MF returned GW-SW acc/dep
                                                                            // Need the -1 to account for 0-based indexing in C#
+                // m_value /= 7; //Only for Carson (weekly)                                                                       
                 try
                 {
                     assignDepAcc(MS_Reservoirs[i].name, m_value);
@@ -582,9 +583,9 @@ public static class SurfGWModule
             // Convergence checked in MODFLOW units.
             converge = converge && ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) <= EXCHNGVol_Tolerance);  // (double)(Math.Abs(MS_FlowsPREV[i]) * percent_diff));
             converge = converge && ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) <= EXCHNGVol_Tolerance); // (double)(Math.Abs(EXCHANGEPREV[i]) * percent_diff));
-            if ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) > EXCHNGVol_Tolerance) Console.WriteLine("Diver:" + i + ":" + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
+            // if ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) > EXCHNGVol_Tolerance) Console.WriteLine("Diver:" + i + ":" + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
             //if ((i == 18 || i == 19) && myModel.mInfo.CurrentModelTimeStepIndex >= 364) Console.WriteLine("Diver:" + i + ":" + MS_Flows[i] + "Exch: " + EXCHANGE[i]);
-            if ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > EXCHNGVol_Tolerance) Console.WriteLine("GW-SW Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
+            // if ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > EXCHNGVol_Tolerance) Console.WriteLine("GW-SW Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
             // myModel.mInfo.CurrentModelTimeStepIndex
 
             //Here is what the header looks like: sw.WriteLine("TS iseg Exchange_Prev Exchange");
@@ -600,7 +601,7 @@ public static class SurfGWModule
             converge = converge && ((double)Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) <= LAKEVol_Tolerance);
             //if ((double)Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) > (double)(Math.Abs(DELTAVOLPREV[i]) * percent_diff)) Console.WriteLine("Res:" + i + ":" + Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]));
             //Check for convergence on the Reservoir Volumes
-            converge = converge && ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i]) <= LAKEVol_Tolerance);
+            converge = converge && ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW- LAKEVOL[i]) <= LAKEVol_Tolerance);
             //if (i == 2 && myModel.mInfo.CurrentModelTimeStepIndex >= 364) Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
             if (MS_Reservoirs[i] != null)
             {
@@ -616,7 +617,7 @@ public static class SurfGWModule
                 //DELTAVOL[i] += -((MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW) - LAKEVOL[i]);
                 //VOLSync = true;
                 //converge = false;
-                Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
+                Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW  + " MF: " + LAKEVOL[i]);
                 STARTLAKEVOL[i] = LAKEVOL[i];
             }
         }
