@@ -96,7 +96,9 @@ public static class SurfGWModule
         map_FileName = GetFullPath(map_FileName);
         xyFileName = GetFullPath(xyFileName);
         
+        //These are the options to add in the .control file to run different versions
         // 0=GSFLOW; 1=PRMS; 2=MODFLOW; 10=MODSIM-GSFLOW; 11=MODSIM-PRMS; 12=MODSIM-MODFLOW; 13=MODSIM
+        //  Option: MODSIM-GSFLOW is the fully integrated mode.
         if (Model_mode < 12 | Model_mode > 20 ) // > 20 means a special PRMS-only mode
         {
             Process_mode = 1; // declare
