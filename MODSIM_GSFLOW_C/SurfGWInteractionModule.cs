@@ -27,6 +27,7 @@ public static class SurfGWModule
     public static double[] MS_Flows; //= new double[1000];
     public static double[] MS_FlowsPREV;
     public static double[] MS_FlowsLIMITED;
+    public static double[] MS_FlowsPOTENTIAL;
     public static double[] Diversions = new double[23];
     public static int[] IDivert = new int[1];
     public static int[] IRelease = new int[1];
@@ -36,6 +37,7 @@ public static class SurfGWModule
     public static double[] DELTAVOLPREV = new double[1];
     public static double[] LAKEVOL = new double[1];
     public static double[] STARTLAKEVOL = new double[1];
+    public static double[] RELEASABLE_STOR = new double[1];
     public static object RAD_list;
     public static DataTable m_table;
     public static DataTable map_table;
@@ -54,7 +56,7 @@ public static class SurfGWModule
     //Fortran DLL interface
 
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void gsflow_prms(ref int Process_mode, ref bool afr, ref bool MS_GSF_converge, ref int Nsegshold, ref int nlakeshold, [In, Out] double[] Diversions, [In, Out] int[] IDivert, [In, Out] double[] EXCHANGE, [In, Out] double[] DELTAVOL, [In, Out] double[] LAKEVOL);
+    public static extern void gsflow_prms(ref int Process_mode, ref bool afr, ref bool MS_GSF_converge, ref int Nsegshold, ref int nlakeshold, [In, Out] double[] Diversions, [In, Out] int[] IDivert, [In, Out] double[] EXCHANGE, [In, Out] double[] DELTAVOL, [In, Out] double[] LAKEVOL, [In, Out] double[] RELEASABLE_STOR);
 
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
     public static extern void gsflow_prmsSettings([In, Out] ref int Numts, ref int Model_mode, ref int startTime, ref int File1_length, [In, Out] char[] FileName1, ref int File2_length, [In, Out] char[] FileName2);
@@ -81,7 +83,7 @@ public static class SurfGWModule
         /* need to pass DIVS */
         Nsegshold = 1;  //initialize temporarily
         Nlakeshold = 1;  //initialize temporarily
-        gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL);
+        gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, RELEASABLE_STOR);
 
         /* need file name of mapping file, read from GSFLOW Control File
            file has link Name, iseg, diversion, ResRelease */
@@ -102,10 +104,10 @@ public static class SurfGWModule
         if (Model_mode < 12 | Model_mode > 20 ) // > 20 means a special PRMS-only mode
         {
             Process_mode = 1; // declare
-            gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions,  IDivert, EXCHANGE,DELTAVOL, LAKEVOL);
+            gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions,  IDivert, EXCHANGE,DELTAVOL, LAKEVOL, RELEASABLE_STOR);
 
             Process_mode = 2; // initialize
-            gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions,  IDivert, EXCHANGE,DELTAVOL, LAKEVOL);
+            gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions,  IDivert, EXCHANGE,DELTAVOL, LAKEVOL, RELEASABLE_STOR);
         }
 
         Process_mode = 0; // run
@@ -120,16 +122,17 @@ public static class SurfGWModule
         DELTAVOLPREV = (double[])ResizeArray(DELTAVOLPREV, new int[] { Nlakeshold });
         LAKEVOL = (double[])ResizeArray(LAKEVOL, new int[] { Nlakeshold });
         STARTLAKEVOL = (double[])ResizeArray(STARTLAKEVOL, new int[] { Nlakeshold });
+        RELEASABLE_STOR = (double[])ResizeArray(RELEASABLE_STOR, new int[] { Nlakeshold });
 
         if (Model_mode < 10) // GSFLOW and PRMS-only
         {
             for (int i = 0; i < Numts; i++)
             {
-                gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions,  IDivert, EXCHANGE,DELTAVOL, LAKEVOL);
+                gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions,  IDivert, EXCHANGE,DELTAVOL, LAKEVOL, RELEASABLE_STOR);
             }
 
             Process_mode = 3; // clean
-            gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions,  IDivert, EXCHANGE,DELTAVOL, LAKEVOL);
+            gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions,  IDivert, EXCHANGE,DELTAVOL, LAKEVOL, RELEASABLE_STOR);
         }
 
         else
@@ -147,7 +150,7 @@ public static class SurfGWModule
             {
                 if (Model_mode == 11) // MODSIM-PRMS
                 {
-                  gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE,DELTAVOL, LAKEVOL);
+                  gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE,DELTAVOL, LAKEVOL, RELEASABLE_STOR);
                 }
                 XYFileReader.Read(myModel,xyFileName);
                 accuracy = Math.Pow(10.0, (double) myModel.accuracy);
@@ -354,6 +357,8 @@ public static class SurfGWModule
                 i += 1;
             }
 
+            // Initialize Diversions array to 0
+            //Diversions = 0.0;
 
             //initialize custom output variables
             Csu.Modsim.NetworkUtils.ModelOutputSupport m_OutputSupport = (Csu.Modsim.NetworkUtils.ModelOutputSupport)myModel.OutputSupportClass;
@@ -450,7 +455,8 @@ public static class SurfGWModule
             {
                 for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
                 {
-                    if (MS_FlowsLIMITED[i] > MS_Flows[i])  // The array MS_Flows returned with altered values if MODFLOW determines not enough flow available
+                    if (Math.Abs(MS_FlowsLIMITED[i] - MS_Flows[i]) > 0.01)  // The array MS_Flows returned with altered values if MODFLOW determines not enough flow available
+                                                                            //Fix the 0.01 to instead be a global tolerance variable
                     {
                         // Set upper limit on link so as not to allow more through than physically available  // int j = Convert.ToInt16(m_SyncTblSEG.Rows[i]["iseg"].ToString());  // DataRow[] m_row = m_SyncTblSEG.Select("iseg = " + j.ToString());
                         DataRow m_row = m_SyncTblSEG.Rows[i];
@@ -546,6 +552,16 @@ public static class SurfGWModule
                 // need to do something
                 MS_FlowsLIMITED[i] = MS_Flows[i];
             }
+
+            // Code lands here for first MS-GSF iteration in every time step: store "potential" MODSIM releases
+            if (!MFRunYet)
+            {
+                for (int i = 0; i < MS_Links.Length; i++)
+                {
+                    MS_FlowsPOTENTIAL[i] = MS_Flows[i];
+                }
+            }
+
             //Implement Reservoir accretions/depletions
             for (int i = 0; i < MS_Reservoirs.Length; i++) DELTAVOLPREV[i] = DELTAVOL[i];
 
@@ -568,7 +584,7 @@ public static class SurfGWModule
 
             if (Model_mode <= 12) // not sure what to do with MODSIM-MODFLOW (13), maybe call MFNWT_RUN
             {
-                gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL); // run mode
+                gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, RELEASABLE_STOR); // run mode
             }
 
             //// Check for MODFLOW-determined limitations in release and/or diversion amounts
@@ -651,7 +667,7 @@ public static class SurfGWModule
                 myModel.mInfo.Iteration = 0;
             } else
             {
-                gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL); // converged mode
+                gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, RELEASABLE_STOR); // converged mode
                 afr = true;
                 Console.WriteLine("           MS_GSF Last Iteration: " + iterCount);
                 iterCount = 0;
