@@ -594,7 +594,7 @@ public static class SurfGWModule
                     }
                 }
 
-                if (myModel.mInfo.CurrentModelTimeStepIndex == 14 | myModel.mInfo.CurrentModelTimeStepIndex == 15)
+                if (myModel.mInfo.CurrentModelTimeStepIndex == 1819)
                 {
                     MS_Flows[21] = MS_Flows[21];
                 }
@@ -788,79 +788,6 @@ public static class SurfGWModule
                 STARTLAKEVOL[i] = LAKEVOL[i];
             }
         }
-        return converge;
-    }
-
-    public static double[,] Div_Osc = new double[5, 4];  //4 cols: last 4 diversions by MODSIM
-    private static Int32 osc = -1;
-    private static Boolean CheckOscillating(double[] MF_Segs)
-    {
-        bool converge = true;
-
-        //initialize array if i = -1
-        if (osc == -1)
-        {
-            for (int x = 0; x < 5; x++)
-            {
-                for (int y = 0; y < 4; y++)
-                {
-                    Div_Osc[x, y] = 0;
-                }
-            }
-        }
-
-        // First, enter the current values into the storage array, may need to shift values
-        if (osc < 3)
-        {
-            // If code lands here, then not enough iterations yet to determine if oscillating
-            osc += 1;
-            for (int j = 0; j < 5; j++)
-            {
-                Div_Osc[j, osc] = MF_Segs[j];
-            }
-            converge = false;
-        }
-        else
-        {
-            // If code lands here, check for oscialltion and then bump values if not
-            osc += 1;
-            for (int y = 0; y < 4; y++)
-            {
-                if (Math.Abs(Div_Osc[0, y] - MF_Segs[0]) < 20 &&
-                    Math.Abs(Div_Osc[1, y] - MF_Segs[1]) < 20 &&
-                    Math.Abs(Div_Osc[2, y] - MF_Segs[2]) < 20 &&
-                    Math.Abs(Div_Osc[3, y] - MF_Segs[3]) < 20 &&
-                    Math.Abs(Div_Osc[4, y] - MF_Segs[4]) < 20)
-                {
-                    // If code lands here then oscillation has occurred
-                    converge = true;
-                    break;
-                }
-                else
-                {
-                    converge = false;
-                }
-            }
-            if (!converge)
-            {
-                // If the code didn't settle on "converge = true" above, then shift values
-                // and store the latest entry
-                for (int x = 0; x < 5; x++)
-                {
-                    for (int y = 1; y < 4; y++)
-                    {
-                        Div_Osc[x, y - 1] = Div_Osc[x, y];
-                    }
-                }
-                for (int x = 0; x < 5; x++)
-                {
-                    Div_Osc[x, 3] = MF_Segs[x];
-                }
-                osc -= 1;
-            }
-        }
-
-
         return converge;
     }
 
