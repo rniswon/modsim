@@ -475,7 +475,7 @@ public static class SurfGWModule
                             }
                             else
                             {
-                                resRelLink.mlInfo.hi = Convert.ToInt32((MS_Flows[i]+ MS_FlowsLIMITED[i])/2 / uConvToMODFLOW * accuracy);
+                                resRelLink.mlInfo.hi = Convert.ToInt32((MS_Flows[i] + MS_FlowsLIMITED[i]) / 2 / uConvToMODFLOW * accuracy);
                             }
 
                             // Flag row as having been adjusted for restoring later
@@ -594,7 +594,7 @@ public static class SurfGWModule
                     }
                 }
 
-                if (myModel.mInfo.CurrentModelTimeStepIndex == 1819)
+                if (myModel.mInfo.CurrentModelTimeStepIndex == 1819 | iterCount >= (maxNoIterations - 500))
                 {
                     MS_Flows[21] = MS_Flows[21];
                 }
@@ -690,7 +690,7 @@ public static class SurfGWModule
                 {
                     gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL); // converged mode
                     afr = true;
-                    Console.WriteLine("           MS_GSF Last Iteration: " + iterCount);
+                    Console.WriteLine("           MS_GSF Last Iteration: " + iterCount + " Stress Period: " + myModel.mInfo.CurrentModelTimeStepIndex);
                     iterCount = 0;
                     MFRunYet = false;
 
