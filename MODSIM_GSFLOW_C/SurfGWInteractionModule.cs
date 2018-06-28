@@ -400,7 +400,42 @@ public static class SurfGWModule
 
     private static void OnIterationTop()
     {
-          
+        if (Model_mode != 13)  // MODSIM-only mode
+        {
+            // Curtail reservoir release by setting upper bound where appropriate
+            if (MFRunYet)
+            {
+                for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
+                {
+                    if (Math.Abs(MS_FlowsLIMITED[i] - MS_Flows[i]) > EXCHNGVol_Tolerance)  // The array MS_Flows returned with altered values if MODFLOW determines not enough flow available
+                                                                                           // Fix the 0.01 to instead be a global tolerance variable
+                    {
+                        // Set upper limit on link so as not to allow more through than physically available  // int j = Convert.ToInt16(m_SyncTblSEG.Rows[i]["iseg"].ToString());  // DataRow[] m_row = m_SyncTblSEG.Select("iseg = " + j.ToString());
+                        DataRow m_row = m_SyncTblSEG.Rows[i];
+
+                        //Check to ensure the current link is a reservoir release link
+                        if (Convert.ToInt16(m_row["ResRelease"]) > 0)
+                        {
+                            Link resRelLink = myModel.FindLink(m_row["Link Name"].ToString());
+
+                            // Recall that MS_Flows is in GSFLOW/MODFLOW units and therefore needs to be converted back to MODSIM units before being stuffed back into a MODSIM-used parameter
+                            if (Convert.ToInt32(MS_Flows[i] / uConvToMODFLOW * accuracy) == 0)
+                            {
+                                resRelLink.mlInfo.hi = Convert.ToInt32(0.0001 / uConvToMODFLOW * accuracy);
+                            }
+                            else
+                            {
+                                resRelLink.mlInfo.hi = Convert.ToInt32((MS_Flows[i] + MS_FlowsLIMITED[i]) / 2 / uConvToMODFLOW * accuracy);
+                            }
+
+                            // Flag row as having been adjusted for restoring later
+                            m_row["adjted"] = 1;
+                            // Console.Write("|" + resRelLink.mlInfo.hi + "|");
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private static void OnMessage(string message)
@@ -450,41 +485,7 @@ public static class SurfGWModule
 
                 //reset starting volume to the last converged MODFLOW reservoir volumes
                 if (MFRunYet) MS_Reservoirs[i].mnInfo.start = (long)(STARTLAKEVOL[i] * accuracy / uConvToMODFLOW);
-            }
-
-            // Curtail reservoir release by setting upper bound where appropriate
-            if (MFRunYet)
-            {
-                for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
-                {
-                    if (Math.Abs(MS_FlowsLIMITED[i] - MS_Flows[i]) > EXCHNGVol_Tolerance)  // The array MS_Flows returned with altered values if MODFLOW determines not enough flow available
-                                                                            // Fix the 0.01 to instead be a global tolerance variable
-                    {
-                        // Set upper limit on link so as not to allow more through than physically available  // int j = Convert.ToInt16(m_SyncTblSEG.Rows[i]["iseg"].ToString());  // DataRow[] m_row = m_SyncTblSEG.Select("iseg = " + j.ToString());
-                        DataRow m_row = m_SyncTblSEG.Rows[i];
-
-                        //Check to ensure the current link is a reservoir release link
-                        if (Convert.ToInt16(m_row["ResRelease"]) > 0)
-                        {
-                            Link resRelLink = myModel.FindLink(m_row["Link Name"].ToString());
-                            
-                            // Recall that MS_Flows is in GSFLOW/MODFLOW units and therefore needs to be converted back to MODSIM units before being stuffed back into a MODSIM-used parameter
-                            if (Convert.ToInt32(MS_Flows[i] / uConvToMODFLOW * accuracy) == 0)
-                            {
-                                resRelLink.mlInfo.hi = Convert.ToInt32(0.0001 / uConvToMODFLOW * accuracy);
-                            }
-                            else
-                            {
-                                resRelLink.mlInfo.hi = Convert.ToInt32((MS_Flows[i]+ MS_FlowsLIMITED[i])/2 / uConvToMODFLOW * accuracy);
-                            }
-
-                            // Flag row as having been adjusted for restoring later
-                            m_row["adjted"] = 1;
-                            // Console.Write("|" + resRelLink.mlInfo.hi + "|");
-                        }
-                    }
-                }
-            }
+            }            
         }
         localMODSIMIter++;
     }
