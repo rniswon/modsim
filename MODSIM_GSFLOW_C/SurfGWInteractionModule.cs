@@ -594,7 +594,7 @@ public static class SurfGWModule
                     }
                 }
 
-                if (myModel.mInfo.CurrentModelTimeStepIndex == 1819 | iterCount >= (maxNoIterations - 500))
+                if (myModel.mInfo.CurrentModelTimeStepIndex == 2504 | myModel.mInfo.Iteration >= (maxNoIterations - 500))
                 {
                     MS_Flows[21] = MS_Flows[21];
                 }
@@ -604,16 +604,27 @@ public static class SurfGWModule
                     gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL); // run mode
                 }
 
-                //// Check for MODFLOW-determined limitations in release and/or diversion amounts
-                //// This code necessary because of 
-                //for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
-                //{
-                //    if (MS_FlowsLIMITED[i] > MS_Flows[i])  // The array MS_Flows returned with altered values if MODFLOW determines not enough flow available
-                //    {
-                //        // Set upper limit on link so as not to allow more through than physically available
+                // When all of the diverted water is seeped before making it to the demand node
+                // A major shortcoming of this approach is that when multiple links (segments) 
+                // comprise the path to the demand node.  The following code won't be able to 
+                // tally all of the seepage losses from the multiple links.  
+                if (myModel.mInfo.CurrentModelTimeStepIndex > 657)
+                {
+                    for (int i = 0; i < MS_Flows.Length; i++)
+                    {
+                        if (IDivert[i] != 0)
+                        {
+                            if ((MS_Flows[i] + EXCHANGE[i]) < EXCHNGVol_Tolerance)
+                            {
+                                Link resRelLink = myModel.FindLink(m_SyncTblSEG.Rows[i]["Link Name"].ToString());
+                                resRelLink.mlInfo.hi = Convert.ToInt32(0.0001 / uConvToMODFLOW * accuracy);
 
-                //    }
-                //}
+                                // Flag row's "adjusted" column
+                                m_SyncTblSEG.Rows[i]["adjted"] = 1;
+                            }
+                        }
+                    }
+                }
 
                 //
                 // Lake 1 (inline lake)
@@ -698,14 +709,14 @@ public static class SurfGWModule
                     // Restore original link capacities
                     for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
                     {
-                        if (Convert.ToInt32(m_SyncTblSEG.Rows[i]["adjted"]) > 0)
-                        {
+                        // if (Convert.ToInt32(m_SyncTblSEG.Rows[i]["adjted"]) > 0)
+                        // {
                             Link resRelLink = myModel.FindLink(m_SyncTblSEG.Rows[i]["Link Name"].ToString());
                             resRelLink.mlInfo.hi = LinkHi;
 
                             // Flag row's "adjusted" column back to not adjusted
                             m_SyncTblSEG.Rows[i]["adjted"] = 0;
-                        }
+                        // }
                     }
 
                 }
