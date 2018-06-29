@@ -402,6 +402,41 @@ public static class SurfGWModule
     {
         if (Model_mode != 13)  // MODSIM-only mode
         {
+            //Asign accretions and depletions to the MODSIM network.
+            for (int i = 0; i < MS_Links.Length; i++)
+            {
+                double m_value = EXCHANGE[i] * accuracy / uConvToMODFLOW;  // This sets the MF returned GW-SW acc/dep
+                                                                           // units conversion to MODSIM is required
+                                                                           // Need the -1 to account for 0-based indexing in C#
+                try
+                {
+                    assignDepAcc(MS_Links[i].name, m_value);
+                }
+                catch (NullReferenceException ex)
+                {
+                    continue;
+                }
+            }
+
+            // Implement Reservoir accretions/depletions
+            for (int i = 0; i < MS_Reservoirs.Length; i++)
+            {
+                double m_value = DELTAVOL[i] * accuracy / uConvToMODFLOW;  // This sets the MF returned GW-SW acc/dep
+                                                                           // Need the -1 to account for 0-based indexing in C#
+                                                                           // m_value /= 7; //Only for Carson (weekly)                                                                       
+                try
+                {
+                    assignDepAcc(MS_Reservoirs[i].name, m_value);
+                }
+                catch (NullReferenceException ex)
+                {
+                    continue;
+                }
+
+                //reset starting volume to the last converged MODFLOW reservoir volumes
+                if (MFRunYet) MS_Reservoirs[i].mnInfo.start = (long)(STARTLAKEVOL[i] * accuracy / uConvToMODFLOW);
+            }
+        
             // Curtail reservoir release by setting upper bound where appropriate
             if (MFRunYet)
             {
@@ -436,6 +471,7 @@ public static class SurfGWModule
                 }
             }
         }
+        localMODSIMIter++;
     }
 
     private static void OnMessage(string message)
@@ -450,44 +486,7 @@ public static class SurfGWModule
 
     private static void OnIterationBottom()
     {
-        if (Model_mode != 13)  // MODSIM-only mode
-        {
-            //Asign accretions and depletions to the MODSIM network.
-            for (int i = 0; i < MS_Links.Length; i++)
-            {
-                double m_value = EXCHANGE[i] * accuracy / uConvToMODFLOW;  // This sets the MF returned GW-SW acc/dep
-                                                                           // units conversion to MODSIM is required
-                                                                           // Need the -1 to account for 0-based indexing in C#
-                try
-                {
-                    assignDepAcc(MS_Links[i].name, m_value);
-                }
-                catch (NullReferenceException ex)
-                {
-                    continue;
-                }
-            }
-
-            // Implement Reservoir accretions/depletions
-            for (int i = 0; i < MS_Reservoirs.Length; i++)
-            {
-                double m_value = DELTAVOL[i] * accuracy / uConvToMODFLOW;  // This sets the MF returned GW-SW acc/dep
-                                                                           // Need the -1 to account for 0-based indexing in C#
-                // m_value /= 7; //Only for Carson (weekly)                                                                       
-                try
-                {
-                    assignDepAcc(MS_Reservoirs[i].name, m_value);
-                }
-                catch (NullReferenceException ex)
-                {
-                    continue;
-                }
-
-                //reset starting volume to the last converged MODFLOW reservoir volumes
-                if (MFRunYet) MS_Reservoirs[i].mnInfo.start = (long)(STARTLAKEVOL[i] * accuracy / uConvToMODFLOW);
-            }            
-        }
-        localMODSIMIter++;
+        
     }
 
     private static void assignDepAcc (String m_Name, double m_Value)
