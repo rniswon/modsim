@@ -36,6 +36,7 @@ public static class SurfGWModule
     public static double[] DELTAVOL = new double[1];
     public static double[] DELTAVOLPREV = new double[1];
     public static double[] LAKEVOL = new double[1];
+    public static double[] DPOOL = new double[1];
     public static double[] STARTLAKEVOL = new double[1];
     public static object RAD_list;
     public static DataTable m_table;
@@ -122,6 +123,7 @@ public static class SurfGWModule
         DELTAVOLPREV = (double[])ResizeArray(DELTAVOLPREV, new int[] { Nlakeshold });
         LAKEVOL = (double[])ResizeArray(LAKEVOL, new int[] { Nlakeshold });
         STARTLAKEVOL = (double[])ResizeArray(STARTLAKEVOL, new int[] { Nlakeshold });
+        DPOOL = (double[])ResizeArray(DPOOL, new int[] { Nlakeshold });
 
         if (Model_mode < 10) // GSFLOW and PRMS-only
         {
@@ -588,7 +590,10 @@ public static class SurfGWModule
                         if (MS_Reservoirs[i] != null)
                         {
                             MS_Reservoirs[i].m.starting_volume = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
+                            // MS_Reservoirs[i].m.min_volume = (long)(DELTAVOL[i] * accuracy / uConvToMODFLOW);
+                            DPOOL[i] = (long)(DELTAVOL[i] * uConvToMODFLOW) / accuracy;  // Store DPOOL in MODFLOW units, not MODSIM units.  
                             MS_Reservoirs[i].mnInfo.start = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
+                            
                             STARTLAKEVOL[i] = LAKEVOL[i];
                         }
                     }
@@ -604,27 +609,16 @@ public static class SurfGWModule
                     gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL); // run mode
                 }
 
-                // When all of the diverted water is seeped before making it to the demand node
-                // A major shortcoming of this approach is that when multiple links (segments) 
-                // comprise the path to the demand node.  The following code won't be able to 
-                // tally all of the seepage losses from the multiple links.  
-                if (myModel.mInfo.CurrentModelTimeStepIndex > 657)
-                {
-                    for (int i = 0; i < MS_Flows.Length; i++)
-                    {
-                        if (IDivert[i] != 0)
-                        {
-                            if ((MS_Flows[i] + EXCHANGE[i]) < EXCHNGVol_Tolerance)
-                            {
-                                Link resRelLink = myModel.FindLink(m_SyncTblSEG.Rows[i]["Link Name"].ToString());
-                                resRelLink.mlInfo.hi = Convert.ToInt32(0.0001 / uConvToMODFLOW * accuracy);
+                //// Check for MODFLOW-determined limitations in release and/or diversion amounts
+                //// This code necessary because of 
+                //for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
+                //{
+                //    if (MS_FlowsLIMITED[i] > MS_Flows[i])  // The array MS_Flows returned with altered values if MODFLOW determines not enough flow available
+                //    {
+                //        // Set upper limit on link so as not to allow more through than physically available
 
-                                // Flag row's "adjusted" column
-                                m_SyncTblSEG.Rows[i]["adjted"] = 1;
-                            }
-                        }
-                    }
-                }
+                //    }
+                //}
 
                 //
                 // Lake 1 (inline lake)
@@ -709,14 +703,14 @@ public static class SurfGWModule
                     // Restore original link capacities
                     for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
                     {
-                        // if (Convert.ToInt32(m_SyncTblSEG.Rows[i]["adjted"]) > 0)
-                        // {
+                        if (Convert.ToInt32(m_SyncTblSEG.Rows[i]["adjted"]) > 0)
+                        {
                             Link resRelLink = myModel.FindLink(m_SyncTblSEG.Rows[i]["Link Name"].ToString());
                             resRelLink.mlInfo.hi = LinkHi;
 
                             // Flag row's "adjusted" column back to not adjusted
                             m_SyncTblSEG.Rows[i]["adjted"] = 0;
-                        // }
+                        }
                     }
 
                 }
@@ -795,7 +789,7 @@ public static class SurfGWModule
                 //DELTAVOL[i] += -((MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW) - LAKEVOL[i]);
                 //VOLSync = true;
                 //converge = false;
-                Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW  + " MF: " + LAKEVOL[i]);
+                Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW  + " MF: " + LAKEVOL[i] + " DPOOL: " + string.Format("{0:N1}", DPOOL[i] / ));
                 STARTLAKEVOL[i] = LAKEVOL[i];
             }
         }
