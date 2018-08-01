@@ -227,14 +227,14 @@ public static class SurfGWModule
             if ((string)mrow["Key"] == "VolumeTolerance") { LAKEVol_Tolerance = Convert.ToDouble( mrow["Value"] ); }
         }
 
-        // Create Sink Node
+        // Create GW-SW Sink Node
         Node m_Sink = myModel.AddNewNode(true);
         m_Sink.nodeType = NodeType.Sink;
         //m_Sink.graphics.point.X = -1150;
         //m_Sink.graphics.point.Y = 5000;
         m_Sink.name = "MF_SINK";
 
-        // Create Source Node
+        // Create GW-SW Source Node
         Node m_Source = myModel.AddNewNode(true);
         m_Source.nodeType = NodeType.NonStorage;
         //m_Source.graphics.point.X = 7200;
@@ -243,7 +243,8 @@ public static class SurfGWModule
         DataTable m_TSTbl = m_Source.m.adaInflowsM.dataTable;
         SetDefaultTableValue(ref m_TSTbl, 1000000000);
 
-        // Connect Source Node
+        // Connect both of just instantiated nodes so that unused source water 
+        // is shunted out of the model through the sink Node
         Link m_Link = myModel.AddNewLink(true);
         Utils.ConnectFromNode(m_Link, m_Source);
         Utils.ConnectToNode(m_Link, m_Sink);
@@ -256,7 +257,14 @@ public static class SurfGWModule
         {
             try
             {
-                Link baseLink = myModel.FindLink((string)mrow["Link Name"]);
+                Link baseLink;
+                if (mrow["Link Name"].ToString() != "")
+                {
+                    baseLink = myModel.FindLink((string)mrow["Link Name"]);
+                } else
+                {
+                    baseLink = null;
+                }
                 if (baseLink != null)
                 {
                     //Depletions to a link simulated at the downstream node of the MODSIM link.
@@ -324,55 +332,55 @@ public static class SurfGWModule
         if (Model_mode != 13)  // Model_mode = 13: MODSIM-only
         {
             //Dimension arrays to the input table
-            Array.Resize<double>(ref MS_Flows, Convert.ToInt32(m_SyncTblSEG.Compute("max([iseg])", string.Empty)));
-            Array.Resize<double>(ref MS_FlowsPREV, Convert.ToInt32(m_SyncTblSEG.Compute("max([iseg])", string.Empty)));
-            Array.Resize<double>(ref MS_FlowsLIMITED, Convert.ToInt32(m_SyncTblSEG.Compute("max([iseg])", string.Empty)));
-            Array.Resize<Link>(ref MS_Links, Convert.ToInt32(m_SyncTblSEG.Compute("max([iseg])", string.Empty)));
+            Array.Resize<double>(ref MS_Flows, m_SyncTblSEG.Rows.Count);
+            Array.Resize<double>(ref MS_FlowsPREV, m_SyncTblSEG.Rows.Count);
+            Array.Resize<double>(ref MS_FlowsLIMITED, m_SyncTblSEG.Rows.Count);
+            Array.Resize<Link>(ref MS_Links, m_SyncTblSEG.Rows.Count);
             Array.Resize<Node>(ref MS_Reservoirs, m_SyncTblRES.Rows.Count);
 
             // Also, initialize MF_Acc_Dep (accretion/depletion) variables
             // TODO: Is this needed - they should be zero
-
-            int i;
-            int j = 0;
+            int i = 0;
             Link m_Link;
-            DataRow m_Row;
-            for (i = 0; i < m_SyncTblSEG.Rows.Count; i++) //foreach (DataRow m_Row in m_SyncTblSEG.Rows)// 
+            foreach (DataRow m_Row in m_SyncTblSEG.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
             {
-                m_Row = m_SyncTblSEG.Rows[i];
-                
-                if (j != (int)((double)m_Row["iseg"] - 1)) // Old approach (pre 3/14/2018): throw new Exception("Iseg doesn't match the index of the array");
-                {                                          // New appraoch (starting on 3/14/2018): Allow there to be iseg's in MF that don't have a corresponding
-                    MS_Flows[j] = 0;                       //                                       link in MODSIM
-                    IDivert[j] = 0;
-                    IRelease[j] = 0;
-                    j += 1;                                // Advance j to effectively go to next index of iseg
-                    i -= 1;                                // stall i by subtracting 1 which will get added back onto after the continue
-                    continue;
-                }
-                MS_Flows[j] = 0;
-                IDivert[j] = (int)(double)m_Row["Diversion"];
-                IRelease[j] = (int)(double)m_Row["ResRelease"];
-
+                //MF_Acc_Dep_Identifier[i] = (double) m_Row["iseg"];
+                if (i != (int)((double)m_Row["iseg"] - 1)) throw new Exception("Iseg doesn't match the index of the array");
+                MS_Flows[i] = 0;
+                IDivert[i] = (int)(double)m_Row["Diversion"];
+                IRelease[i] = (int)(double)m_Row["ResRelease"];
                 if (IRelease[i] >= 1)
                 {
                     IDivert[i] = 2;  // Fortran needs to distinguish between diversion and reservoir release
                 }                    // A code of 2 will signify a reservoir release
-                m_Link = myModel.FindLink((string)m_Row["Link Name"]); // Use .FindLink() instead
+                if (m_Row["Link Name"].ToString() != "")
+                {
+                    m_Link = myModel.FindLink((string)m_Row["Link Name"]); // Use .FindLink() instead
+                } else
+                {
+                    if (m_Row["Link Name"].ToString() == "" && (Convert.ToInt32(m_Row["Diversion"]) != 0 || Convert.ToInt32(m_Row["ResRelease"]) != 0))
+                    {
+                        Console.WriteLine("Diversion or reservoir release specified for missing MODSIM link in Mapping_Info table");
+                        System.Environment.Exit(1);
+                    }
+                    //m_Link = myModel.AddNewLink(true);
+                    //m_Link.name = "dummy_" + i.ToString();
+                    m_Link = null;
+                }
+                
                 MS_Links[i] = m_Link;
-                j += 1;
+                i += 1;
             }
 
             //Initialize Reservoir arrays
             Node m_Res;
             i = 0;
-            for (i = 0; i < m_SyncTblRES.Rows.Count; i++) //foreach (m_Row in m_SyncTblRES.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
+            foreach (DataRow m_Row in m_SyncTblRES.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
             {
-                m_Row = m_SyncTblRES.Rows[i];
                 if (i != ((short)m_Row["GSF_LAK_ID"]) - 1) throw new Exception("Iseg doesn't match the index of the array");
                 m_Res = myModel.FindNode((string)m_Row["MODSIM_Name"]);
                 MS_Reservoirs[i] = m_Res;
-                // i += 1;
+                i += 1;
             }
 
             // Initialize Diversions array to 0
@@ -406,8 +414,12 @@ public static class SurfGWModule
 
             // Store max link capacity for restoration of MODFLOW-adjusted maximum amounts, 
             // arbitrarily choosing the first link in the synchronization table
-            Link resRelLink = myModel.FindLink(m_SyncTblSEG.Rows[0]["Link Name"].ToString());
-            LinkHi = resRelLink.mlInfo.hi;
+            if(m_SyncTblSEG.Rows[0]["Link Name"].ToString() != "")
+            {
+                Link resRelLink = myModel.FindLink(m_SyncTblSEG.Rows[0]["Link Name"].ToString());
+                LinkHi = resRelLink.mlInfo.hi;
+            }
+            
 
             //Initialize variable to iterate between MODSIM and GSFLOW
             MFRunYet = false;
@@ -429,7 +441,11 @@ public static class SurfGWModule
                                                                            // Need the -1 to account for 0-based indexing in C#
                 try
                 {
-                    assignDepAcc(MS_Links[i].name, m_value);
+                    if(MS_Links[i] != null)
+                    {
+                        assignDepAcc(MS_Links[i].name, m_value);
+                    }
+                    
                 }
                 catch (NullReferenceException ex)
                 {
@@ -468,6 +484,7 @@ public static class SurfGWModule
                         DataRow m_row = m_SyncTblSEG.Rows[i];
 
                         //Check to ensure the current link is a reservoir release link
+                        // TODO: m_row["Link Name"] in the 3rd line below won't work if it isn't specified in the mapping info datatable
                         if (Convert.ToInt16(m_row["ResRelease"]) > 0)
                         {
                             Link resRelLink = myModel.FindLink(m_row["Link Name"].ToString());
@@ -639,17 +656,17 @@ public static class SurfGWModule
 
                 //
                 // Lake 1 (inline lake)
-                //double LK9_in_val;
-                //double LK9_out_val1;
-                //double LK9_out_val2;
-                //double LK9_out_val3;
-                //Link LK9_in = myModel.FindLink("199");
-                //LK9_in_val = (double)LK9_in.mlInfo.flow / accuracy * uConvToMODFLOW;
-                //Link LK9_out1 = myModel.FindLink("lake_9_out");
-                //Link LK9_out2 = myModel.FindLink("lake_9_out_1");
+                double LK9_in_val;
+                double LK9_out_val1;
+                double LK9_out_val2;
+                double LK9_out_val3;
+                Link LK9_in = myModel.FindLink("199");  
+                LK9_in_val = (double)LK9_in.mlInfo.flow / accuracy * uConvToMODFLOW;
+                Link LK9_out1 = myModel.FindLink("lake_9_NonStorage");
+                Link LK9_out2 = myModel.FindLink("lake_9_out_2");
                 //Link LK9_out3 = myModel.FindLink("lake_9_out_2");
-                //LK9_out_val1 = (double)LK9_out1.mlInfo.flow / accuracy * uConvToMODFLOW;
-                //LK9_out_val2 = (double)LK9_out2.mlInfo.flow / accuracy * uConvToMODFLOW;
+                LK9_out_val1 = (double)LK9_out1.mlInfo.flow / accuracy * uConvToMODFLOW;
+                LK9_out_val2 = (double)LK9_out2.mlInfo.flow / accuracy * uConvToMODFLOW;
                 //LK9_out_val3 = (double)LK9_out3.mlInfo.flow / accuracy * uConvToMODFLOW;
 
                 //// Lake 2 (offline lake)
@@ -665,21 +682,21 @@ public static class SurfGWModule
                 //Link LK2_out = myModel.FindLink("OffLineRes_NonStorage13");
                 //LK2_out_val = (double)LK2_out.mlInfo.flow / accuracy * uConvToMODFLOW;
 
-                //double LK9_oldvol;
+                double LK9_oldvol;
                 //double LK2_oldvol;
-                //double LK9_newvol;
+                double LK9_newvol;
                 //double LK2_newvol;
 
-                //LK9_oldvol = MS_Reservoirs[0].mnInfo.start / accuracy * uConvToMODFLOW;
+                LK9_oldvol = MS_Reservoirs[8].mnInfo.start / accuracy * uConvToMODFLOW;
                 //LK2_oldvol = MS_Reservoirs[1].mnInfo.start / accuracy * uConvToMODFLOW;
 
-                //LK9_newvol = MS_Reservoirs[0].mnInfo.stend / accuracy * uConvToMODFLOW;
+                LK9_newvol = MS_Reservoirs[8].mnInfo.stend / accuracy * uConvToMODFLOW;
                 //LK2_newvol = MS_Reservoirs[1].mnInfo.stend / accuracy * uConvToMODFLOW;
 
                 ////Console.WriteLine(LK1_in.ToString() + " " + LK1_out.ToString() + " " + LK2_tot_in.ToString() + " " + LK2_out_val.ToString());
                 //in_out_sw.WriteLine(LK1_in_val + " " + LK1_out_val + " " + LK1_oldvol + " " + LK1_newvol + " " + DELTAVOL[0].ToString() + " " + LK2_tot_in + " " + LK2_out_val + " " + LK2_oldvol + " " + LK2_newvol + " " + DELTAVOL[1].ToString());
-                //in_out_sw.WriteLine(iterCount + " " + LK9_in_val + " " + LK9_out_val1 + " " + LK9_out_val2 + " " + LK9_out_val3 + " " + LK9_oldvol + " " + LK9_newvol + " " + DELTAVOL[0].ToString());
-                //in_out_sw.Flush();
+                in_out_sw.WriteLine(iterCount + " " + LK9_in_val + " " + LK9_out_val1 + " " + LK9_out_val2 + " " + LK9_oldvol + " " + LK9_newvol + " " + DELTAVOL[0].ToString());
+                in_out_sw.Flush();
                 // to here
 
                 //Check for convergence between MODSIM and MODFLOW
