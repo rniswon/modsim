@@ -656,17 +656,17 @@ public static class SurfGWModule
 
                 //
                 // Lake 1 (inline lake)
-                double LK9_in_val;
-                double LK9_out_val1;
-                double LK9_out_val2;
-                double LK9_out_val3;
-                Link LK9_in = myModel.FindLink("199");  
-                LK9_in_val = (double)LK9_in.mlInfo.flow / accuracy * uConvToMODFLOW;
-                Link LK9_out1 = myModel.FindLink("lake_9_NonStorage");
-                Link LK9_out2 = myModel.FindLink("lake_9_out_2");
+                //double LK9_in_val;
+                //double LK9_out_val1;
+                //double LK9_out_val2;
+                //double LK9_out_val3;
+                //Link LK9_in = myModel.FindLink("199");  
+                //LK9_in_val = (double)LK9_in.mlInfo.flow / accuracy * uConvToMODFLOW;
+                //Link LK9_out1 = myModel.FindLink("lake_9_NonStorage");
+                //Link LK9_out2 = myModel.FindLink("lake_9_out_2");
                 //Link LK9_out3 = myModel.FindLink("lake_9_out_2");
-                LK9_out_val1 = (double)LK9_out1.mlInfo.flow / accuracy * uConvToMODFLOW;
-                LK9_out_val2 = (double)LK9_out2.mlInfo.flow / accuracy * uConvToMODFLOW;
+                //LK9_out_val1 = (double)LK9_out1.mlInfo.flow / accuracy * uConvToMODFLOW;
+                //LK9_out_val2 = (double)LK9_out2.mlInfo.flow / accuracy * uConvToMODFLOW;
                 //LK9_out_val3 = (double)LK9_out3.mlInfo.flow / accuracy * uConvToMODFLOW;
 
                 //// Lake 2 (offline lake)
@@ -682,21 +682,21 @@ public static class SurfGWModule
                 //Link LK2_out = myModel.FindLink("OffLineRes_NonStorage13");
                 //LK2_out_val = (double)LK2_out.mlInfo.flow / accuracy * uConvToMODFLOW;
 
-                double LK9_oldvol;
-                //double LK2_oldvol;
-                double LK9_newvol;
-                //double LK2_newvol;
+                //double LK9_oldvol;
+                ////double LK2_oldvol;
+                //double LK9_newvol;
+                ////double LK2_newvol;
 
-                LK9_oldvol = MS_Reservoirs[8].mnInfo.start / accuracy * uConvToMODFLOW;
-                //LK2_oldvol = MS_Reservoirs[1].mnInfo.start / accuracy * uConvToMODFLOW;
+                //LK9_oldvol = MS_Reservoirs[8].mnInfo.start / accuracy * uConvToMODFLOW;
+                ////LK2_oldvol = MS_Reservoirs[1].mnInfo.start / accuracy * uConvToMODFLOW;
 
-                LK9_newvol = MS_Reservoirs[8].mnInfo.stend / accuracy * uConvToMODFLOW;
-                //LK2_newvol = MS_Reservoirs[1].mnInfo.stend / accuracy * uConvToMODFLOW;
+                //LK9_newvol = MS_Reservoirs[8].mnInfo.stend / accuracy * uConvToMODFLOW;
+                ////LK2_newvol = MS_Reservoirs[1].mnInfo.stend / accuracy * uConvToMODFLOW;
 
-                ////Console.WriteLine(LK1_in.ToString() + " " + LK1_out.ToString() + " " + LK2_tot_in.ToString() + " " + LK2_out_val.ToString());
-                //in_out_sw.WriteLine(LK1_in_val + " " + LK1_out_val + " " + LK1_oldvol + " " + LK1_newvol + " " + DELTAVOL[0].ToString() + " " + LK2_tot_in + " " + LK2_out_val + " " + LK2_oldvol + " " + LK2_newvol + " " + DELTAVOL[1].ToString());
-                in_out_sw.WriteLine(iterCount + " " + LK9_in_val + " " + LK9_out_val1 + " " + LK9_out_val2 + " " + LK9_oldvol + " " + LK9_newvol + " " + DELTAVOL[0].ToString());
-                in_out_sw.Flush();
+                //////Console.WriteLine(LK1_in.ToString() + " " + LK1_out.ToString() + " " + LK2_tot_in.ToString() + " " + LK2_out_val.ToString());
+                ////in_out_sw.WriteLine(LK1_in_val + " " + LK1_out_val + " " + LK1_oldvol + " " + LK1_newvol + " " + DELTAVOL[0].ToString() + " " + LK2_tot_in + " " + LK2_out_val + " " + LK2_oldvol + " " + LK2_newvol + " " + DELTAVOL[1].ToString());
+                //in_out_sw.WriteLine(iterCount + " " + LK9_in_val + " " + LK9_out_val1 + " " + LK9_out_val2 + " " + LK9_oldvol + " " + LK9_newvol + " " + DELTAVOL[0].ToString());
+                //in_out_sw.Flush();
                 // to here
 
                 //Check for convergence between MODSIM and MODFLOW
