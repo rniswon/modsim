@@ -514,7 +514,7 @@ public static class SurfGWModule
 
     private static void OnMessage(string message)
     {
-        //Console.Write(message + "\n");
+        Console.Write(message + "\n");
     }
 
     private static void OnError(string message)
@@ -737,7 +737,11 @@ public static class SurfGWModule
                     localMODSIMIter = 0;
 
                 }
-                else if(Model_mode == 11) { afr = true; }
+                else if(Model_mode == 11)
+                {
+                    afr = true;
+                    iterCount = 0;
+                }
                 else
                 {
                     gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP); // converged mode
@@ -827,7 +831,7 @@ public static class SurfGWModule
                 if ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i]) > LAKEVol_Tolerance) Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
             }
         }
-        if (converge)
+        if (converge && Model_mode != 11)
         {
             Console.WriteLine("");
             //Trying to correct the end Volume convergence
