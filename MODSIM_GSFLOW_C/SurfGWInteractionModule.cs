@@ -382,6 +382,13 @@ public static class SurfGWModule
                 if (i != ((short)m_Row["GSF_LAK_ID"]) - 1) throw new Exception("Iseg doesn't match the index of the array");
                 m_Res = myModel.FindNode((string)m_Row["MODSIM_Name"]);
                 MS_Reservoirs[i] = m_Res;
+                //If PRMS-MODSIM initialize the reservoir evaporation arrays
+                if (Model_mode == 11) //PRMS-MODSIM mode
+                {
+                    //PRMS calculates potential evaporation with is used in MODSIM to compute reservoir evaporation
+                    //  MODSIM user input will be overwritten 
+                    MS_Reservoirs[i].mnInfo.evaporationrate = (double[,])ResizeArray(MS_Reservoirs[i].mnInfo.evaporationrate, new int[] { MS_Reservoirs[i].mnInfo.start_storage.Length, 1 });
+                }
                 i += 1;
             }
 
@@ -613,7 +620,16 @@ public static class SurfGWModule
                 }
 
                 //Implement Reservoir accretions/depletions
-                for (int i = 0; i < MS_Reservoirs.Length; i++) DELTAVOLPREV[i] = DELTAVOL[i];
+                for (int i = 0; i < MS_Reservoirs.Length; i++)
+                {
+                    DELTAVOLPREV[i] = DELTAVOL[i];
+                    if (Model_mode == 11) //PRMS-MODSIM mode
+                    {
+                        //PRMS calculates potential evaporation with is used in MODSIM to compute reservoir evaporation
+                        //  MODSIM user input will be overwritten 
+                        if (MS_Reservoirs[i] != null) MS_Reservoirs[i].mnInfo.evaporationrate[myModel.mInfo.CurrentModelTimeStepIndex, 0] = -LAKEVAP[i];
+                    }
+                }
 
                 //Need to know the value of LAKEVOL for the first (SS)
                 // If first iteration of first time step, overide MODSIM Lake volumes
@@ -725,7 +741,7 @@ public static class SurfGWModule
                     MS_GSF_converge = true;
                 }
 
-                if (!MS_GSF_converge)
+                if (!MS_GSF_converge || iterCount <2)
                 {
                     afr = false;
                     MFRunYet = true;
@@ -816,32 +832,36 @@ public static class SurfGWModule
             sw.Flush();
         }
 
-        for (int i = 0; i < DELTAVOL.Length; i++)
+        if (Model_mode != 11)
         {
-            //TO DO: Add reservoir volume convergence.
-            // Needs to compare MODSIM end storage with MODFLOW LAKEVOL
-            // Convergence checked in MODFLOW units.
-            converge = converge && ((double)Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) <= LAKEVol_Tolerance);
-            //if ((double)Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) > (double)(Math.Abs(DELTAVOLPREV[i]) * percent_diff)) Console.WriteLine("Res:" + i + ":" + Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]));
-            //Check for convergence on the Reservoir Volumes
-            converge = converge && ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW- LAKEVOL[i]) <= LAKEVol_Tolerance);
-            //if (i == 2 && myModel.mInfo.CurrentModelTimeStepIndex >= 364) Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
-            if (MS_Reservoirs[i] != null)
+
+            for (int i = 0; i < DELTAVOL.Length; i++)
             {
-                if ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i]) > LAKEVol_Tolerance) Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
+                //TO DO: Add reservoir volume convergence.
+                // Needs to compare MODSIM end storage with MODFLOW LAKEVOL
+                // Convergence checked in MODFLOW units.
+                converge = converge && ((double)Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) <= LAKEVol_Tolerance);
+                //if ((double)Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) > (double)(Math.Abs(DELTAVOLPREV[i]) * percent_diff)) Console.WriteLine("Res:" + i + ":" + Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]));
+                //Check for convergence on the Reservoir Volumes
+                converge = converge && ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i]) <= LAKEVol_Tolerance);
+                //if (i == 2 && myModel.mInfo.CurrentModelTimeStepIndex >= 364) Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
+                if (MS_Reservoirs[i] != null)
+                {
+                    if ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i]) > LAKEVol_Tolerance) Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
+                }
             }
-        }
-        if (converge && Model_mode != 11)
-        {
-            Console.WriteLine("");
-            //Trying to correct the end Volume convergence
-            for (int i = 0; i < MS_Reservoirs.Length; i++)
+            if (converge)
             {
-                //DELTAVOL[i] += -((MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW) - LAKEVOL[i]);
-                //VOLSync = true;
-                //converge = false;
-                Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW  + " MF: " + LAKEVOL[i] + " DPOOL: " + string.Format("{0:N1}", DPOOL[i]));
-                STARTLAKEVOL[i] = LAKEVOL[i];
+                Console.WriteLine("");
+                //Trying to correct the end Volume convergence
+                for (int i = 0; i < MS_Reservoirs.Length; i++)
+                {
+                    //DELTAVOL[i] += -((MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW) - LAKEVOL[i]);
+                    //VOLSync = true;
+                    //converge = false;
+                    Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i] + " DPOOL: " + string.Format("{0:N1}", DPOOL[i]));
+                    STARTLAKEVOL[i] = LAKEVOL[i];
+                }
             }
         }
         return converge;
