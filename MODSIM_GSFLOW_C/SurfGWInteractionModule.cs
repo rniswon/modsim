@@ -757,6 +757,7 @@ public static class SurfGWModule
                     //myModel.mInfo.Iteration = 0;
                     //Set local MODSIM iteration count
                     localMODSIMIter = 0;
+                    MS_GSF_converge = false;
 
                 }
                 else if(Model_mode == 11)
