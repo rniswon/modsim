@@ -328,7 +328,7 @@ public static class SurfGWModule
         return temp;
     }
 
-    private static double uConvToMODFLOW;
+    private static double uConvToMODFLOW, uConvRateToMODSIM;
     private static void OnInitialize()
     {
         if (Model_mode != 13)  // Model_mode = 13: MODSIM-only
@@ -409,6 +409,8 @@ public static class SurfGWModule
                 // 1000m3 is the default units for MODSIM in metric mode
                 // MODFLOW assumed to run in m3.
                 uConvToMODFLOW = 1000;
+                //  PRMS will always send evap in inches.  We need to apply the conversion meters in metric.
+                uConvRateToMODSIM = 0.0254;
             }
             else
             {
@@ -416,6 +418,8 @@ public static class SurfGWModule
                 // total acre-ft for the entirety of the time step
                 // MODFLOW assumed to run in ft3.
                 uConvToMODFLOW = 43560.0001;
+                //  PRMS will always send evap in inches.  We need to apply the conversion feet in english.
+                uConvRateToMODSIM = 1/12;
             }
 
             // Write a header row to the streamwriter for evaluating convergence with R
@@ -626,8 +630,10 @@ public static class SurfGWModule
                     if (Model_mode == 11) //PRMS-MODSIM mode
                     {
                         //PRMS calculates potential evaporation with is used in MODSIM to compute reservoir evaporation
-                        //  MODSIM user input will be overwritten 
-                        if (MS_Reservoirs[i] != null) MS_Reservoirs[i].mnInfo.evaporationrate[myModel.mInfo.CurrentModelTimeStepIndex, 0] = -LAKEVAP[i];
+                        //  MODSIM user input will be overwritten
+                        //  PRMS will always send evap in inches.  We need to apply the conversion metric/english.
+                        //  LAKEEVAP is going to include only evaporation, precipitation is comming in the DELTAVOL variable.
+                        if (MS_Reservoirs[i] != null) MS_Reservoirs[i].mnInfo.evaporationrate[myModel.mInfo.CurrentModelTimeStepIndex, 0] = -LAKEVAP[i]* uConvRateToMODSIM;
                     }
                 }
 
