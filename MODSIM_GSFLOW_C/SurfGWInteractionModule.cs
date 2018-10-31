@@ -13,7 +13,7 @@ using Csu.Modsim.ModsimIO;
 
 public static class SurfGWModule
 {
-    public static Model myModel = new Model();
+    private static Model myModel= new Model();
     public static SortedList myDepletions;
     public static SortedList myAcretions;
     public static Link[] MS_Links;
@@ -66,121 +66,136 @@ public static class SurfGWModule
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
     public static extern void LAK2MODSIM_InitLakes([In, Out] double[] DELTAVOL, [In, Out] double[] LAKEVOL);
 
+    public static Model GetModel()
+    {
+        return myModel;
+    }
+
     public static void Main(string[] CmdArgs)
     {
-        
-        int Numts = 1;
-        int len_xyname, len_mapname;
-
-        xyFileName = new String(' ', 80);
-        mappingFileName = new String(' ', 80);
-        len_xyname = xyFileName.Length;
-        len_mapname = mappingFileName.Length;
-
-        // Process_mode: 0 = run, 1 = delcare; 2 = initialize; 3 = clean; 4 = setdims
-        Process_mode = 4;  // setdims
-        afr = true;
-        MS_GSF_converge = false;
-        /* pass 2 arrays with NSS values, first has Diversion flag, second has ResRelease flag */
-        /* need to pass DIVS */
-        Nsegshold = 1;  //initialize temporarily
-        Nlakeshold = 1;  //initialize temporarily
-        gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP);
-
-        /* need file name of mapping file, read from GSFLOW Control File
-           file has link Name, iseg, diversion, ResRelease */
-
-        // Convert string to Fortran array of characters.
-        char[] xyPathChars = xyFileName.ToCharacterArrayFortran(len_xyname);
-        char[] mapPathChars = mappingFileName.ToCharacterArrayFortran(len_mapname);
-
-        gsflow_prmsSettings(ref Numts, ref Model_mode, ref startTime[0], ref len_xyname, xyPathChars, ref len_mapname, mapPathChars);
-        xyFileName = new string(xyPathChars);
-        string map_FileName = new string(mapPathChars);
-        map_FileName = GetFullPath(map_FileName);
-        xyFileName = GetFullPath(xyFileName);
-        
-        //These are the options to add in the .control file to run different versions
-        // 0=GSFLOW; 1=PRMS; 2=MODFLOW; 10=MODSIM-GSFLOW; 11=MODSIM-PRMS; 12=MODSIM-MODFLOW; 13=MODSIM
-        //  Option: MODSIM-GSFLOW is the fully integrated mode.
-        if (Model_mode < 13 | Model_mode > 20) // > 20 means a special PRMS-only mode
+        try
         {
-            Process_mode = 1; // declare
+
+            int Numts = 1;
+            int len_xyname, len_mapname;
+
+            xyFileName = new String(' ', 80);
+            mappingFileName = new String(' ', 80);
+            len_xyname = xyFileName.Length;
+            len_mapname = mappingFileName.Length;
+
+            // Process_mode: 0 = run, 1 = delcare; 2 = initialize; 3 = clean; 4 = setdims
+            Process_mode = 4;  // setdims
+            afr = true;
+            MS_GSF_converge = false;
+            /* pass 2 arrays with NSS values, first has Diversion flag, second has ResRelease flag */
+            /* need to pass DIVS */
+            Nsegshold = 1;  //initialize temporarily
+            Nlakeshold = 1;  //initialize temporarily
             gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP);
-        }
 
-        if (Model_mode < 12 | Model_mode > 20) // > 20 means a special PRMS-only mode
-        {
-            Process_mode = 2; // initialize
-            gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions,  IDivert, EXCHANGE,DELTAVOL, LAKEVOL, LAKEVAP);
-        }
+            /* need file name of mapping file, read from GSFLOW Control File
+               file has link Name, iseg, diversion, ResRelease */
 
-        Process_mode = 0; // run
+            // Convert string to Fortran array of characters.
+            char[] xyPathChars = xyFileName.ToCharacterArrayFortran(len_xyname);
+            char[] mapPathChars = mappingFileName.ToCharacterArrayFortran(len_mapname);
 
-        // Redimension arrays to equal number of segments and lakes
-        Diversions = (double[])ResizeArray(Diversions, new int[] { Nsegshold });
-        IDivert = (int[])ResizeArray(IDivert, new int[] { Nsegshold });
-        IRelease = (int[])ResizeArray(IRelease, new int[] { Nsegshold });
-        EXCHANGE = (double[])ResizeArray(EXCHANGE, new int[] { Nsegshold });
-        EXCHANGEPREV = (double[])ResizeArray(EXCHANGEPREV, new int[] { Nsegshold });
-        DELTAVOL = (double[])ResizeArray(DELTAVOL, new int[] { Nlakeshold });
-        DELTAVOLPREV = (double[])ResizeArray(DELTAVOLPREV, new int[] { Nlakeshold });
-        LAKEVOL = (double[])ResizeArray(LAKEVOL, new int[] { Nlakeshold });
-        STARTLAKEVOL = (double[])ResizeArray(STARTLAKEVOL, new int[] { Nlakeshold });
-        DPOOL = (double[])ResizeArray(DPOOL, new int[] { Nlakeshold });
-        LAKEVAP = (double[])ResizeArray(LAKEVAP, new int[] { Nlakeshold });
+            gsflow_prmsSettings(ref Numts, ref Model_mode, ref startTime[0], ref len_xyname, xyPathChars, ref len_mapname, mapPathChars);
+            //Start time is [0]=year [1]=month [2]=day
+            //End simulation using Numts
+            xyFileName = new string(xyPathChars);
+            string map_FileName = new string(mapPathChars);
+            map_FileName = GetFullPath(map_FileName);
+            xyFileName = GetFullPath(xyFileName);
 
-        if (Model_mode < 10) // GSFLOW and PRMS-only
-        {
-            for (int i = 0; i < Numts; i++)
+            //These are the options to add in the .control file to run different versions
+            // 0=GSFLOW; 1=PRMS; 2=MODFLOW; 10=MODSIM-GSFLOW; 11=MODSIM-PRMS; 12=MODSIM-MODFLOW; 13=MODSIM
+            //  Option: MODSIM-GSFLOW is the fully integrated mode.
+            if (Model_mode < 13 | Model_mode > 20) // > 20 means a special PRMS-only mode
             {
-                gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions,  IDivert, EXCHANGE,DELTAVOL, LAKEVOL, LAKEVAP);
+                Process_mode = 1; // declare
+                gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP);
             }
 
-            Process_mode = 3; // clean
-            gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions,  IDivert, EXCHANGE,DELTAVOL, LAKEVOL, LAKEVAP);
-        }
-
-        else
-        // do something different if MODSIM-MODFLOW **** CAUTION ****
-        {
-            myModel = new Model();
-            myModel.Init += OnInitialize;
-            myModel.IterBottom += OnIterationBottom;
-            myModel.IterTop += OnIterationTop;
-            myModel.Converged += OnIterationConverge;
-            myModel.End += OnFinished;
-            myModel.OnMessage += OnMessage;
-            myModel.OnModsimError += OnError; 
-            try
+            if (Model_mode < 12 | Model_mode > 20) // > 20 means a special PRMS-only mode
             {
-                //if (Model_mode == 11) // MODSIM-PRMS
-                //{
-                //  gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE,DELTAVOL, LAKEVOL, LAKEVAP);
-                //}
-                XYFileReader.Read(myModel,xyFileName);
-                accuracy = Math.Pow(10.0, (double) myModel.accuracy);
-                if (Model_mode != 13)  // MODSIM-only mode
+                Process_mode = 2; // initialize
+                gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP);
+            }
+
+            Process_mode = 0; // run
+
+            // Redimension arrays to equal number of segments and lakes
+            Diversions = (double[])ResizeArray(Diversions, new int[] { Nsegshold });
+            IDivert = (int[])ResizeArray(IDivert, new int[] { Nsegshold });
+            IRelease = (int[])ResizeArray(IRelease, new int[] { Nsegshold });
+            EXCHANGE = (double[])ResizeArray(EXCHANGE, new int[] { Nsegshold });
+            EXCHANGEPREV = (double[])ResizeArray(EXCHANGEPREV, new int[] { Nsegshold });
+            DELTAVOL = (double[])ResizeArray(DELTAVOL, new int[] { Nlakeshold });
+            DELTAVOLPREV = (double[])ResizeArray(DELTAVOLPREV, new int[] { Nlakeshold });
+            LAKEVOL = (double[])ResizeArray(LAKEVOL, new int[] { Nlakeshold });
+            STARTLAKEVOL = (double[])ResizeArray(STARTLAKEVOL, new int[] { Nlakeshold });
+            DPOOL = (double[])ResizeArray(DPOOL, new int[] { Nlakeshold });
+            LAKEVAP = (double[])ResizeArray(LAKEVAP, new int[] { Nlakeshold });
+
+            if (Model_mode < 10) // GSFLOW and PRMS-only
+            {
+                for (int i = 0; i < Numts; i++)
                 {
-                    PrepareMODSIMNetwork(map_FileName);
+                    gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP);
                 }
-                XYFileWriter.Write(myModel, xyFileName.Replace(".xy", "MSGSF.xy"));
-                Modsim.RunSolver(myModel);
-                //Copy output to the original file name - Custom Output carries the MF Dep/Acc
-                File.Copy(xyFileName.Replace(".xy", "MSGSFOUTPUT.mdb"), xyFileName.Replace(".xy", "OUTPUT.mdb"), true);
-                Console.WriteLine(" MF_MS Simulation Finished Succesfully");
 
+                Process_mode = 3; // clean
+                gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP);
             }
-            catch (Exception ex)
-            {
-                Console.Write(ex.Message);
-            }
-            finally
-            {
-                sw.Close();
 
+            else
+            // do something different if MODSIM-MODFLOW **** CAUTION ****
+            {
+                //myModel = new Model();
+                myModel.Init += OnInitialize;
+                myModel.IterBottom += OnIterationBottom;
+                myModel.IterTop += OnIterationTop;
+                myModel.Converged += OnIterationConverge;
+                myModel.End += OnFinished;
+                myModel.OnMessage += OnMessage;
+                myModel.OnModsimError += OnError;
+                try
+                {
+                    //if (Model_mode == 11) // MODSIM-PRMS
+                    //{
+                    //  gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE,DELTAVOL, LAKEVOL, LAKEVAP);
+                    //}
+                    XYFileReader.Read(myModel, xyFileName);
+                    accuracy = Math.Pow(10.0, (double)myModel.accuracy);
+                    if (Model_mode != 13)  // MODSIM-only mode
+                    {
+                        PrepareMODSIMNetwork(map_FileName);
+                    }
+                    XYFileWriter.Write(myModel, xyFileName.Replace(".xy", "MSGSF.xy"));
+                    Modsim.RunSolver(myModel);
+                    //Copy output to the original file name - Custom Output carries the MF Dep/Acc
+                    File.Copy(xyFileName.Replace(".xy", "MSGSFOUTPUT.mdb"), xyFileName.Replace(".xy", "OUTPUT.mdb"), true);
+                    Console.WriteLine(" MF_MS Simulation Finished Succesfully");
+
+                }
+                catch (Exception ex)
+                {
+                    Console.Write(ex.Message);
+                }
+                finally
+                {
+                    sw.Close();
+
+                }
             }
         }
+        catch (Exception ex)
+        {
+            Console.Write(ex.Message);
+        }
+        Console.ReadKey();
     }
 
     private static string GetFullPath(string FileName)
@@ -418,6 +433,8 @@ public static class SurfGWModule
                 // total acre-ft for the entirety of the time step
                 // MODFLOW assumed to run in ft3.
                 uConvToMODFLOW = 43560.0001;
+                //temporary fix for RR PRMS
+                uConvToMODFLOW = 1233.48;
                 //  PRMS will always send evap in inches.  We need to apply the conversion feet in english.
                 uConvRateToMODSIM = 1/12;
             }
@@ -440,6 +457,7 @@ public static class SurfGWModule
             //Initialize local MODSIM iteration count
             localMODSIMIter = 0;
         }
+       
     }
 
     private static void OnIterationTop()
@@ -521,7 +539,7 @@ public static class SurfGWModule
             }
         }
         localMODSIMIter++;
-    }
+      }
 
     private static void OnMessage(string message)
     {
@@ -535,7 +553,6 @@ public static class SurfGWModule
 
     private static void OnIterationBottom()
     {
-        
     }
 
     private static void assignDepAcc (String m_Name, double m_Value)
@@ -550,13 +567,13 @@ public static class SurfGWModule
             {
                 //Acretions
                 depLink.mlInfo.hi = 0;
-                accLink.mlInfo.hi = Convert.ToInt32(m_Value);
+                accLink.mlInfo.hi = Convert.ToInt32(Math.Round(m_Value,0));
             }
             else
             {
                 //Depletions
                 //set Depletions to the stream network as upper bounds in the high priority links
-                depLink.mlInfo.hi = Convert.ToInt32(-m_Value);
+                depLink.mlInfo.hi = Convert.ToInt32(Math.Round(-m_Value,0));
                 accLink.mlInfo.hi = 0;
             }
         }
