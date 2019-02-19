@@ -43,10 +43,10 @@ public static class SurfGWModule
     public static object RAD_list;
     public static DataTable m_table;
     public static DataTable map_table;
-    public static StreamWriter sw = new StreamWriter(@"Iter_Output.txt");
-    public static StreamWriter in_out_sw5 = new StreamWriter(@"Lake5_Ins_Outs.txt");   // for output to debugging file
-    public static StreamWriter in_out_sw6 = new StreamWriter(@"Lake6_Ins_Outs.txt");
-    public static StreamWriter all_links = new StreamWriter(@"All_Links_Q.txt");     // Another debug file
+    //public static StreamWriter sw = new StreamWriter(@"Iter_Output.txt");
+    //public static StreamWriter in_out_sw5 = new StreamWriter(@"Lake5_Ins_Outs.txt");   // for output to debugging file
+    //public static StreamWriter in_out_sw6 = new StreamWriter(@"Lake6_Ins_Outs.txt");
+    //public static StreamWriter all_links = new StreamWriter(@"All_Links_Q.txt");     // Another debug file
     public static List<int> Main_Ditches = new List<int>();
     public static bool afr, MS_GSF_converge;
     public static int Model_mode, Nsegshold, Nlakeshold;
@@ -194,7 +194,7 @@ public static class SurfGWModule
                 }
                 finally
                 {
-                    sw.Close();
+                    //sw.Close();
 
                 }
             }
@@ -203,7 +203,7 @@ public static class SurfGWModule
         {
             Console.Write(ex.Message);
         }
-        Console.ReadKey();
+        
     }
 
     private static string GetFullPath(string FileName)
@@ -448,7 +448,7 @@ public static class SurfGWModule
             }
 
             // Write a header row to the streamwriter for evaluating convergence with R
-            sw.WriteLine("TS iseg Exchange_Prev Exchange");
+            //sw.WriteLine("TS iseg Exchange_Prev Exchange");
 
             // Store max link capacity for restoration of MODFLOW-adjusted maximum amounts, 
             // arbitrarily choosing the first link in the synchronization table
@@ -594,6 +594,36 @@ public static class SurfGWModule
 
     private static void OnIterationBottom()
     {
+        double gvflow;
+        Link gv_gage;
+        Link al_link;
+        int month;
+        DateTime currentDate = myModel.TimeStepManager.Index2Date(myModel.mInfo.CurrentModelTimeStepIndex, TypeIndexes.ModelIndex);
+
+        month = currentDate.Month;
+        gv_gage = myModel.FindLink("1");
+        al_link = myModel.FindLink("divtabsCV-8015trans-diversions-c82-19790702-20150928.txt");
+
+        // check flow at gv < 200 cfs, convert to ac-ft/mo, multiply by accuracy
+        gvflow = Convert.ToDouble(gv_gage.mlInfo.flow);
+
+        if(month >= 4 & month < 10)  // 'irrigation season
+        {
+            if(gvflow <= ((200 * 86400 * 7) / uConvToMODFLOW) * accuracy)
+            {
+                // convert 200 cfs to acre-ft per stress period
+                // set 1/3-2/3 split through capacities and inflows
+                al_link.mlInfo.hi = (long)(0.34 * gvflow);
+                al_link.mlInfo.lo = (long)(0.33 * gvflow);
+            }
+            else
+            {
+                // set max capacity to 100 cfs, current max capacity ~80 but was/could be higher
+                al_link.mlInfo.hi = (long)((100.0 * 86400 * 7) / uConvToMODFLOW * accuracy);
+            }
+        }
+
+
     }
 
     private static void assignDepAcc (String m_Name, double m_Value)
@@ -821,12 +851,12 @@ public static class SurfGWModule
                     if (MS_Links[i] != null)
                     {
                         Link expLink = myModel.FindLink(MS_Links[i].name);
-                        all_links.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + MS_Links[i].name + " " + "iter_" + txtiter.ToString() + " " + (double)expLink.mlInfo.flow / accuracy * uConvToMODFLOW);
-                        all_links.Flush();
+                        //all_links.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + MS_Links[i].name + " " + "iter_" + txtiter.ToString() + " " + (double)expLink.mlInfo.flow / accuracy * uConvToMODFLOW);
+                        //all_links.Flush();
                     } else
                     {
-                        all_links.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + (i +1).ToString() + " " + "iter_" + txtiter.ToString() + " 0.0");
-                        all_links.Flush();
+                        //all_links.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + (i +1).ToString() + " " + "iter_" + txtiter.ToString() + " 0.0");
+                        //all_links.Flush();
                     }
                 }
                 txtiter += 1;
@@ -941,8 +971,8 @@ public static class SurfGWModule
             // myModel.mInfo.CurrentModelTimeStepIndex
 
             //Here is what the header looks like: sw.WriteLine("TS iseg Exchange_Prev Exchange");
-            sw.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + Convert.ToInt32(i + 1) + " " + Convert.ToSingle(EXCHANGEPREV[i]) + " " + Convert.ToSingle(EXCHANGE[i]));
-            sw.Flush();
+            //sw.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + Convert.ToInt32(i + 1) + " " + Convert.ToSingle(EXCHANGEPREV[i]) + " " + Convert.ToSingle(EXCHANGE[i]));
+            //sw.Flush();
         }
 
         if (Model_mode != 11)
