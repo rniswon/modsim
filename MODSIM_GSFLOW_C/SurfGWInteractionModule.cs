@@ -37,19 +37,24 @@ public static class SurfGWModule
     public static double[] DELTAVOLPREV = new double[1];
     public static double[] LAKEVOL = new double[1];
     public static double[] LAKEVAP = new double[1];
+    public static double[] MXLKVOL = new double[1];
     public static double[] DPOOL = new double[1];
     public static double[] STARTLAKEVOL = new double[1];
     public static object RAD_list;
     public static DataTable m_table;
     public static DataTable map_table;
-    public static StreamWriter sw = new StreamWriter(@"Iter_Output.txt");
-    public static StreamWriter in_out_sw = new StreamWriter(@"Lake_Ins_Outs.txt");   //for output to debugging file
+    //public static StreamWriter sw = new StreamWriter(@"Iter_Output.txt");
+    //public static StreamWriter in_out_sw5 = new StreamWriter(@"Lake5_Ins_Outs.txt");   // for output to debugging file
+    //public static StreamWriter in_out_sw6 = new StreamWriter(@"Lake6_Ins_Outs.txt");
+    //public static StreamWriter all_links = new StreamWriter(@"All_Links_Q.txt");     // Another debug file
     public static List<int> Main_Ditches = new List<int>();
     public static bool afr, MS_GSF_converge;
     public static int Model_mode, Nsegshold, Nlakeshold;
     public static int[] startTime = new int[6];
     public static int Process_mode;
-    public static long LinkHi;
+    public static int txtiter = 1;
+    public static long[] LinkHi = new long[1];
+    public static long[] LinkHi_Sv = new long[1];
     public static string mappingFileName;
     public static string xyFileName;
     private static double accuracy;
@@ -135,10 +140,13 @@ public static class SurfGWModule
             DELTAVOL = (double[])ResizeArray(DELTAVOL, new int[] { Nlakeshold });
             DELTAVOLPREV = (double[])ResizeArray(DELTAVOLPREV, new int[] { Nlakeshold });
             LAKEVOL = (double[])ResizeArray(LAKEVOL, new int[] { Nlakeshold });
+            MXLKVOL = (double[])ResizeArray(MXLKVOL, new int[] { Nlakeshold });
             STARTLAKEVOL = (double[])ResizeArray(STARTLAKEVOL, new int[] { Nlakeshold });
             DPOOL = (double[])ResizeArray(DPOOL, new int[] { Nlakeshold });
             LAKEVAP = (double[])ResizeArray(LAKEVAP, new int[] { Nlakeshold });
-
+            LinkHi = (long[])ResizeArray(LinkHi, new int[] { Nsegshold });
+            LinkHi_Sv = (long[])ResizeArray(LinkHi, new int[] { Nsegshold });
+            
             if (Model_mode < 10) // GSFLOW and PRMS-only
             {
                 for (int i = 0; i < Numts; i++)
@@ -186,7 +194,7 @@ public static class SurfGWModule
                 }
                 finally
                 {
-                    sw.Close();
+                    //sw.Close();
 
                 }
             }
@@ -195,7 +203,7 @@ public static class SurfGWModule
         {
             Console.Write(ex.Message);
         }
-        Console.ReadKey();
+        
     }
 
     private static string GetFullPath(string FileName)
@@ -218,8 +226,8 @@ public static class SurfGWModule
     private static void PrepareMODSIMNetwork(string m_TblPath)
     {
         MWH.MWHUtils.GeneralUtils.MyDBUtils m_DBUtils = new MWH.MWHUtils.GeneralUtils.MyDBUtils(m_TblPath);
-        string m_Sql = "SELECT [MS-GSF_mapping_info].[Link Name], [MS-GSF_mapping_info].[iseg], [MS-GSF_mapping_info].[Diversion], [MS-GSF_mapping_info].ResRelease FROM [MS-GSF_mapping_info] ORDER BY [MS-GSF_mapping_info].iseg;";
-        m_SyncTblSEG= m_DBUtils.GetTableFromDB(m_Sql, "SegmentSync");//"SELECT Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name FROM Modsim_Streams WHERE (((Modsim_Streams.MF_iseg) Is Not Null)) GROUP BY Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name;", "Streams");
+        string m_Sql = "SELECT [MS-GSF_mapping_info].[Link Name], [MS-GSF_mapping_info].[iseg], [MS-GSF_mapping_info].[Diversion], [MS-GSF_mapping_info].ResRelease, [MS-GSF_mapping_info].AssocRes FROM [MS-GSF_mapping_info] ORDER BY [MS-GSF_mapping_info].iseg;";
+        m_SyncTblSEG= m_DBUtils.GetTableFromDB(m_Sql, "SegmentSync"); //"SELECT Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name FROM Modsim_Streams WHERE (((Modsim_Streams.MF_iseg) Is Not Null)) GROUP BY Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name;", "Streams");
         m_SyncTblSEG.Columns.Add("adjted", typeof(System.Int32));
 
         // Initialize column values
@@ -258,7 +266,7 @@ public static class SurfGWModule
         //m_Source.graphics.point.Y = 180;
         m_Source.name = "MF_SOURCE";
         DataTable m_TSTbl = m_Source.m.adaInflowsM.dataTable;
-        SetDefaultTableValue(ref m_TSTbl, 1000000000);
+        SetDefaultTableValue(ref m_TSTbl, 2100000000);
 
         // Connect both of just instantiated nodes so that unused source water 
         // is shunted out of the model through the sink Node
@@ -434,22 +442,27 @@ public static class SurfGWModule
                 // MODFLOW assumed to run in ft3.
                 uConvToMODFLOW = 43560.0001;
                 //temporary fix for RR PRMS
-                uConvToMODFLOW = 1233.48;
+//                uConvToMODFLOW = 1233.48;
                 //  PRMS will always send evap in inches.  We need to apply the conversion feet in english.
                 uConvRateToMODSIM = 1/12;
             }
 
             // Write a header row to the streamwriter for evaluating convergence with R
-            sw.WriteLine("TS iseg Exchange_Prev Exchange");
+            //sw.WriteLine("TS iseg Exchange_Prev Exchange");
 
             // Store max link capacity for restoration of MODFLOW-adjusted maximum amounts, 
             // arbitrarily choosing the first link in the synchronization table
-            if(m_SyncTblSEG.Rows[0]["Link Name"].ToString() != "")
+            i = 0;
+            foreach (DataRow m_Row in m_SyncTblSEG.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
             {
-                Link resRelLink = myModel.FindLink(m_SyncTblSEG.Rows[0]["Link Name"].ToString());
-                LinkHi = resRelLink.mlInfo.hi;
+                if (m_SyncTblSEG.Rows[i]["Link Name"].ToString() != "")
+                {
+                    Link resRelLink = myModel.FindLink(m_SyncTblSEG.Rows[i]["Link Name"].ToString());
+                    LinkHi[i] = (long)resRelLink.m.maxVariable.dataTable.Rows[0][1];
+                }
+                i += 1;
             }
-            
+            LinkHi_Sv = (long[])LinkHi.Clone();
 
             //Initialize variable to iterate between MODSIM and GSFLOW
             MFRunYet = false;
@@ -457,7 +470,6 @@ public static class SurfGWModule
             //Initialize local MODSIM iteration count
             localMODSIMIter = 0;
         }
-       
     }
 
     private static void OnIterationTop()
@@ -515,19 +527,48 @@ public static class SurfGWModule
                         DataRow m_row = m_SyncTblSEG.Rows[i];
 
                         //Check to ensure the current link is a reservoir release link
+
+                        // 10-13-2018: What I'm hoping is a bug fix for Wes's model:
+                        // In the IF() statement that follows, it was originally written to check that the volume in the reservoir currently being checked
+                        // wasn't nearing the deadpool.  However, I found that sometimes MODSIM would get into this region while MODFLOW was not.  Therefore
+                        // amended code to check both MODSIM and MODFLOW for the reservoir being checked.  To do this, I used the m_syncRES table to lookup
+                        // the MODFLOW Lake # for the current reservoir node name, assuming that the "AssocRes" value for the current row contains the 
+                        // reservoir feeding the current link.  For example, there are three ways to lake get 5 (And remember everything is 0 based):
+                        // So instead of writing "LAKE[4]", it could be written as either of the following:
+                        // LAKEVOL[Int32.Parse(m_row["AssocRes"].ToString().Substring(m_row["AssocRes"].ToString().LastIndexOf('_') + 1)) - 1]  // Assumes all models use a "Lake_5" type format, or in other words that there is an "_" (underscore) followed by the lake number
+                        // LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1]
+                        //
+                        // For now, I'm going to use the latter to amend the if statement.
+
                         // TODO: m_row["Link Name"] in the 3rd line below won't work if it isn't specified in the mapping info datatable
                         if (Convert.ToInt16(m_row["ResRelease"]) > 0)
                         {
                             Link resRelLink = myModel.FindLink(m_row["Link Name"].ToString());
 
-                            // Recall that MS_Flows is in GSFLOW/MODFLOW units and therefore needs to be converted back to MODSIM units before being stuffed back into a MODSIM-used parameter
-                            if (Convert.ToInt32(MS_Flows[i] / uConvToMODFLOW * accuracy) == 0)
+                            if (! (((double)myModel.FindNode(m_row["AssocRes"].ToString()).mnInfo.stend > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)) || ((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume))))
                             {
-                                resRelLink.mlInfo.hi = Convert.ToInt32(0.0001 / uConvToMODFLOW * accuracy);
+                                // Recall that MS_Flows is in GSFLOW/MODFLOW units and therefore needs to be converted back to MODSIM units before being stuffed back into a MODSIM-used parameter
+                                if (Convert.ToInt32(MS_Flows[i] / uConvToMODFLOW * accuracy) == 0)
+                                {
+                                    resRelLink.mlInfo.hi = Convert.ToInt32(0.0001 / uConvToMODFLOW * accuracy);
+                                }
+                                // The next else if statement added in response to the bug affecting Wes's model
+                                //else if (MS_FlowsLIMITED[i] > MS_Flows[i] && (!(((double)myModel.FindNode(m_row["AssocRes"].ToString()).mnInfo.stend > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)) || ((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)))))
+                                //{
+                                //    resRelLink.mlInfo.hi = Convert.ToInt32(MS_FlowsLIMITED[i] / uConvToMODFLOW * accuracy);
+                                //}
+                                else
+                                {
+                                    resRelLink.mlInfo.hi = Convert.ToInt32((MS_Flows[i] + MS_FlowsLIMITED[i]) / 2 / uConvToMODFLOW * accuracy);
+                                }
+
+                                // Flag row as having been adjusted for restoring later
+                                m_row["adjted"] = 1;
+                                // Console.Write("|" + resRelLink.mlInfo.hi + "|");
                             }
-                            else
+                            else if ( (LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume )
                             {
-                                resRelLink.mlInfo.hi = Convert.ToInt32((MS_Flows[i] + MS_FlowsLIMITED[i]) / 2 / uConvToMODFLOW * accuracy);
+                                resRelLink.mlInfo.hi = Math.Max(resRelLink.mlInfo.hi, Convert.ToInt32((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) - (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume));
                             }
 
                             // Flag row as having been adjusted for restoring later
@@ -553,6 +594,36 @@ public static class SurfGWModule
 
     private static void OnIterationBottom()
     {
+        double gvflow;
+        Link gv_gage;
+        Link al_link;
+        int month;
+        DateTime currentDate = myModel.TimeStepManager.Index2Date(myModel.mInfo.CurrentModelTimeStepIndex, TypeIndexes.ModelIndex);
+
+        month = currentDate.Month;
+        gv_gage = myModel.FindLink("1");
+        al_link = myModel.FindLink("divtabsCV-8015trans-diversions-c82-19790702-20150928.txt");
+
+        // check flow at gv < 200 cfs, convert to ac-ft/mo, multiply by accuracy
+        gvflow = Convert.ToDouble(gv_gage.mlInfo.flow);
+
+        if(month >= 4 & month < 10)  // 'irrigation season
+        {
+            if(gvflow <= ((200 * 86400 * 7) / uConvToMODFLOW) * accuracy)
+            {
+                // convert 200 cfs to acre-ft per stress period
+                // set 1/3-2/3 split through capacities and inflows
+                al_link.mlInfo.hi = (long)(0.34 * gvflow);
+                al_link.mlInfo.lo = (long)(0.33 * gvflow);
+            }
+            else
+            {
+                // set max capacity to 100 cfs, current max capacity ~80 but was/could be higher
+                al_link.mlInfo.hi = (long)((100.0 * 86400 * 7) / uConvToMODFLOW * accuracy);
+            }
+        }
+
+
     }
 
     private static void assignDepAcc (String m_Name, double m_Value)
@@ -658,8 +729,19 @@ public static class SurfGWModule
                 // If first iteration of first time step, overide MODSIM Lake volumes
                 if (!MFRunYet && (myModel.mInfo.CurrentModelTimeStepIndex == 0))
                 {
+                    for (int i = 0; i < MS_Reservoirs.Length; i++)
+                    {
+                        if (MS_Reservoirs[i] != null)
+                        {
+                            MXLKVOL[i] = MS_Reservoirs[i].m.max_volume / accuracy * uConvToMODFLOW;
+                        }
+                        else
+                        {
+                            MXLKVOL[i] = -1.0;
+                        }
+                    }
                     // Easiest way forward might be to expose LAK2MODSIM in the DLL so it is callable both by GSFLOW and by MODSIM (this may have implications for MODSIM-PRMS mode)
-                    if (Model_mode != 11)
+                    if (Model_mode != 11)  //Model_mode 11: PRMS-MODSIM mode
                     {
                         LAK2MODSIM_InitLakes(DELTAVOL, LAKEVOL);
                         for (int i = 0; i < LAKEVOL.Length; i++)
@@ -700,47 +782,84 @@ public static class SurfGWModule
 
                 //
                 // Lake 1 (inline lake)
-                //double LK9_in_val;
-                //double LK9_out_val1;
-                //double LK9_out_val2;
-                //double LK9_out_val3;
-                //Link LK9_in = myModel.FindLink("199");  
-                //LK9_in_val = (double)LK9_in.mlInfo.flow / accuracy * uConvToMODFLOW;
-                //Link LK9_out1 = myModel.FindLink("lake_9_NonStorage");
-                //Link LK9_out2 = myModel.FindLink("lake_9_out_2");
-                //Link LK9_out3 = myModel.FindLink("lake_9_out_2");
-                //LK9_out_val1 = (double)LK9_out1.mlInfo.flow / accuracy * uConvToMODFLOW;
-                //LK9_out_val2 = (double)LK9_out2.mlInfo.flow / accuracy * uConvToMODFLOW;
-                //LK9_out_val3 = (double)LK9_out3.mlInfo.flow / accuracy * uConvToMODFLOW;
+                double LK5_in_val;
+                //double LK6_in_val;
+                //double up1_val;
+                //double up2_val;
+                //double up3_val;
+                //double up4_val;
+                //double up5_val;
+                //double up6_val;
+                //double rdm_val1;
+                //double rdm_val2;
+                //double l542_in;
+                //double l542_out;
+                //double LK5_out_val1;
+                //double LK7_out2;
+                //double LK6_out_val1;
+                //double LK6_out2;
+                ////double LK9_out_val2;
+                ////double LK9_out_val3;
+                //Link LK5_in = myModel.FindLink("219");
+                //Link LK5_out1 = myModel.FindLink("505");
+                //Link LK7_out_2 = myModel.FindLink("523");
 
-                //// Lake 2 (offline lake)
-                //double LK2_in1_val;
-                //double LK2_in2_val;
-                //double LK2_tot_in;
-                //double LK2_out_val;
-                //Link LK2_in1 = myModel.FindLink("NonStorage11_OffLineRes");
-                //LK2_in1_val = (double)LK2_in1.mlInfo.flow / accuracy * uConvToMODFLOW;
-                //Link LK2_in2 = myModel.FindLink("NonStorage12_OffLineRes");
-                //LK2_in2_val = (double)LK2_in2.mlInfo.flow / accuracy * uConvToMODFLOW;
-                //LK2_tot_in = LK2_in1_val + LK2_in2_val;
-                //Link LK2_out = myModel.FindLink("OffLineRes_NonStorage13");
-                //LK2_out_val = (double)LK2_out.mlInfo.flow / accuracy * uConvToMODFLOW;
+                //Link up1_lnk = myModel.FindLink("543");
+                //Link up2_lnk = myModel.FindLink("217");
 
-                //double LK9_oldvol;
+                //Link LK6_in = myModel.FindLink("198");
+                //Link LK6_out1 = myModel.FindLink("lake_6_out_1");
+                //Link LK6_out_2 = myModel.FindLink("517");
+                
+                //LK5_in_val = (double)LK5_in.mlInfo.flow / accuracy * uConvToMODFLOW;
+                //LK7_out2 = (double)LK7_out_2.mlInfo.flow / accuracy * uConvToMODFLOW;
+                //LK5_out_val1 = (double)LK5_out1.mlInfo.flow / accuracy * uConvToMODFLOW;
+
+                //up1_val = (double)up1_lnk.mlInfo.flow / accuracy * uConvToMODFLOW;
+                //up2_val = (double)up2_lnk.mlInfo.flow / accuracy * uConvToMODFLOW;
+
+                //LK6_in_val = (double)LK6_in.mlInfo.flow / accuracy * uConvToMODFLOW;
+                //LK6_out2 = (double)LK6_out_2.mlInfo.flow / accuracy * uConvToMODFLOW;
+                //LK6_out_val1 = (double)LK6_out1.mlInfo.flow / accuracy * uConvToMODFLOW;
+
+                //double LK5_oldvol;
                 ////double LK2_oldvol;
-                //double LK9_newvol;
+                //double LK5_newvol;
                 ////double LK2_newvol;
 
-                //LK9_oldvol = MS_Reservoirs[8].mnInfo.start / accuracy * uConvToMODFLOW;
+                //LK5_oldvol = MS_Reservoirs[4].mnInfo.start / accuracy * uConvToMODFLOW;
                 ////LK2_oldvol = MS_Reservoirs[1].mnInfo.start / accuracy * uConvToMODFLOW;
 
-                //LK9_newvol = MS_Reservoirs[8].mnInfo.stend / accuracy * uConvToMODFLOW;
+                //LK5_newvol = MS_Reservoirs[4].mnInfo.stend / accuracy * uConvToMODFLOW;
                 ////LK2_newvol = MS_Reservoirs[1].mnInfo.stend / accuracy * uConvToMODFLOW;
 
                 //////Console.WriteLine(LK1_in.ToString() + " " + LK1_out.ToString() + " " + LK2_tot_in.ToString() + " " + LK2_out_val.ToString());
                 ////in_out_sw.WriteLine(LK1_in_val + " " + LK1_out_val + " " + LK1_oldvol + " " + LK1_newvol + " " + DELTAVOL[0].ToString() + " " + LK2_tot_in + " " + LK2_out_val + " " + LK2_oldvol + " " + LK2_newvol + " " + DELTAVOL[1].ToString());
-                //in_out_sw.WriteLine(iterCount + " " + LK9_in_val + " " + LK9_out_val1 + " " + LK9_out_val2 + " " + LK9_oldvol + " " + LK9_newvol + " " + DELTAVOL[0].ToString());
-                //in_out_sw.Flush();
+                //in_out_sw5.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + iterCount + " " + LK5_in_val + " " + (LK5_out_val1) + " " + LK5_oldvol + " " + LK5_newvol + " " + DELTAVOL[6].ToString());
+                //in_out_sw5.Flush();
+
+                //double LK6_oldvol;
+                //double LK6_newvol;
+                //LK6_oldvol = MS_Reservoirs[5].mnInfo.start / accuracy * uConvToMODFLOW;
+                //LK6_newvol = MS_Reservoirs[5].mnInfo.stend / accuracy * uConvToMODFLOW;
+                //in_out_sw6.WriteLine(iterCount + " " + LK6_in_val + " " + LK6_out_val1 + " " + LK6_oldvol + " " + LK6_newvol + " " + DELTAVOL[5].ToString());
+                //in_out_sw6.Flush();
+
+                // Attempting another way to view the link flows.  Print out all links to a file to hone in on where oscillations are occurring
+                for (int i = 0; i < MS_Links.Length; i++)
+                {
+                    if (MS_Links[i] != null)
+                    {
+                        Link expLink = myModel.FindLink(MS_Links[i].name);
+                        //all_links.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + MS_Links[i].name + " " + "iter_" + txtiter.ToString() + " " + (double)expLink.mlInfo.flow / accuracy * uConvToMODFLOW);
+                        //all_links.Flush();
+                    } else
+                    {
+                        //all_links.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + (i +1).ToString() + " " + "iter_" + txtiter.ToString() + " 0.0");
+                        //all_links.Flush();
+                    }
+                }
+                txtiter += 1;
                 // to here
 
                 //Check for convergence between MODSIM and MODFLOW
@@ -797,7 +916,7 @@ public static class SurfGWModule
                         if (Convert.ToInt32(m_SyncTblSEG.Rows[i]["adjted"]) > 0)
                         {
                             Link resRelLink = myModel.FindLink(m_SyncTblSEG.Rows[i]["Link Name"].ToString());
-                            resRelLink.mlInfo.hi = LinkHi;
+                            resRelLink.mlInfo.hi = LinkHi_Sv[0];
 
                             // Flag row's "adjusted" column back to not adjusted
                             m_SyncTblSEG.Rows[i]["adjted"] = 0;
@@ -846,14 +965,14 @@ public static class SurfGWModule
             // Convergence checked in MODFLOW units.
             converge = converge && ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) <= EXCHNGVol_Tolerance);  // (double)(Math.Abs(MS_FlowsPREV[i]) * percent_diff));
             converge = converge && ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) <= EXCHNGVol_Tolerance); // (double)(Math.Abs(EXCHANGEPREV[i]) * percent_diff));
-            // if ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) > EXCHNGVol_Tolerance) Console.WriteLine("Diver:" + i + ":" + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
+            if ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) > EXCHNGVol_Tolerance) Console.WriteLine("Diver:" + i + ":" + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
             //if ((i == 18 || i == 19) && myModel.mInfo.CurrentModelTimeStepIndex >= 364) Console.WriteLine("Diver:" + i + ":" + MS_Flows[i] + "Exch: " + EXCHANGE[i]);
             // if ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > EXCHNGVol_Tolerance) Console.WriteLine("GW-SW Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
             // myModel.mInfo.CurrentModelTimeStepIndex
 
             //Here is what the header looks like: sw.WriteLine("TS iseg Exchange_Prev Exchange");
-            sw.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + Convert.ToInt32(i + 1) + " " + Convert.ToSingle(EXCHANGEPREV[i]) + " " + Convert.ToSingle(EXCHANGE[i]));
-            sw.Flush();
+            //sw.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + Convert.ToInt32(i + 1) + " " + Convert.ToSingle(EXCHANGEPREV[i]) + " " + Convert.ToSingle(EXCHANGE[i]));
+            //sw.Flush();
         }
 
         if (Model_mode != 11)
@@ -883,8 +1002,11 @@ public static class SurfGWModule
                     //DELTAVOL[i] += -((MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW) - LAKEVOL[i]);
                     //VOLSync = true;
                     //converge = false;
-                    Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i] + " DPOOL: " + string.Format("{0:N1}", DPOOL[i]));
-                    STARTLAKEVOL[i] = LAKEVOL[i];
+                    if(MS_Reservoirs[i] != null)
+                    {
+                        Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i] + " DPOOL: " + string.Format("{0:N1}", DPOOL[i]));
+                        STARTLAKEVOL[i] = LAKEVOL[i];
+                    }
                 }
             }
         }
