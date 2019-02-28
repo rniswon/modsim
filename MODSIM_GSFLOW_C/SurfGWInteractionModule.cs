@@ -6,10 +6,9 @@ using System.Runtime.InteropServices;
 using System.IO;
 using System.Data;
 using System.Collections.Generic;
-using MWH.MWHUtils.GeneralUtils;
+//using MWH.MWHUtils.GeneralUtils;
 using Csu.Modsim.ModsimIO;
-
-
+using System.Data.OleDb;
 
 public static class SurfGWModule
 {
@@ -225,9 +224,9 @@ public static class SurfGWModule
     private static Int32 maxNoIterations,iterCount; 
     private static void PrepareMODSIMNetwork(string m_TblPath)
     {
-        MWH.MWHUtils.GeneralUtils.MyDBUtils m_DBUtils = new MWH.MWHUtils.GeneralUtils.MyDBUtils(m_TblPath);
+        //MWH.MWHUtils.GeneralUtils.MyDBUtils m_DBUtils = new MWH.MWHUtils.GeneralUtils.MyDBUtils(m_TblPath);
         string m_Sql = "SELECT [MS-GSF_mapping_info].[Link Name], [MS-GSF_mapping_info].[iseg], [MS-GSF_mapping_info].[Diversion], [MS-GSF_mapping_info].ResRelease, [MS-GSF_mapping_info].AssocRes FROM [MS-GSF_mapping_info] ORDER BY [MS-GSF_mapping_info].iseg;";
-        m_SyncTblSEG= m_DBUtils.GetTableFromDB(m_Sql, "SegmentSync"); //"SELECT Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name FROM Modsim_Streams WHERE (((Modsim_Streams.MF_iseg) Is Not Null)) GROUP BY Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name;", "Streams");
+        m_SyncTblSEG= GetTableFromDB(m_TblPath,m_Sql, "SegmentSync"); //"SELECT Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name FROM Modsim_Streams WHERE (((Modsim_Streams.MF_iseg) Is Not Null)) GROUP BY Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name;", "Streams");
         m_SyncTblSEG.Columns.Add("adjted", typeof(System.Int32));
 
         // Initialize column values
@@ -238,11 +237,11 @@ public static class SurfGWModule
 
         // Get Reservoir mapping table 
         m_Sql = "SELECT * FROM [MS-GSF_Lake_Mapping_Info] ORDER BY [MS-GSF_Lake_Mapping_Info].GSF_LAK_ID;";
-        m_SyncTblRES = m_DBUtils.GetTableFromDB(m_Sql, "ReservoirSync");
+        m_SyncTblRES = GetTableFromDB(m_TblPath, m_Sql, "ReservoirSync");
 
         // Get the settings from the database
         m_Sql = "SELECT * FROM [Settings];";
-        m_SyncTblSettings = m_DBUtils.GetTableFromDB(m_Sql, "Settings");
+        m_SyncTblSettings = GetTableFromDB(m_TblPath, m_Sql, "Settings");
 
         // Assign settings
         foreach (DataRow mrow in m_SyncTblSettings.Rows)
@@ -1027,5 +1026,28 @@ public static class SurfGWModule
         return chars;
     }
 
+    private static DataTable GetTableFromDB(string databasePath, string sql, string tableName)
+    {
+        DataTable results = new DataTable();
+        try
+        {
+            string connString = $"Provider=Microsoft.ACE.OLEDB.12.0;data source={databasePath}";
+
+            using (OleDbConnection conn = new OleDbConnection(connString))
+            {
+                OleDbCommand cmd = new OleDbCommand(sql, conn);
+
+                conn.Open();
+
+                OleDbDataAdapter adapter = new OleDbDataAdapter(cmd);
+                adapter.SelectCommand = cmd;
+                adapter.Fill(results);
+                results.TableName = tableName;
+            }
+        }
+        catch (Exception ex) { Console.WriteLine(ex.Message); }
+
+        return results;
+    }
 }
 
