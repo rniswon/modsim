@@ -9,6 +9,7 @@ using System.Collections.Generic;
 //using MWH.MWHUtils.GeneralUtils;
 using Csu.Modsim.ModsimIO;
 using System.Data.OleDb;
+using System.Data.SQLite;
 
 public static class SurfGWModule
 {
@@ -58,6 +59,10 @@ public static class SurfGWModule
     public static string xyFileName;
     private static double accuracy;
     private static int localMODSIMIter;
+
+    //Flags for custom project codes
+    private static bool WES_ON = false;
+
 
     //Fortran DLL interface
 
@@ -190,17 +195,18 @@ public static class SurfGWModule
                 catch (Exception ex)
                 {
                     Console.Write(ex.Message);
+                    Console.ReadLine();
                 }
                 finally
                 {
                     //sw.Close();
-
                 }
             }
         }
         catch (Exception ex)
         {
             Console.Write(ex.Message);
+            Console.ReadLine();
         }
         
     }
@@ -593,35 +599,37 @@ public static class SurfGWModule
 
     private static void OnIterationBottom()
     {
-        double gvflow;
-        Link gv_gage;
-        Link al_link;
-        int month;
-        DateTime currentDate = myModel.TimeStepManager.Index2Date(myModel.mInfo.CurrentModelTimeStepIndex, TypeIndexes.ModelIndex);
-
-        month = currentDate.Month;
-        gv_gage = myModel.FindLink("1");
-        al_link = myModel.FindLink("divtabsCV-8015trans-diversions-c82-19790702-20150928.txt");
-
-        // check flow at gv < 200 cfs, convert to ac-ft/mo, multiply by accuracy
-        gvflow = Convert.ToDouble(gv_gage.mlInfo.flow);
-
-        if(month >= 4 & month < 10)  // 'irrigation season
+        if (WES_ON)
         {
-            if(gvflow <= ((200 * 86400 * 7) / uConvToMODFLOW) * accuracy)
+            double gvflow;
+            Link gv_gage;
+            Link al_link;
+            int month;
+            DateTime currentDate = myModel.TimeStepManager.Index2Date(myModel.mInfo.CurrentModelTimeStepIndex, TypeIndexes.ModelIndex);
+
+            month = currentDate.Month;
+            gv_gage = myModel.FindLink("1");
+            al_link = myModel.FindLink("divtabsCV-8015trans-diversions-c82-19790702-20150928.txt");
+
+            // check flow at gv < 200 cfs, convert to ac-ft/mo, multiply by accuracy
+            gvflow = Convert.ToDouble(gv_gage.mlInfo.flow);
+
+            if (month >= 4 & month < 10)  // 'irrigation season
             {
-                // convert 200 cfs to acre-ft per stress period
-                // set 1/3-2/3 split through capacities and inflows
-                al_link.mlInfo.hi = (long)(0.34 * gvflow);
-                al_link.mlInfo.lo = (long)(0.33 * gvflow);
-            }
-            else
-            {
-                // set max capacity to 100 cfs, current max capacity ~80 but was/could be higher
-                al_link.mlInfo.hi = (long)((100.0 * 86400 * 7) / uConvToMODFLOW * accuracy);
+                if (gvflow <= ((200 * 86400 * 7) / uConvToMODFLOW) * accuracy)
+                {
+                    // convert 200 cfs to acre-ft per stress period
+                    // set 1/3-2/3 split through capacities and inflows
+                    al_link.mlInfo.hi = (long)(0.34 * gvflow);
+                    al_link.mlInfo.lo = (long)(0.33 * gvflow);
+                }
+                else
+                {
+                    // set max capacity to 100 cfs, current max capacity ~80 but was/could be higher
+                    al_link.mlInfo.hi = (long)((100.0 * 86400 * 7) / uConvToMODFLOW * accuracy);
+                }
             }
         }
-
 
     }
 
@@ -1026,28 +1034,100 @@ public static class SurfGWModule
         return chars;
     }
 
-    private static DataTable GetTableFromDB(string databasePath, string sql, string tableName)
+    //private static DataTable GetTableFromDB(string databasePath, string sql, string tableName)
+    //{
+    //    DataTable results = new DataTable();
+    //    try
+    //    {
+    //        string connString = "Provider=Microsoft.ACE.OLEDB.12.0;data source=" + databasePath;
+
+    //        using (OleDbConnection conn = new OleDbConnection(connString))
+    //        {
+    //            OleDbCommand cmd = new OleDbCommand(sql, conn);
+
+    //            conn.Open();
+
+    //            OleDbDataAdapter adapter = new OleDbDataAdapter(cmd);
+    //            adapter.SelectCommand = cmd;
+    //            adapter.Fill(results);
+    //            results.TableName = tableName;
+    //        }
+    //    }
+    //    catch (Exception ex) { Console.WriteLine(ex.Message); }
+
+    //    return results;
+    //}
+
+    public static DataTable GetTableFromDB(string databasePath, string sql, string tableName)
     {
-        DataTable results = new DataTable();
+        CheckDatabaseConnection(databasePath);
+        DataTable rval = new DataTable();
         try
         {
-            string connString = $"Provider=Microsoft.ACE.OLEDB.12.0;data source={databasePath}";
-
-            using (OleDbConnection conn = new OleDbConnection(connString))
+            using (SQLiteCommand cmd = new SQLiteCommand(sql, _sqlconnection))
             {
-                OleDbCommand cmd = new OleDbCommand(sql, conn);
-
-                conn.Open();
-
-                OleDbDataAdapter adapter = new OleDbDataAdapter(cmd);
-                adapter.SelectCommand = cmd;
-                adapter.Fill(results);
-                results.TableName = tableName;
+                using (SQLiteDataAdapter adapter = new SQLiteDataAdapter(cmd))
+                {
+                    adapter.Fill(rval);
+                }
+                rval.TableName = tableName;
             }
         }
-        catch (Exception ex) { Console.WriteLine(ex.Message); }
+        catch (Exception ex)
+        {
+            Console.WriteLine("ERROR [DATABASE]" + ex.Message);
+        }
+        finally
+        {
+            CommitTransaction();
+        }
+        return rval;
+    }
 
-        return results;
+    private static SQLiteConnection _sqlconnection { get; set; }
+    private static SQLiteTransaction _sqltransaction { get; set; }
+    private static void CheckDatabaseConnection(string dbFile, bool beginTransaction = true)
+    {
+        if (_sqlconnection == null || _sqlconnection.State != ConnectionState.Open)
+        {
+            string ConnectionString = GetSqLiteConnectionString(dbFile);
+            _sqlconnection = new SQLiteConnection(ConnectionString);
+            _sqlconnection.Open();
+        }
+
+        if (_sqltransaction == null && beginTransaction)
+        {
+            _sqltransaction = _sqlconnection.BeginTransaction();
+        }
+        return;
+    }
+
+    private static string GetSqLiteConnectionString(string dbFileName)
+    {
+        SQLiteConnectionStringBuilder conn = new SQLiteConnectionStringBuilder
+        {
+            DataSource = dbFileName,
+            Version = 3,
+            FailIfMissing = true,
+        };
+        conn.Add("Compress", true);
+
+        return conn.ConnectionString;
+    }
+
+    public static void CommitTransaction()
+    {
+        if (_sqltransaction != null && _sqltransaction.Connection != null)
+        {
+            _sqltransaction.Commit();
+            _sqltransaction = null;
+        }
+
+        if (_sqlconnection != null && _sqlconnection.State == ConnectionState.Open)
+        {
+            _sqlconnection.Close();
+            _sqlconnection = null;
+        }
     }
 }
 
