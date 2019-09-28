@@ -194,7 +194,7 @@ public static class SurfGWModule
                 }
                 catch (Exception ex)
                 {
-                    Console.Write(ex.Message);
+                    Console.Write(ex.Message+Environment.NewLine+ex.StackTrace.ToString());
                     Console.ReadLine();
                 }
                 finally
@@ -252,7 +252,7 @@ public static class SurfGWModule
         // Assign settings
         foreach (DataRow mrow in m_SyncTblSettings.Rows)
         {
-            if ((string)mrow["Key"] == "MaxIter") { maxNoIterations = (Int32)mrow["Value"]; iterCount = 0; }
+            if ((string)mrow["Key"] == "MaxIter") { maxNoIterations = int.Parse(mrow["Value"].ToString()); iterCount = 0; }
             if ((string)mrow["Key"] == "FLowTolerance") { EXCHNGVol_Tolerance = Convert.ToDouble( mrow["Value"] ); }
             if ((string)mrow["Key"] == "VolumeTolerance") { LAKEVol_Tolerance = Convert.ToDouble( mrow["Value"] ); }
         }
@@ -375,17 +375,17 @@ public static class SurfGWModule
             foreach (DataRow m_Row in m_SyncTblSEG.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
             {
                 //MF_Acc_Dep_Identifier[i] = (double) m_Row["iseg"];
-                if (i != (int)((double)m_Row["iseg"] - 1)) throw new Exception("Iseg doesn't match the index of the array");
+                if (i != (int)(double.Parse(m_Row["iseg"].ToString()) - 1)) throw new Exception("Iseg doesn't match the index of the array");
                 MS_Flows[i] = 0;
-                IDivert[i] = (int)(double)m_Row["Diversion"];
-                IRelease[i] = (int)(double)m_Row["ResRelease"];
+                IDivert[i] = (int)double.Parse(m_Row["Diversion"].ToString());
+                IRelease[i] = (int)double.Parse(m_Row["ResRelease"].ToString());
                 if (IRelease[i] >= 1)
                 {
                     IDivert[i] = 2;  // Fortran needs to distinguish between diversion and reservoir release
                 }                    // A code of 2 will signify a reservoir release
                 if (m_Row["Link Name"].ToString() != "")
                 {
-                    m_Link = myModel.FindLink((string)m_Row["Link Name"]); // Use .FindLink() instead
+                    m_Link = myModel.FindLink(m_Row["Link Name"].ToString()); // Use .FindLink() instead
                 } else
                 {
                     if (m_Row["Link Name"].ToString() == "" && (Convert.ToInt32(m_Row["Diversion"]) != 0 || Convert.ToInt32(m_Row["ResRelease"]) != 0))
@@ -407,7 +407,7 @@ public static class SurfGWModule
             i = 0;
             foreach (DataRow m_Row in m_SyncTblRES.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
             {
-                if (i != ((short)m_Row["GSF_LAK_ID"]) - 1) throw new Exception("Iseg doesn't match the index of the array");
+                if (i != (short.Parse(m_Row["GSF_LAK_ID"].ToString())) - 1) throw new Exception("Iseg doesn't match the index of the array");
                 m_Res = myModel.FindNode((string)m_Row["MODSIM_Name"]);
                 MS_Reservoirs[i] = m_Res;
                 //If PRMS-MODSIM initialize the reservoir evaporation arrays
@@ -463,7 +463,9 @@ public static class SurfGWModule
                 if (m_SyncTblSEG.Rows[i]["Link Name"].ToString() != "")
                 {
                     Link resRelLink = myModel.FindLink(m_SyncTblSEG.Rows[i]["Link Name"].ToString());
-                    LinkHi[i] = (long)resRelLink.m.maxVariable.dataTable.Rows[0][1];
+                    if(resRelLink.m.maxVariable.dataTable.Rows.Count>0) LinkHi[i] = (long)resRelLink.m.maxVariable.dataTable.Rows[0][1];
+                    else
+                    LinkHi[i] = resRelLink.m.maxConstant;
                 }
                 i += 1;
             }
@@ -550,35 +552,42 @@ public static class SurfGWModule
                         {
                             Link resRelLink = myModel.FindLink(m_row["Link Name"].ToString());
 
-                            if (! (((double)myModel.FindNode(m_row["AssocRes"].ToString()).mnInfo.stend > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)) || ((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume))))
+                            //This if avoids crash trying to find node with empty values in the database.
+                            //  not sure how it was running without this
+                            //  Need to check that it doesn't create an issue with not setting flag 
+                            //     m_row["adjted"] = 1;
+                            if (m_row["AssocRes"].ToString() != "")
                             {
-                                // Recall that MS_Flows is in GSFLOW/MODFLOW units and therefore needs to be converted back to MODSIM units before being stuffed back into a MODSIM-used parameter
-                                if (Convert.ToInt32(MS_Flows[i] / uConvToMODFLOW * accuracy) == 0)
+                                if (!(((double)myModel.FindNode(m_row["AssocRes"].ToString()).mnInfo.stend > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)) || ((LAKEVOL[int.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume))))
                                 {
-                                    resRelLink.mlInfo.hi = Convert.ToInt32(0.0001 / uConvToMODFLOW * accuracy);
+                                    // Recall that MS_Flows is in GSFLOW/MODFLOW units and therefore needs to be converted back to MODSIM units before being stuffed back into a MODSIM-used parameter
+                                    if (Convert.ToInt32(MS_Flows[i] / uConvToMODFLOW * accuracy) == 0)
+                                    {
+                                        resRelLink.mlInfo.hi = Convert.ToInt32(0.0001 / uConvToMODFLOW * accuracy);
+                                    }
+                                    // The next else if statement added in response to the bug affecting Wes's model
+                                    //else if (MS_FlowsLIMITED[i] > MS_Flows[i] && (!(((double)myModel.FindNode(m_row["AssocRes"].ToString()).mnInfo.stend > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)) || ((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)))))
+                                    //{
+                                    //    resRelLink.mlInfo.hi = Convert.ToInt32(MS_FlowsLIMITED[i] / uConvToMODFLOW * accuracy);
+                                    //}
+                                    else
+                                    {
+                                        resRelLink.mlInfo.hi = Convert.ToInt32((MS_Flows[i] + MS_FlowsLIMITED[i]) / 2 / uConvToMODFLOW * accuracy);
+                                    }
+
+                                    // Flag row as having been adjusted for restoring later
+                                    m_row["adjted"] = 1;
+                                    // Console.Write("|" + resRelLink.mlInfo.hi + "|");
                                 }
-                                // The next else if statement added in response to the bug affecting Wes's model
-                                //else if (MS_FlowsLIMITED[i] > MS_Flows[i] && (!(((double)myModel.FindNode(m_row["AssocRes"].ToString()).mnInfo.stend > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)) || ((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)))))
-                                //{
-                                //    resRelLink.mlInfo.hi = Convert.ToInt32(MS_FlowsLIMITED[i] / uConvToMODFLOW * accuracy);
-                                //}
-                                else
+                                else if ((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)
                                 {
-                                    resRelLink.mlInfo.hi = Convert.ToInt32((MS_Flows[i] + MS_FlowsLIMITED[i]) / 2 / uConvToMODFLOW * accuracy);
+                                    resRelLink.mlInfo.hi = Math.Max(resRelLink.mlInfo.hi, Convert.ToInt32((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) - (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume));
                                 }
 
                                 // Flag row as having been adjusted for restoring later
                                 m_row["adjted"] = 1;
                                 // Console.Write("|" + resRelLink.mlInfo.hi + "|");
                             }
-                            else if ( (LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume )
-                            {
-                                resRelLink.mlInfo.hi = Math.Max(resRelLink.mlInfo.hi, Convert.ToInt32((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) - (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume));
-                            }
-
-                            // Flag row as having been adjusted for restoring later
-                            m_row["adjted"] = 1;
-                            // Console.Write("|" + resRelLink.mlInfo.hi + "|");
                         }
                     }
                 }
