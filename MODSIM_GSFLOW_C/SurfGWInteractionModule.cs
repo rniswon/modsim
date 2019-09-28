@@ -68,7 +68,7 @@ public static class SurfGWModule
     public static extern void gsflow_prmsSettings([In, Out] ref int Numts, ref int Model_mode, ref int startTime, ref int File1_length, [In, Out] char[] FileName1, ref int File2_length, [In, Out] char[] FileName2);
 
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void LAK2MODSIM_InitLakes([In, Out] double[] DELTAVOL, [In, Out] double[] LAKEVOL);
+    public static extern void LAK2MODSIM_InitLakes([In, Out] double[] DELTAVOL, [In, Out] double[] LAKEVOL, [In, Out] double[] MXLKVOL);
 
     public static Model GetModel()
     {
@@ -457,7 +457,8 @@ public static class SurfGWModule
                 if (m_SyncTblSEG.Rows[i]["Link Name"].ToString() != "")
                 {
                     Link resRelLink = myModel.FindLink(m_SyncTblSEG.Rows[i]["Link Name"].ToString());
-                    LinkHi[i] = (long)resRelLink.m.maxVariable.dataTable.Rows[0][1];
+                    if (resRelLink.m.maxVariable.dataTable.Rows.Count > 0) LinkHi[i] = (long)resRelLink.m.maxVariable.dataTable.Rows[0][1];
+                    else LinkHi[i] = (long)resRelLink.m.maxConstant;
                 }
                 i += 1;
             }
@@ -593,34 +594,34 @@ public static class SurfGWModule
 
     private static void OnIterationBottom()
     {
-        double gvflow;
-        Link gv_gage;
-        Link al_link;
-        int month;
-        DateTime currentDate = myModel.TimeStepManager.Index2Date(myModel.mInfo.CurrentModelTimeStepIndex, TypeIndexes.ModelIndex);
+        //double gvflow;
+        //Link gv_gage;
+        //Link al_link;
+        //int month;
+        //DateTime currentDate = myModel.TimeStepManager.Index2Date(myModel.mInfo.CurrentModelTimeStepIndex, TypeIndexes.ModelIndex);
 
-        month = currentDate.Month;
-        gv_gage = myModel.FindLink("1");
-        al_link = myModel.FindLink("divtabsCV-8015trans-diversions-c82-19790702-20150928.txt");
+        //month = currentDate.Month;
+        //gv_gage = myModel.FindLink("1");
+        //al_link = myModel.FindLink("divtabsCV-8015trans-diversions-c82-19790702-20150928.txt");
 
-        // check flow at gv < 200 cfs, convert to ac-ft/mo, multiply by accuracy
-        gvflow = Convert.ToDouble(gv_gage.mlInfo.flow);
+        //// check flow at gv < 200 cfs, convert to ac-ft/mo, multiply by accuracy
+        //gvflow = Convert.ToDouble(gv_gage.mlInfo.flow);
 
-        if(month >= 4 & month < 10)  // 'irrigation season
-        {
-            if(gvflow <= ((200 * 86400 * 7) / uConvToMODFLOW) * accuracy)
-            {
-                // convert 200 cfs to acre-ft per stress period
-                // set 1/3-2/3 split through capacities and inflows
-                al_link.mlInfo.hi = (long)(0.34 * gvflow);
-                al_link.mlInfo.lo = (long)(0.33 * gvflow);
-            }
-            else
-            {
-                // set max capacity to 100 cfs, current max capacity ~80 but was/could be higher
-                al_link.mlInfo.hi = (long)((100.0 * 86400 * 7) / uConvToMODFLOW * accuracy);
-            }
-        }
+        //if(month >= 4 & month < 10)  // 'irrigation season
+        //{
+        //    if(gvflow <= ((200 * 86400 * 7) / uConvToMODFLOW) * accuracy)
+        //    {
+        //        // convert 200 cfs to acre-ft per stress period
+        //        // set 1/3-2/3 split through capacities and inflows
+        //        al_link.mlInfo.hi = (long)(0.34 * gvflow);
+        //        al_link.mlInfo.lo = (long)(0.33 * gvflow);
+        //    }
+        //    else
+        //    {
+        //        // set max capacity to 100 cfs, current max capacity ~80 but was/could be higher
+        //        al_link.mlInfo.hi = (long)((100.0 * 86400 * 7) / uConvToMODFLOW * accuracy);
+        //    }
+        //}
 
 
     }
@@ -742,7 +743,7 @@ public static class SurfGWModule
                     // Easiest way forward might be to expose LAK2MODSIM in the DLL so it is callable both by GSFLOW and by MODSIM (this may have implications for MODSIM-PRMS mode)
                     if (Model_mode != 11)  //Model_mode 11: PRMS-MODSIM mode
                     {
-                        LAK2MODSIM_InitLakes(DELTAVOL, LAKEVOL);
+                        LAK2MODSIM_InitLakes(DELTAVOL, LAKEVOL, MXLKVOL);
                         for (int i = 0; i < LAKEVOL.Length; i++)
                         {
                             if (MS_Reservoirs[i] != null)
