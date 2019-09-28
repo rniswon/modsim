@@ -9,7 +9,6 @@ using System.Collections.Generic;
 //using MWH.MWHUtils.GeneralUtils;
 using Csu.Modsim.ModsimIO;
 using System.Data.OleDb;
-using System.Data.SQLite;
 
 public static class SurfGWModule
 {
@@ -60,10 +59,6 @@ public static class SurfGWModule
     private static double accuracy;
     private static int localMODSIMIter;
 
-    //Flags for custom project codes
-    private static bool WES_ON = false;
-
-
     //Fortran DLL interface
 
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -73,7 +68,7 @@ public static class SurfGWModule
     public static extern void gsflow_prmsSettings([In, Out] ref int Numts, ref int Model_mode, ref int startTime, ref int File1_length, [In, Out] char[] FileName1, ref int File2_length, [In, Out] char[] FileName2);
 
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void LAK2MODSIM_InitLakes([In, Out] double[] DELTAVOL, [In, Out] double[] LAKEVOL);
+    public static extern void LAK2MODSIM_InitLakes([In, Out] double[] DELTAVOL, [In, Out] double[] LAKEVOL, [In, Out] double[] MXLKVOL);
 
     public static Model GetModel()
     {
@@ -194,19 +189,18 @@ public static class SurfGWModule
                 }
                 catch (Exception ex)
                 {
-                    Console.Write(ex.Message+Environment.NewLine+ex.StackTrace.ToString());
-                    Console.ReadLine();
+                    Console.Write(ex.Message);
                 }
                 finally
                 {
                     //sw.Close();
+
                 }
             }
         }
         catch (Exception ex)
         {
             Console.Write(ex.Message);
-            Console.ReadLine();
         }
         
     }
@@ -252,7 +246,7 @@ public static class SurfGWModule
         // Assign settings
         foreach (DataRow mrow in m_SyncTblSettings.Rows)
         {
-            if ((string)mrow["Key"] == "MaxIter") { maxNoIterations = int.Parse(mrow["Value"].ToString()); iterCount = 0; }
+            if ((string)mrow["Key"] == "MaxIter") { maxNoIterations = (Int32)mrow["Value"]; iterCount = 0; }
             if ((string)mrow["Key"] == "FLowTolerance") { EXCHNGVol_Tolerance = Convert.ToDouble( mrow["Value"] ); }
             if ((string)mrow["Key"] == "VolumeTolerance") { LAKEVol_Tolerance = Convert.ToDouble( mrow["Value"] ); }
         }
@@ -375,17 +369,17 @@ public static class SurfGWModule
             foreach (DataRow m_Row in m_SyncTblSEG.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
             {
                 //MF_Acc_Dep_Identifier[i] = (double) m_Row["iseg"];
-                if (i != (int)(double.Parse(m_Row["iseg"].ToString()) - 1)) throw new Exception("Iseg doesn't match the index of the array");
+                if (i != (int)((double)m_Row["iseg"] - 1)) throw new Exception("Iseg doesn't match the index of the array");
                 MS_Flows[i] = 0;
-                IDivert[i] = (int)double.Parse(m_Row["Diversion"].ToString());
-                IRelease[i] = (int)double.Parse(m_Row["ResRelease"].ToString());
+                IDivert[i] = (int)(double)m_Row["Diversion"];
+                IRelease[i] = (int)(double)m_Row["ResRelease"];
                 if (IRelease[i] >= 1)
                 {
                     IDivert[i] = 2;  // Fortran needs to distinguish between diversion and reservoir release
                 }                    // A code of 2 will signify a reservoir release
                 if (m_Row["Link Name"].ToString() != "")
                 {
-                    m_Link = myModel.FindLink(m_Row["Link Name"].ToString()); // Use .FindLink() instead
+                    m_Link = myModel.FindLink((string)m_Row["Link Name"]); // Use .FindLink() instead
                 } else
                 {
                     if (m_Row["Link Name"].ToString() == "" && (Convert.ToInt32(m_Row["Diversion"]) != 0 || Convert.ToInt32(m_Row["ResRelease"]) != 0))
@@ -407,7 +401,7 @@ public static class SurfGWModule
             i = 0;
             foreach (DataRow m_Row in m_SyncTblRES.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
             {
-                if (i != (short.Parse(m_Row["GSF_LAK_ID"].ToString())) - 1) throw new Exception("Iseg doesn't match the index of the array");
+                if (i != ((short)m_Row["GSF_LAK_ID"]) - 1) throw new Exception("Iseg doesn't match the index of the array");
                 m_Res = myModel.FindNode((string)m_Row["MODSIM_Name"]);
                 MS_Reservoirs[i] = m_Res;
                 //If PRMS-MODSIM initialize the reservoir evaporation arrays
@@ -463,9 +457,8 @@ public static class SurfGWModule
                 if (m_SyncTblSEG.Rows[i]["Link Name"].ToString() != "")
                 {
                     Link resRelLink = myModel.FindLink(m_SyncTblSEG.Rows[i]["Link Name"].ToString());
-                    if(resRelLink.m.maxVariable.dataTable.Rows.Count>0) LinkHi[i] = (long)resRelLink.m.maxVariable.dataTable.Rows[0][1];
-                    else
-                    LinkHi[i] = resRelLink.m.maxConstant;
+                    if (resRelLink.m.maxVariable.dataTable.Rows.Count > 0) LinkHi[i] = (long)resRelLink.m.maxVariable.dataTable.Rows[0][1];
+                    else LinkHi[i] = (long)resRelLink.m.maxConstant;
                 }
                 i += 1;
             }
@@ -552,42 +545,35 @@ public static class SurfGWModule
                         {
                             Link resRelLink = myModel.FindLink(m_row["Link Name"].ToString());
 
-                            //This if avoids crash trying to find node with empty values in the database.
-                            //  not sure how it was running without this
-                            //  Need to check that it doesn't create an issue with not setting flag 
-                            //     m_row["adjted"] = 1;
-                            if (m_row["AssocRes"].ToString() != "")
+                            if (! (((double)myModel.FindNode(m_row["AssocRes"].ToString()).mnInfo.stend > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)) || ((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume))))
                             {
-                                if (!(((double)myModel.FindNode(m_row["AssocRes"].ToString()).mnInfo.stend > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)) || ((LAKEVOL[int.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume))))
+                                // Recall that MS_Flows is in GSFLOW/MODFLOW units and therefore needs to be converted back to MODSIM units before being stuffed back into a MODSIM-used parameter
+                                if (Convert.ToInt32(MS_Flows[i] / uConvToMODFLOW * accuracy) == 0)
                                 {
-                                    // Recall that MS_Flows is in GSFLOW/MODFLOW units and therefore needs to be converted back to MODSIM units before being stuffed back into a MODSIM-used parameter
-                                    if (Convert.ToInt32(MS_Flows[i] / uConvToMODFLOW * accuracy) == 0)
-                                    {
-                                        resRelLink.mlInfo.hi = Convert.ToInt32(0.0001 / uConvToMODFLOW * accuracy);
-                                    }
-                                    // The next else if statement added in response to the bug affecting Wes's model
-                                    //else if (MS_FlowsLIMITED[i] > MS_Flows[i] && (!(((double)myModel.FindNode(m_row["AssocRes"].ToString()).mnInfo.stend > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)) || ((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)))))
-                                    //{
-                                    //    resRelLink.mlInfo.hi = Convert.ToInt32(MS_FlowsLIMITED[i] / uConvToMODFLOW * accuracy);
-                                    //}
-                                    else
-                                    {
-                                        resRelLink.mlInfo.hi = Convert.ToInt32((MS_Flows[i] + MS_FlowsLIMITED[i]) / 2 / uConvToMODFLOW * accuracy);
-                                    }
-
-                                    // Flag row as having been adjusted for restoring later
-                                    m_row["adjted"] = 1;
-                                    // Console.Write("|" + resRelLink.mlInfo.hi + "|");
+                                    resRelLink.mlInfo.hi = Convert.ToInt32(0.0001 / uConvToMODFLOW * accuracy);
                                 }
-                                else if ((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)
+                                // The next else if statement added in response to the bug affecting Wes's model
+                                //else if (MS_FlowsLIMITED[i] > MS_Flows[i] && (!(((double)myModel.FindNode(m_row["AssocRes"].ToString()).mnInfo.stend > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)) || ((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)))))
+                                //{
+                                //    resRelLink.mlInfo.hi = Convert.ToInt32(MS_FlowsLIMITED[i] / uConvToMODFLOW * accuracy);
+                                //}
+                                else
                                 {
-                                    resRelLink.mlInfo.hi = Math.Max(resRelLink.mlInfo.hi, Convert.ToInt32((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) - (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume));
+                                    resRelLink.mlInfo.hi = Convert.ToInt32((MS_Flows[i] + MS_FlowsLIMITED[i]) / 2 / uConvToMODFLOW * accuracy);
                                 }
 
                                 // Flag row as having been adjusted for restoring later
                                 m_row["adjted"] = 1;
                                 // Console.Write("|" + resRelLink.mlInfo.hi + "|");
                             }
+                            else if ( (LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume )
+                            {
+                                resRelLink.mlInfo.hi = Math.Max(resRelLink.mlInfo.hi, Convert.ToInt32((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) - (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume));
+                            }
+
+                            // Flag row as having been adjusted for restoring later
+                            m_row["adjted"] = 1;
+                            // Console.Write("|" + resRelLink.mlInfo.hi + "|");
                         }
                     }
                 }
@@ -608,37 +594,35 @@ public static class SurfGWModule
 
     private static void OnIterationBottom()
     {
-        if (WES_ON)
-        {
-            double gvflow;
-            Link gv_gage;
-            Link al_link;
-            int month;
-            DateTime currentDate = myModel.TimeStepManager.Index2Date(myModel.mInfo.CurrentModelTimeStepIndex, TypeIndexes.ModelIndex);
+        //double gvflow;
+        //Link gv_gage;
+        //Link al_link;
+        //int month;
+        //DateTime currentDate = myModel.TimeStepManager.Index2Date(myModel.mInfo.CurrentModelTimeStepIndex, TypeIndexes.ModelIndex);
 
-            month = currentDate.Month;
-            gv_gage = myModel.FindLink("1");
-            al_link = myModel.FindLink("divtabsCV-8015trans-diversions-c82-19790702-20150928.txt");
+        //month = currentDate.Month;
+        //gv_gage = myModel.FindLink("1");
+        //al_link = myModel.FindLink("divtabsCV-8015trans-diversions-c82-19790702-20150928.txt");
 
-            // check flow at gv < 200 cfs, convert to ac-ft/mo, multiply by accuracy
-            gvflow = Convert.ToDouble(gv_gage.mlInfo.flow);
+        //// check flow at gv < 200 cfs, convert to ac-ft/mo, multiply by accuracy
+        //gvflow = Convert.ToDouble(gv_gage.mlInfo.flow);
 
-            if (month >= 4 & month < 10)  // 'irrigation season
-            {
-                if (gvflow <= ((200 * 86400 * 7) / uConvToMODFLOW) * accuracy)
-                {
-                    // convert 200 cfs to acre-ft per stress period
-                    // set 1/3-2/3 split through capacities and inflows
-                    al_link.mlInfo.hi = (long)(0.34 * gvflow);
-                    al_link.mlInfo.lo = (long)(0.33 * gvflow);
-                }
-                else
-                {
-                    // set max capacity to 100 cfs, current max capacity ~80 but was/could be higher
-                    al_link.mlInfo.hi = (long)((100.0 * 86400 * 7) / uConvToMODFLOW * accuracy);
-                }
-            }
-        }
+        //if(month >= 4 & month < 10)  // 'irrigation season
+        //{
+        //    if(gvflow <= ((200 * 86400 * 7) / uConvToMODFLOW) * accuracy)
+        //    {
+        //        // convert 200 cfs to acre-ft per stress period
+        //        // set 1/3-2/3 split through capacities and inflows
+        //        al_link.mlInfo.hi = (long)(0.34 * gvflow);
+        //        al_link.mlInfo.lo = (long)(0.33 * gvflow);
+        //    }
+        //    else
+        //    {
+        //        // set max capacity to 100 cfs, current max capacity ~80 but was/could be higher
+        //        al_link.mlInfo.hi = (long)((100.0 * 86400 * 7) / uConvToMODFLOW * accuracy);
+        //    }
+        //}
+
 
     }
 
@@ -759,7 +743,7 @@ public static class SurfGWModule
                     // Easiest way forward might be to expose LAK2MODSIM in the DLL so it is callable both by GSFLOW and by MODSIM (this may have implications for MODSIM-PRMS mode)
                     if (Model_mode != 11)  //Model_mode 11: PRMS-MODSIM mode
                     {
-                        LAK2MODSIM_InitLakes(DELTAVOL, LAKEVOL);
+                        LAK2MODSIM_InitLakes(DELTAVOL, LAKEVOL, MXLKVOL);
                         for (int i = 0; i < LAKEVOL.Length; i++)
                         {
                             if (MS_Reservoirs[i] != null)
@@ -1043,100 +1027,28 @@ public static class SurfGWModule
         return chars;
     }
 
-    //private static DataTable GetTableFromDB(string databasePath, string sql, string tableName)
-    //{
-    //    DataTable results = new DataTable();
-    //    try
-    //    {
-    //        string connString = "Provider=Microsoft.ACE.OLEDB.12.0;data source=" + databasePath;
-
-    //        using (OleDbConnection conn = new OleDbConnection(connString))
-    //        {
-    //            OleDbCommand cmd = new OleDbCommand(sql, conn);
-
-    //            conn.Open();
-
-    //            OleDbDataAdapter adapter = new OleDbDataAdapter(cmd);
-    //            adapter.SelectCommand = cmd;
-    //            adapter.Fill(results);
-    //            results.TableName = tableName;
-    //        }
-    //    }
-    //    catch (Exception ex) { Console.WriteLine(ex.Message); }
-
-    //    return results;
-    //}
-
-    public static DataTable GetTableFromDB(string databasePath, string sql, string tableName)
+    private static DataTable GetTableFromDB(string databasePath, string sql, string tableName)
     {
-        CheckDatabaseConnection(databasePath);
-        DataTable rval = new DataTable();
+        DataTable results = new DataTable();
         try
         {
-            using (SQLiteCommand cmd = new SQLiteCommand(sql, _sqlconnection))
+            string connString = $"Provider=Microsoft.ACE.OLEDB.12.0;data source={databasePath}";
+
+            using (OleDbConnection conn = new OleDbConnection(connString))
             {
-                using (SQLiteDataAdapter adapter = new SQLiteDataAdapter(cmd))
-                {
-                    adapter.Fill(rval);
-                }
-                rval.TableName = tableName;
+                OleDbCommand cmd = new OleDbCommand(sql, conn);
+
+                conn.Open();
+
+                OleDbDataAdapter adapter = new OleDbDataAdapter(cmd);
+                adapter.SelectCommand = cmd;
+                adapter.Fill(results);
+                results.TableName = tableName;
             }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine("ERROR [DATABASE]" + ex.Message);
-        }
-        finally
-        {
-            CommitTransaction();
-        }
-        return rval;
-    }
+        catch (Exception ex) { Console.WriteLine(ex.Message); }
 
-    private static SQLiteConnection _sqlconnection { get; set; }
-    private static SQLiteTransaction _sqltransaction { get; set; }
-    private static void CheckDatabaseConnection(string dbFile, bool beginTransaction = true)
-    {
-        if (_sqlconnection == null || _sqlconnection.State != ConnectionState.Open)
-        {
-            string ConnectionString = GetSqLiteConnectionString(dbFile);
-            _sqlconnection = new SQLiteConnection(ConnectionString);
-            _sqlconnection.Open();
-        }
-
-        if (_sqltransaction == null && beginTransaction)
-        {
-            _sqltransaction = _sqlconnection.BeginTransaction();
-        }
-        return;
-    }
-
-    private static string GetSqLiteConnectionString(string dbFileName)
-    {
-        SQLiteConnectionStringBuilder conn = new SQLiteConnectionStringBuilder
-        {
-            DataSource = dbFileName,
-            Version = 3,
-            FailIfMissing = true,
-        };
-        conn.Add("Compress", true);
-
-        return conn.ConnectionString;
-    }
-
-    public static void CommitTransaction()
-    {
-        if (_sqltransaction != null && _sqltransaction.Connection != null)
-        {
-            _sqltransaction.Commit();
-            _sqltransaction = null;
-        }
-
-        if (_sqlconnection != null && _sqlconnection.State == ConnectionState.Open)
-        {
-            _sqlconnection.Close();
-            _sqlconnection = null;
-        }
+        return results;
     }
 }
 
