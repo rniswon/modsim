@@ -73,7 +73,7 @@ public static class SurfGWModule
     public static extern void gsflow_prmsSettings([In, Out] ref int Numts, ref int Model_mode, ref int startTime, ref int File1_length, [In, Out] char[] FileName1, ref int File2_length, [In, Out] char[] FileName2);
 
     [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void LAK2MODSIM_InitLakes([In, Out] double[] DELTAVOL, [In, Out] double[] LAKEVOL);
+    public static extern void LAK2MODSIM_InitLakes([In, Out] double[] DELTAVOL, [In, Out] double[] LAKEVOL, [In, Out] double[] MXLKVOL);
 
     public static Model GetModel()
     {
@@ -463,9 +463,14 @@ public static class SurfGWModule
                 if (m_SyncTblSEG.Rows[i]["Link Name"].ToString() != "")
                 {
                     Link resRelLink = myModel.FindLink(m_SyncTblSEG.Rows[i]["Link Name"].ToString());
-                    if(resRelLink.m.maxVariable.dataTable.Rows.Count>0) LinkHi[i] = (long)resRelLink.m.maxVariable.dataTable.Rows[0][1];
+                    if(resRelLink.m.maxVariable.dataTable.Rows.Count>0) 
+                    {
+                        LinkHi[i] = (long)resRelLink.m.maxVariable.dataTable.Rows[0][1];
+                    }
                     else
-                    LinkHi[i] = resRelLink.m.maxConstant;
+                    {
+                        LinkHi[i] = resRelLink.m.maxConstant;
+                    }
                 }
                 i += 1;
             }
@@ -759,7 +764,7 @@ public static class SurfGWModule
                     // Easiest way forward might be to expose LAK2MODSIM in the DLL so it is callable both by GSFLOW and by MODSIM (this may have implications for MODSIM-PRMS mode)
                     if (Model_mode != 11)  //Model_mode 11: PRMS-MODSIM mode
                     {
-                        LAK2MODSIM_InitLakes(DELTAVOL, LAKEVOL);
+                        LAK2MODSIM_InitLakes(DELTAVOL, LAKEVOL, MXLKVOL);
                         for (int i = 0; i < LAKEVOL.Length; i++)
                         {
                             if (MS_Reservoirs[i] != null)
