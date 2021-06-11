@@ -715,15 +715,14 @@ public static class SurfGWModule
                     // Only add flows for diversion links.
                     if (IDivert[i] > 0)
                     {
-                        MS_Flows[i] = (double)MS_Links[i].mlInfo.flow / accuracy * uConvToMODFLOW; //flow values converted to MODFLOW units
-
-                        // MODFLOW interprets a specified release from a lake of 0.0 as a flag, specifically a flag
-                        // telling MODFLOW to calculate the natural outflow from the based on the outlet's bed elevation
-                        // this prevents that flag from being tripped.
-                        if (IRelease[i] > 0 && MS_Flows[i] == 0)
-                        {
-                            MS_Flows[i] = 0.0001;
-                        }
+                        MS_Flows[i] = (double)MS_Links[i].mlInfo.flow / accuracy * uConvToMODFLOW; //flow values converted to MODFLOW 
+                    }
+                    // MODFLOW interprets a specified release from a lake of 0.0 as a flag, specifically a flag
+                    // telling MODFLOW to calculate the natural outflow from the based on the outlet's bed elevation
+                    // this prevents that flag from being tripped.
+                    if (IRelease[i] > 0 && MS_Flows[i] == 0)
+                    {
+                        MS_Flows[i] = 0.0001;
                     }
                     EXCHANGEPREV[i] = EXCHANGE[i];
 

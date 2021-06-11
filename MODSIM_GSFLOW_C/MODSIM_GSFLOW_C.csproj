@@ -154,7 +154,7 @@
   <PropertyGroup>
     <PreBuildEvent>REM COPY /Y  "$(SolutionDir)\$(Configuration)\GSFLOW_MODSIM.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
 REM COPY /Y  "$(SolutionDir)\$(Platform)\GSFLOW_MODSIM.dll" "$(TargetDir)\..\..\..\GSFlowLibraries\$(Configuration)\GSFLOW_MODSIM.dll"
-REM COPY /Y  "$(SolutionDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
+COPY /Y  "$(SolutionDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
 </PreBuildEvent>
   </PropertyGroup>
   <Import Project="packages\System.Data.SQLite.Core.1.0.111.0\build\net40\System.Data.SQLite.Core.targets" Condition="Exists('packages\System.Data.SQLite.Core.1.0.111.0\build\net40\System.Data.SQLite.Core.targets')" />
