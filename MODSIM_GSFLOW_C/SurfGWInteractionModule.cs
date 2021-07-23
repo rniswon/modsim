@@ -188,7 +188,7 @@ public static class SurfGWModule
                     XYFileWriter.Write(myModel, xyFileName.Replace(".xy", "MSGSF.xy"));
                     Modsim.RunSolver(myModel);
                     //Copy output to the original file name - Custom Output carries the MF Dep/Acc
-                    File.Copy(xyFileName.Replace(".xy", "MSGSFOUTPUT.mdb"), xyFileName.Replace(".xy", "OUTPUT.mdb"), true);
+                    File.Copy(xyFileName.Replace(".xy", "MSGSFOUTPUT.sqlite"), xyFileName.Replace(".xy", "OUTPUT.sqlite"), true);
                     Console.WriteLine(" MF_MS Simulation Finished Succesfully");
 
                 }
@@ -271,7 +271,7 @@ public static class SurfGWModule
         //m_Source.graphics.point.Y = 180;
         m_Source.name = "MF_SOURCE";
         DataTable m_TSTbl = m_Source.m.adaInflowsM.dataTable;
-        SetDefaultTableValue(ref m_TSTbl, 2100000000);
+        SetDefaultTableValue(ref m_TSTbl, 9900000000);
 
         // Connect both of just instantiated nodes so that unused source water 
         // is shunted out of the model through the sink Node
@@ -336,7 +336,7 @@ public static class SurfGWModule
         count++;
     }
 
-    private static void SetDefaultTableValue(ref DataTable m_Tbl, int value)
+    private static void SetDefaultTableValue(ref DataTable m_Tbl, long value)
     {
         DataRow tsRow = m_Tbl.NewRow();
         tsRow[0] = myModel.TimeStepManager.dataStartDate;
@@ -696,6 +696,16 @@ public static class SurfGWModule
     
     private static void OnIterationConverge()
     {
+        // Some debug code
+        DateTime currentDate = myModel.TimeStepManager.Index2Date(myModel.mInfo.CurrentModelTimeStepIndex, TypeIndexes.ModelIndex);
+        DateTime chkDate = new DateTime(1980, 10, 17);
+        int equiv = DateTime.Compare(currentDate, chkDate);
+        if (equiv == 0)
+        {
+            string debugbreakpt = "stop here";
+            debugbreakpt += "do something more";
+        }
+        
         if (Model_mode != 13)
         {
             bool MS_GSF_converge = false;
@@ -769,7 +779,7 @@ public static class SurfGWModule
                             if (MS_Reservoirs[i] != null)
                             {
                                 MS_Reservoirs[i].m.starting_volume = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
-                                // MS_Reservoirs[i].m.min_volume = (long)(DELTAVOL[i] * accuracy / uConvToMODFLOW);
+                                MS_Reservoirs[i].m.min_volume = (long)(DELTAVOL[i] * accuracy / uConvToMODFLOW);
                                 DPOOL[i] = (long)DELTAVOL[i];  // Store DPOOL in MODFLOW units, not MODSIM units.  
                                 MS_Reservoirs[i].mnInfo.start = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
 
@@ -985,7 +995,7 @@ public static class SurfGWModule
             // Convergence checked in MODFLOW units.
             converge = converge && ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) <= EXCHNGVol_Tolerance);  // (double)(Math.Abs(MS_FlowsPREV[i]) * percent_diff));
             converge = converge && ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) <= EXCHNGVol_Tolerance); // (double)(Math.Abs(EXCHANGEPREV[i]) * percent_diff));
-            if ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) > EXCHNGVol_Tolerance) Console.WriteLine("Diver:" + i + ":" + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
+            if ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) > EXCHNGVol_Tolerance) Console.WriteLine("For iseg: " + (i + 1).ToString() + " difference between MODSIM & MF is: " + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
             //if ((i == 18 || i == 19) && myModel.mInfo.CurrentModelTimeStepIndex >= 364) Console.WriteLine("Diver:" + i + ":" + MS_Flows[i] + "Exch: " + EXCHANGE[i]);
             // if ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > EXCHNGVol_Tolerance) Console.WriteLine("GW-SW Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
             // myModel.mInfo.CurrentModelTimeStepIndex
