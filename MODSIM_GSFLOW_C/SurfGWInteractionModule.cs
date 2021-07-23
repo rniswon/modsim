@@ -271,7 +271,7 @@ public static class SurfGWModule
         //m_Source.graphics.point.Y = 180;
         m_Source.name = "MF_SOURCE";
         DataTable m_TSTbl = m_Source.m.adaInflowsM.dataTable;
-        SetDefaultTableValue(ref m_TSTbl, 2100000000);
+        SetDefaultTableValue(ref m_TSTbl, 9900000000);
 
         // Connect both of just instantiated nodes so that unused source water 
         // is shunted out of the model through the sink Node
@@ -336,7 +336,7 @@ public static class SurfGWModule
         count++;
     }
 
-    private static void SetDefaultTableValue(ref DataTable m_Tbl, int value)
+    private static void SetDefaultTableValue(ref DataTable m_Tbl, long value)
     {
         DataRow tsRow = m_Tbl.NewRow();
         tsRow[0] = myModel.TimeStepManager.dataStartDate;
@@ -698,7 +698,7 @@ public static class SurfGWModule
     {
         // Some debug code
         DateTime currentDate = myModel.TimeStepManager.Index2Date(myModel.mInfo.CurrentModelTimeStepIndex, TypeIndexes.ModelIndex);
-        DateTime chkDate = new DateTime(1981, 1, 31);
+        DateTime chkDate = new DateTime(1980, 10, 17);
         int equiv = DateTime.Compare(currentDate, chkDate);
         if (equiv == 0)
         {
@@ -779,7 +779,7 @@ public static class SurfGWModule
                             if (MS_Reservoirs[i] != null)
                             {
                                 MS_Reservoirs[i].m.starting_volume = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
-                                // MS_Reservoirs[i].m.min_volume = (long)(DELTAVOL[i] * accuracy / uConvToMODFLOW);
+                                MS_Reservoirs[i].m.min_volume = (long)(DELTAVOL[i] * accuracy / uConvToMODFLOW);
                                 DPOOL[i] = (long)DELTAVOL[i];  // Store DPOOL in MODFLOW units, not MODSIM units.  
                                 MS_Reservoirs[i].mnInfo.start = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
 
