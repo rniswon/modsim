@@ -322,7 +322,7 @@ public static class SurfGWModule
         Utils.ConnectFromNode(m_DepLink, m_Node);
         Utils.ConnectToNode(m_DepLink, m_Sink);
         m_DepLink.name = "MF_Dep_" + baseName;
-        m_DepLink.m.cost = -300000 - count;
+        m_DepLink.m.cost = -500000 - count;
         DataTable m_TSTbl = m_DepLink.m.maxVariable.dataTable;
         SetDefaultTableValue(ref m_TSTbl, 0);
         //Create Accretion Link
@@ -330,7 +330,7 @@ public static class SurfGWModule
         Utils.ConnectFromNode(m_AccLink, m_Source);
         Utils.ConnectToNode(m_AccLink, m_Node);
         m_AccLink.name = "MF_Acc_" + baseName;
-        m_AccLink.m.cost = -300000 - count;
+        m_AccLink.m.cost = -500000 - count;
         m_TSTbl = m_AccLink.m.maxVariable.dataTable;
         SetDefaultTableValue(ref m_TSTbl, 0);
         count++;
