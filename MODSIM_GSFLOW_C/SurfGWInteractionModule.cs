@@ -779,7 +779,7 @@ public static class SurfGWModule
                             if (MS_Reservoirs[i] != null)
                             {
                                 MS_Reservoirs[i].m.starting_volume = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
-                                MS_Reservoirs[i].m.min_volume = (long)(DELTAVOL[i] * accuracy / uConvToMODFLOW);
+                                MS_Reservoirs[i].m.resBalance.targetPercentages[0] = (double)(DELTAVOL[i] * accuracy / uConvToMODFLOW)/ MS_Reservoirs[i].m.max_volume*100;
                                 DPOOL[i] = (long)DELTAVOL[i];  // Store DPOOL in MODFLOW units, not MODSIM units.  
                                 MS_Reservoirs[i].mnInfo.start = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
 
