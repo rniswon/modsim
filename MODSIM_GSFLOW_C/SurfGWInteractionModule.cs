@@ -19,6 +19,7 @@ public static class SurfGWModule
     public static Link[] MS_Links;
     public static Node[] MS_Reservoirs;
     public static bool Adv_TabF = false;
+    public static bool breakout = false;
     public static Link m_releaseLnk;
     public static Node m_ResNode;
     public static double[] MF_LK_Vol = new double[1]; // this example has only one reservoir
@@ -59,6 +60,7 @@ public static class SurfGWModule
     public static string xyFileName;
     private static double accuracy;
     private static int localMODSIMIter;
+    
 
     //Flags for custom project codes
     private static bool WES_ON = false;
@@ -410,6 +412,7 @@ public static class SurfGWModule
                 if (i != (short.Parse(m_Row["GSF_LAK_ID"].ToString())) - 1) throw new Exception("Iseg doesn't match the index of the array");
                 m_Res = myModel.FindNode((string)m_Row["MODSIM_Name"]);
                 MS_Reservoirs[i] = m_Res;
+
                 //If PRMS-MODSIM initialize the reservoir evaporation arrays
                 if (Model_mode == 11) //PRMS-MODSIM mode
                 {
@@ -476,10 +479,10 @@ public static class SurfGWModule
             }
             LinkHi_Sv = (long[])LinkHi.Clone();
 
-            //Initialize variable to iterate between MODSIM and GSFLOW
+            // Initialize variable to iterate between MODSIM and GSFLOW
             MFRunYet = false;
 
-            //Initialize local MODSIM iteration count
+            // Initialize local MODSIM iteration count
             localMODSIMIter = 0;
         }
     }
@@ -741,23 +744,12 @@ public static class SurfGWModule
                     MS_FlowsLIMITED[i] = MS_Flows[i];
                 }
 
-                //Implement Reservoir accretions/depletions
-                for (int i = 0; i < MS_Reservoirs.Length; i++)
-                {
-                    DELTAVOLPREV[i] = DELTAVOL[i];
-                    if (Model_mode == 11) //PRMS-MODSIM mode
-                    {
-                        //PRMS calculates potential evaporation with is used in MODSIM to compute reservoir evaporation
-                        //  MODSIM user input will be overwritten
-                        //  PRMS will always send evap in inches.  We need to apply the conversion metric/english.
-                        //  LAKEEVAP is going to include only evaporation, precipitation is comming in the DELTAVOL variable.
-                        if (MS_Reservoirs[i] != null) MS_Reservoirs[i].mnInfo.evaporationrate[myModel.mInfo.CurrentModelTimeStepIndex, 0] = -LAKEVAP[i]* uConvRateToMODSIM;
-                    }
-                }
+                // The following function also used in OnInitialize()
+                Store_Net_Res_AccDepl();
 
                 //Need to know the value of LAKEVOL for the first (SS)
                 // If first iteration of first time step, overide MODSIM Lake volumes
-                if (!MFRunYet && (myModel.mInfo.CurrentModelTimeStepIndex == 0))
+                if (!MFRunYet && (myModel.mInfo.CurrentModelTimeStepIndex == 0) && !breakout)
                 {
                     for (int i = 0; i < MS_Reservoirs.Length; i++)
                     {
@@ -779,13 +771,31 @@ public static class SurfGWModule
                             if (MS_Reservoirs[i] != null)
                             {
                                 MS_Reservoirs[i].m.starting_volume = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
-                                MS_Reservoirs[i].m.resBalance.targetPercentages[0] = (double)(DELTAVOL[i] * accuracy / uConvToMODFLOW)/ MS_Reservoirs[i].m.max_volume*100;
+
+                                // From Enrique:   I looked at the MODSIM code and it seems like there is a reservoir 
+                                //                 initialization happening before the custom onInitialize happens.  
+                                //                 This initialization sets the end volume of the t-1 to the start volume. 
+                                //                 I believe that's why the initial storage is kept at the values we are setting.  
+                                MS_Reservoirs[i].mnInfo.stend = MS_Reservoirs[i].m.starting_volume;
+
+                                // The following is a work-around until 
+                                // Inline reservoir: 0.46%  Offline reservoir: 
+                                MS_Reservoirs[i].m.resBalance.targetPercentages[0] = (double)(DELTAVOL[i] * accuracy / uConvToMODFLOW) / MS_Reservoirs[i].m.max_volume * 100;
                                 DPOOL[i] = (long)DELTAVOL[i];  // Store DPOOL in MODFLOW units, not MODSIM units.  
                                 MS_Reservoirs[i].mnInfo.start = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
+                                MS_Reservoirs[i].mnInfo.start_storage[0] = MS_Reservoirs[i].mnInfo.start;
 
                                 STARTLAKEVOL[i] = LAKEVOL[i];
+
+                                // Because the code needs to cycle back to redo the MODSIM solution after running this bit of code,
+                                // reset the DELTAVOL values back to 0 since this variable is used in OnIterationTop()
+                                DELTAVOL[i] = 0;
                             }
                         }
+                        myModel.mInfo.convg = false;
+                        myModel.mInfo.Iteration = 0;
+                        breakout = true;
+                        return;
                     }
                 }
 
@@ -924,7 +934,6 @@ public static class SurfGWModule
                     //Set local MODSIM iteration count
                     localMODSIMIter = 0;
                     MS_GSF_converge = false;
-
                 }
                 else if(Model_mode == 11)
                 {
@@ -956,8 +965,27 @@ public static class SurfGWModule
                 }
 
                 myModel.mInfo.convg = MS_GSF_converge;
+                myModel.mInfo.Iteration = 0;
             }
         }
+    }
+
+    private static void Store_Net_Res_AccDepl()
+    {
+        //Implement Reservoir accretions/depletions
+        for (int i = 0; i < MS_Reservoirs.Length; i++)
+        {
+            DELTAVOLPREV[i] = DELTAVOL[i];
+            if (Model_mode == 11) //PRMS-MODSIM mode
+            {
+                //PRMS calculates potential evaporation with is used in MODSIM to compute reservoir evaporation
+                //  MODSIM user input will be overwritten
+                //  PRMS will always send evap in inches.  We need to apply the conversion metric/english.
+                //  LAKEEVAP is going to include only evaporation, precipitation is comming in the DELTAVOL variable.
+                if (MS_Reservoirs[i] != null) MS_Reservoirs[i].mnInfo.evaporationrate[myModel.mInfo.CurrentModelTimeStepIndex, 0] = -LAKEVAP[i] * uConvRateToMODSIM;
+            }
+        }
+
     }
 
     private static void OnFinished()
