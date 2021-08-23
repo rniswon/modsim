@@ -527,7 +527,8 @@ public static class SurfGWModule
                 }
 
                 //reset starting volume to the last converged MODFLOW reservoir volumes
-                if (MFRunYet) MS_Reservoirs[i].mnInfo.start = (long)(STARTLAKEVOL[i] * accuracy / uConvToMODFLOW);
+                if (MFRunYet && localMODSIMIter == 0) 
+                    MS_Reservoirs[i].mnInfo.start = (long)(STARTLAKEVOL[i] * accuracy / uConvToMODFLOW);
             }
         
             // Curtail reservoir release by setting upper bound where appropriate
@@ -566,35 +567,36 @@ public static class SurfGWModule
                             //     m_row["adjted"] = 1;
                             if (m_row["AssocRes"].ToString() != "")
                             {
-                                if (!(((double)myModel.FindNode(m_row["AssocRes"].ToString()).mnInfo.stend > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)) || ((LAKEVOL[int.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume))))
-                                {
-                                    // Recall that MS_Flows is in GSFLOW/MODFLOW units and therefore needs to be converted back to MODSIM units before being stuffed back into a MODSIM-used parameter
-                                    if (Convert.ToInt32(MS_Flows[i] / uConvToMODFLOW * accuracy) == 0)
-                                    {
-                                        resRelLink.mlInfo.hi = Convert.ToInt32(0.0001 / uConvToMODFLOW * accuracy);
-                                    }
-                                    // The next else if statement added in response to the bug affecting Wes's model
-                                    //else if (MS_FlowsLIMITED[i] > MS_Flows[i] && (!(((double)myModel.FindNode(m_row["AssocRes"].ToString()).mnInfo.stend > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)) || ((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)))))
-                                    //{
-                                    //    resRelLink.mlInfo.hi = Convert.ToInt32(MS_FlowsLIMITED[i] / uConvToMODFLOW * accuracy);
-                                    //}
-                                    else
-                                    {
-                                        resRelLink.mlInfo.hi = Convert.ToInt32((MS_Flows[i] + MS_FlowsLIMITED[i]) / 2 / uConvToMODFLOW * accuracy);
-                                    }
+                                //if (!(((double)myModel.FindNode(m_row["AssocRes"].ToString()).mnInfo.stend > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)) 
+                                //    || ((LAKEVOL[int.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume))))
+                                //{
+                                //    // Recall that MS_Flows is in GSFLOW/MODFLOW units and therefore needs to be converted back to MODSIM units before being stuffed back into a MODSIM-used parameter
+                                //    if (Convert.ToInt32(MS_Flows[i] / uConvToMODFLOW * accuracy) == 0)
+                                //    {
+                                //        resRelLink.mlInfo.hi = Convert.ToInt32(0.0001 / uConvToMODFLOW * accuracy);
+                                //    }
+                                //    // The next else if statement added in response to the bug affecting Wes's model
+                                //    //else if (MS_FlowsLIMITED[i] > MS_Flows[i] && (!(((double)myModel.FindNode(m_row["AssocRes"].ToString()).mnInfo.stend > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)) || ((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)))))
+                                //    //{
+                                //    //    resRelLink.mlInfo.hi = Convert.ToInt32(MS_FlowsLIMITED[i] / uConvToMODFLOW * accuracy);
+                                //    //}
+                                //    else
+                                //    {
+                                //        resRelLink.mlInfo.hi = Convert.ToInt32((MS_Flows[i] + MS_FlowsLIMITED[i]) / 2 / uConvToMODFLOW * accuracy);
+                                //    }
 
-                                    // Flag row as having been adjusted for restoring later
-                                    m_row["adjted"] = 1;
-                                    // Console.Write("|" + resRelLink.mlInfo.hi + "|");
-                                }
-                                else if ((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)
-                                {
-                                    resRelLink.mlInfo.hi = Math.Max(resRelLink.mlInfo.hi, Convert.ToInt32((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) - (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume));
-                                }
+                                //    // Flag row as having been adjusted for restoring later
+                                //    m_row["adjted"] = 1;
+                                //    // Console.Write("|" + resRelLink.mlInfo.hi + "|");
+                                //}
+                                //else if ((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)
+                                //{
+                                //    resRelLink.mlInfo.hi = Math.Max(resRelLink.mlInfo.hi, Convert.ToInt32((LAKEVOL[Int32.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) - (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume));
+                                //}
 
-                                // Flag row as having been adjusted for restoring later
-                                m_row["adjted"] = 1;
-                                // Console.Write("|" + resRelLink.mlInfo.hi + "|");
+                                //// Flag row as having been adjusted for restoring later
+                                //m_row["adjted"] = 1;
+                                //// Console.Write("|" + resRelLink.mlInfo.hi + "|");
                             }
                         }
                     }
@@ -714,13 +716,8 @@ public static class SurfGWModule
             bool MS_GSF_converge = false;
 
             //Check for a minimum number of iteration after MS-GSF has not converged
-            if (localMODSIMIter <= 7)
+            if (localMODSIMIter >= 7)
             {
-                myModel.mInfo.convg = MS_GSF_converge;
-            }
-            else
-            {
-
                 // extract the MODSIM calculated diversion values for inserting into an array that is passed to MF
                 for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
                 {
@@ -747,62 +744,23 @@ public static class SurfGWModule
                 // The following function also used in OnInitialize()
                 Store_Net_Res_AccDepl();
 
-                //Need to know the value of LAKEVOL for the first (SS)
-                // If first iteration of first time step, overide MODSIM Lake volumes
-                if (!MFRunYet && (myModel.mInfo.CurrentModelTimeStepIndex == 0) && !breakout)
+                if (!breakout)
                 {
-                    for (int i = 0; i < MS_Reservoirs.Length; i++)
-                    {
-                        if (MS_Reservoirs[i] != null)
-                        {
-                            MXLKVOL[i] = MS_Reservoirs[i].m.max_volume / accuracy * uConvToMODFLOW;
-                        }
-                        else
-                        {
-                            MXLKVOL[i] = -1.0;
-                        }
-                    }
-                    // Easiest way forward might be to expose LAK2MODSIM in the DLL so it is callable both by GSFLOW and by MODSIM (this may have implications for MODSIM-PRMS mode)
-                    if (Model_mode != 11)  //Model_mode 11: PRMS-MODSIM mode
-                    {
-                        LAK2MODSIM_InitLakes(DELTAVOL, LAKEVOL, MXLKVOL);
-                        for (int i = 0; i < LAKEVOL.Length; i++)
-                        {
-                            if (MS_Reservoirs[i] != null)
-                            {
-                                MS_Reservoirs[i].m.starting_volume = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
+                    ProcessGSFLOW_SSResults();
+                    //These won't be necesary if executed OnInitialize
+                    myModel.mInfo.convg = false;
+                    myModel.mInfo.Iteration = 0;
+                    localMODSIMIter = 0;
+                    return;
 
-                                // From Enrique:   I looked at the MODSIM code and it seems like there is a reservoir 
-                                //                 initialization happening before the custom onInitialize happens.  
-                                //                 This initialization sets the end volume of the t-1 to the start volume. 
-                                //                 I believe that's why the initial storage is kept at the values we are setting.  
-                                MS_Reservoirs[i].mnInfo.stend = MS_Reservoirs[i].m.starting_volume;
-
-                                // The following is a work-around until 
-                                // Inline reservoir: 0.46%  Offline reservoir: 
-                                MS_Reservoirs[i].m.resBalance.targetPercentages[0] = (double)(DELTAVOL[i] * accuracy / uConvToMODFLOW) / MS_Reservoirs[i].m.max_volume * 100;
-                                DPOOL[i] = (long)DELTAVOL[i];  // Store DPOOL in MODFLOW units, not MODSIM units.  
-                                MS_Reservoirs[i].mnInfo.start = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
-                                MS_Reservoirs[i].mnInfo.start_storage[0] = MS_Reservoirs[i].mnInfo.start;
-
-                                STARTLAKEVOL[i] = LAKEVOL[i];
-
-                                // Because the code needs to cycle back to redo the MODSIM solution after running this bit of code,
-                                // reset the DELTAVOL values back to 0 since this variable is used in OnIterationTop()
-                                DELTAVOL[i] = 0;
-                            }
-                        }
-                        myModel.mInfo.convg = false;
-                        myModel.mInfo.Iteration = 0;
-                        breakout = true;
-                        return;
-                    }
                 }
 
-                if (myModel.mInfo.CurrentModelTimeStepIndex >= 2504 | myModel.mInfo.Iteration >= (maxNoIterations - 500))
-                {
-                    MS_Flows[21] = MS_Flows[21];
-                }
+
+                //ETS - 08/22/21 this seems to be for debugging hardcoded from some specific case - commented.
+                //if (myModel.mInfo.CurrentModelTimeStepIndex >= 2504 | myModel.mInfo.Iteration >= (maxNoIterations - 500))
+                //{
+                //    MS_Flows[21] = MS_Flows[21];
+                //}
 
                 if (Model_mode <= 12)
                 {
@@ -917,6 +875,7 @@ public static class SurfGWModule
                     Console.WriteLine("\r\n MODSIM & GSFLOW Ran into maximum number of iterations - Warning !!! models have not converged.");
                     MS_GSF_converge = true;
                 }
+                //ETS - This check make sense if the iteration is reset every time that MODSIM restart. 
                 if (myModel.mInfo.Iteration > myModel.maxit)
                 {
                     Console.WriteLine("\r\n MODSIM ran into maximum number of iterations - Warning !!! models have not converged.");
@@ -929,10 +888,7 @@ public static class SurfGWModule
                     MFRunYet = true;
                     //MODFLOWConverge = CheckOscillating(MF_Segs);
                     //MODSIM converged but we are sending it back to iterate with MODFLOW values.
-                    //     Reset the interal MODSIM iterations
-                    //myModel.mInfo.Iteration = 0;
-                    //Set local MODSIM iteration count
-                    localMODSIMIter = 0;
+                                       
                     MS_GSF_converge = false;
                 }
                 else if(Model_mode == 11)
@@ -955,17 +911,71 @@ public static class SurfGWModule
                         if (Convert.ToInt32(m_SyncTblSEG.Rows[i]["adjted"]) > 0)
                         {
                             Link resRelLink = myModel.FindLink(m_SyncTblSEG.Rows[i]["Link Name"].ToString());
-                            resRelLink.mlInfo.hi = LinkHi_Sv[0];
+                            //ETS - [TODO] it seems like this array should use i index not 0
+                            resRelLink.mlInfo.hi = LinkHi_Sv[i];
 
                             // Flag row's "adjusted" column back to not adjusted
                             m_SyncTblSEG.Rows[i]["adjted"] = 0;
                         }
                     }
-
+                    //Set local MODSIM iteration count
+                    localMODSIMIter = 0;
+                    myModel.mInfo.Iteration = 0;
                 }
+            }
+            //Set local MODSIM iteration count
+            myModel.mInfo.convg = MS_GSF_converge;
+        }
+    }
 
-                myModel.mInfo.convg = MS_GSF_converge;
-                myModel.mInfo.Iteration = 0;
+    private static void ProcessGSFLOW_SSResults()
+    {
+        //Need to know the value of LAKEVOL for the first (SS)
+        // If first iteration of first time step, overide MODSIM Lake volumes
+        if (!MFRunYet && (myModel.mInfo.CurrentModelTimeStepIndex == 0) && !breakout)
+        {
+            for (int i = 0; i < MS_Reservoirs.Length; i++)
+            {
+                if (MS_Reservoirs[i] != null)
+                {
+                    MXLKVOL[i] = MS_Reservoirs[i].m.max_volume / accuracy * uConvToMODFLOW;
+                }
+                else
+                {
+                    MXLKVOL[i] = -1.0;
+                }
+            }
+            // Easiest way forward might be to expose LAK2MODSIM in the DLL so it is callable both by GSFLOW and by MODSIM (this may have implications for MODSIM-PRMS mode)
+            if (Model_mode != 11)  //Model_mode 11: PRMS-MODSIM mode
+            {
+                LAK2MODSIM_InitLakes(DELTAVOL, LAKEVOL, MXLKVOL);
+                for (int i = 0; i < LAKEVOL.Length; i++)
+                {
+                    if (MS_Reservoirs[i] != null)
+                    {
+                        MS_Reservoirs[i].m.starting_volume = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
+
+                        // From Enrique:   I looked at the MODSIM code and it seems like there is a reservoir 
+                        //                 initialization happening before the custom onInitialize happens.  
+                        //                 This initialization sets the end volume of the t-1 to the start volume. 
+                        //                 I believe that's why the initial storage is kept at the values we are setting.  
+                        MS_Reservoirs[i].mnInfo.stend = MS_Reservoirs[i].m.starting_volume;
+
+                        // The following is a work-around until 
+                        // Inline reservoir: 0.46%  Offline reservoir: 
+                        MS_Reservoirs[i].m.resBalance.targetPercentages[0] = (double)(DELTAVOL[i] * accuracy / uConvToMODFLOW) / MS_Reservoirs[i].m.max_volume * 100;
+                        DPOOL[i] = (long)DELTAVOL[i];  // Store DPOOL in MODFLOW units, not MODSIM units.  
+                        MS_Reservoirs[i].mnInfo.start = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
+                        MS_Reservoirs[i].mnInfo.start_storage[0] = MS_Reservoirs[i].mnInfo.start;
+
+                        STARTLAKEVOL[i] = LAKEVOL[i];
+
+                        // Because the code needs to cycle back to redo the MODSIM solution after running this bit of code,
+                        // reset the DELTAVOL values back to 0 since this variable is used in OnIterationTop()
+                        DELTAVOL[i] = 0;
+                    }
+                }
+                breakout = true;
             }
         }
     }
