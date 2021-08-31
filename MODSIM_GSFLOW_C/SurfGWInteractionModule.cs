@@ -526,9 +526,13 @@ public static class SurfGWModule
                     continue;
                 }
 
-                //reset starting volume to the last converged MODFLOW reservoir volumes
-                if (MFRunYet && localMODSIMIter == 0) 
+                // reset starting volume to the last converged MODFLOW reservoir volumes
+                // but don't do this following the steady-state initialization step
+                if (!MFRunYet && localMODSIMIter == 0 && myModel.mInfo.CurrentModelTimeStepIndex != 0)
+                {
                     MS_Reservoirs[i].mnInfo.start = (long)(STARTLAKEVOL[i] * accuracy / uConvToMODFLOW);
+                    MS_Reservoirs[i].mnInfo.stend = MS_Reservoirs[i].mnInfo.start;
+                }
             }
         
             // Curtail reservoir release by setting upper bound where appropriate
@@ -703,7 +707,7 @@ public static class SurfGWModule
     {
         // Some debug code
         DateTime currentDate = myModel.TimeStepManager.Index2Date(myModel.mInfo.CurrentModelTimeStepIndex, TypeIndexes.ModelIndex);
-        DateTime chkDate = new DateTime(1980, 10, 17);
+        DateTime chkDate = new DateTime(1982, 5, 21);
         int equiv = DateTime.Compare(currentDate, chkDate);
         if (equiv == 0)
         {
@@ -880,6 +884,8 @@ public static class SurfGWModule
                 {
                     Console.WriteLine("\r\n MODSIM ran into maximum number of iterations - Warning !!! models have not converged.");
                     MS_GSF_converge = true;
+
+                    update_lake_synchronization();
                 }
 
                 if (!MS_GSF_converge || iterCount <2)
@@ -912,6 +918,8 @@ public static class SurfGWModule
                         {
                             Link resRelLink = myModel.FindLink(m_SyncTblSEG.Rows[i]["Link Name"].ToString());
                             //ETS - [TODO] it seems like this array should use i index not 0
+                            //      [TODO] This may need to account for time series of "hi's" 
+                            //             (See Enrique's Notes from 8/22/2021 for more information)
                             resRelLink.mlInfo.hi = LinkHi_Sv[i];
 
                             // Flag row's "adjusted" column back to not adjusted
@@ -976,6 +984,23 @@ public static class SurfGWModule
                     }
                 }
                 breakout = true;
+            }
+        }
+    }
+
+    private static void update_lake_synchronization()
+    {
+        Console.WriteLine("");
+        //Trying to correct the end Volume convergence
+        for (int i = 0; i < MS_Reservoirs.Length; i++)
+        {
+            //DELTAVOL[i] += -((MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW) - LAKEVOL[i]);
+            //VOLSync = true;
+            //converge = false;
+            if (MS_Reservoirs[i] != null)
+            {
+                Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i] + " DPOOL: " + string.Format("{0:N1}", DPOOL[i]));
+                STARTLAKEVOL[i] = LAKEVOL[i];
             }
         }
     }
@@ -1063,19 +1088,7 @@ public static class SurfGWModule
             }
             if (converge)
             {
-                Console.WriteLine("");
-                //Trying to correct the end Volume convergence
-                for (int i = 0; i < MS_Reservoirs.Length; i++)
-                {
-                    //DELTAVOL[i] += -((MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW) - LAKEVOL[i]);
-                    //VOLSync = true;
-                    //converge = false;
-                    if(MS_Reservoirs[i] != null)
-                    {
-                        Console.WriteLine("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i] + " DPOOL: " + string.Format("{0:N1}", DPOOL[i]));
-                        STARTLAKEVOL[i] = LAKEVOL[i];
-                    }
-                }
+                update_lake_synchronization();
             }
         }
         return converge;
