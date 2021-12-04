@@ -154,6 +154,7 @@ This is the network that is modified for the coupled simulation and executed thr
     ```
     if (!(((double)myModel.FindNode(m_row["AssocRes"].ToString()).mnInfo.stend > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume)) || ((LAKEVOL[int.Parse(m_SyncTblRES.Select("MODSIM_Name Like '" + m_row["AssocRes"].ToString() + "'")[0][0].ToString()) - 1] / uConvToMODFLOW * accuracy) > (0.9 * (double)myModel.FindNode(m_row["AssocRes"].ToString()).m.max_volume))))
     ```
+    It seems like it's the opposite - meaning when is not 90% or above.
 
 3. How is the table field _**adjted**_ used?
 
