@@ -501,11 +501,11 @@ public static class SurfGWModule
                                                                            // Need the -1 to account for 0-based indexing in C#
                 try
                 {
-                    if(MS_Links[i] != null)
+                    if (MS_Links[i] != null)
                     {
                         assignDepAcc(MS_Links[i].name, m_value);
                     }
-                    
+
                 }
                 catch (NullReferenceException ex)
                 {
@@ -536,7 +536,7 @@ public static class SurfGWModule
                     MS_Reservoirs[i].mnInfo.stend = MS_Reservoirs[i].mnInfo.start;
                 }
             }
-        
+
             // Curtail reservoir release by setting upper bound where appropriate
             if (MFRunYet)
             {
@@ -898,6 +898,23 @@ public static class SurfGWModule
                     //MODSIM converged but we are sending it back to iterate with MODFLOW values.
                                        
                     MS_GSF_converge = false;
+
+                    //Processing Deamnds from Ag.Package
+                    for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
+                    {
+                        //Setting the MODSIM demand to the value set from GSFLOW
+                        //   Using the diversions array 
+                        if (Convert.ToInt16(m_SyncTblSEG.Rows[i]["Diversion"]) > 0)
+                        {
+                            //Assumes that the demand is connected to the link mapped to the segment.
+                            Node demNode = MS_Links[i].to;
+                            int hydState = demNode.mnInfo.hydStateIndex;
+                            demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(MS_Flows[i] * myModel.ScaleFactor, 0);
+                            Console.WriteLine($"                    MS_GSF Setting Demands for {demNode.name} to {MS_FlowsLIMITED[i]}");
+                        }
+
+                    }
+
                 }
                 else if(Model_mode == 11)
                 {
@@ -928,6 +945,7 @@ public static class SurfGWModule
                             m_SyncTblSEG.Rows[i]["adjted"] = 0;
                         }
                     }
+
                     //Set local MODSIM iteration count
                     localMODSIMIter = 0;
                     myModel.mInfo.Iteration = 0;
