@@ -104,8 +104,13 @@ public static class SurfGWModule
             /* need to pass DIVS */
             Nsegshold = 1;  //initialize temporarily
             Nlakeshold = 1;  //initialize temporarily
-            gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
-
+            try
+            {
+                gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
+            } catch (Exception ex)
+            {
+                int i = 1;
+            }
             /* need file name of mapping file, read from GSFLOW Control File
                file has link Name, iseg, diversion, ResRelease */
 
@@ -904,13 +909,16 @@ public static class SurfGWModule
                     {
                         //Setting the MODSIM demand to the value set from GSFLOW
                         //   Using the diversions array 
-                        if (agDemand[i]>=0)//Convert.ToInt16(m_SyncTblSEG.Rows[i]["Diversion"]) > 0)
+                        if (Convert.ToInt16(m_SyncTblSEG.Rows[i]["Diversion"]) > 0 && agDemand[i] >= 0)
                         {
                             //Assumes that the demand is connected to the link mapped to the segment.
-                            Node demNode = MS_Links[i].to;
-                            int hydState = demNode.mnInfo.hydStateIndex;
-                            demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * myModel.ScaleFactor, 0);
-                            Console.WriteLine($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
+                            Node demNode = MS_Links[i].from.InflowLinks.link.from;
+                            if (demNode.nodeType == NodeType.Demand)
+                            {
+                                int hydState = demNode.mnInfo.hydStateIndex;
+                                demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * myModel.ScaleFactor, 0);
+                                Console.WriteLine($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
+                            }
                         }
 
                     }
