@@ -904,13 +904,13 @@ public static class SurfGWModule
                     {
                         //Setting the MODSIM demand to the value set from GSFLOW
                         //   Using the diversions array 
-                        if (Convert.ToInt16(m_SyncTblSEG.Rows[i]["Diversion"]) > 0)
+                        if (agDemand[i]>=0)//Convert.ToInt16(m_SyncTblSEG.Rows[i]["Diversion"]) > 0)
                         {
                             //Assumes that the demand is connected to the link mapped to the segment.
                             Node demNode = MS_Links[i].to;
                             int hydState = demNode.mnInfo.hydStateIndex;
-                            demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(MS_Flows[i] * myModel.ScaleFactor, 0);
-                            Console.WriteLine($"                    MS_GSF Setting Demands for {demNode.name} to {MS_FlowsLIMITED[i]}");
+                            demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * myModel.ScaleFactor, 0);
+                            Console.WriteLine($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
                         }
 
                     }
