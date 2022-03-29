@@ -195,6 +195,10 @@ public static class SurfGWModule
                         PrepareMODSIMNetwork(map_FileName);
                     }
                     XYFileWriter.Write(myModel, xyFileName.Replace(".xy", "MSGSF.xy"));
+                    //Delete the existing output file -- useful for debugging.
+                    string outputFile = xyFileName.Replace(".xy", "MSGSFOUTPUT.sqlite");
+                    if (File.Exists(outputFile))
+                        File.Delete(outputFile);
                     Modsim.RunSolver(myModel);
                     //Copy output to the original file name - Custom Output carries the MF Dep/Acc
                     File.Copy(xyFileName.Replace(".xy", "MSGSFOUTPUT.sqlite"), xyFileName.Replace(".xy", "OUTPUT.sqlite"), true);
