@@ -189,7 +189,7 @@ public static class SurfGWModule
                     //  gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE,DELTAVOL, LAKEVOL, LAKEVAP);
                     //}
                     XYFileReader.Read(myModel, xyFileName);
-                    accuracy = Math.Pow(10.0, (double)myModel.accuracy);
+                    accuracy = myModel.ScaleFactor;// Math.Pow(10.0, (double)myModel.accuracy);
                     if (Model_mode != 13)  // MODSIM-only mode
                     {
                         PrepareMODSIMNetwork(map_FileName);
@@ -259,6 +259,7 @@ public static class SurfGWModule
         m_SyncTblRES = GetTableFromDB(m_TblPath, m_Sql, "ReservoirSync");
 
         // Get the settings from the database
+        m_Sql = "SELECT * FROM [Settings];";
         m_Sql = "SELECT * FROM [Settings];";
         m_SyncTblSettings = GetTableFromDB(m_TblPath, m_Sql, "Settings");
 
@@ -920,7 +921,7 @@ public static class SurfGWModule
                             if (demNode.nodeType == NodeType.Demand)
                             {
                                 int hydState = demNode.mnInfo.hydStateIndex;
-                                demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * myModel.ScaleFactor, 0);
+                                demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * accuracy / uConvToMODFLOW, 0);
                                 Console.WriteLine($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
                             }
                         }
