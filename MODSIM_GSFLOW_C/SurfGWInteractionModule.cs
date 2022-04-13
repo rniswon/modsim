@@ -372,6 +372,7 @@ public static class SurfGWModule
         {
             //Dimension arrays to the input table
             Array.Resize<double>(ref MS_Flows, m_SyncTblSEG.Rows.Count);
+            Array.Resize<double>(ref agDemand, m_SyncTblSEG.Rows.Count);
             Array.Resize<double>(ref MS_FlowsPREV, m_SyncTblSEG.Rows.Count);
             Array.Resize<double>(ref MS_FlowsLIMITED, m_SyncTblSEG.Rows.Count);
             Array.Resize<Link>(ref MS_Links, m_SyncTblSEG.Rows.Count);
