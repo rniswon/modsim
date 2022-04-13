@@ -189,7 +189,7 @@ public static class SurfGWModule
                     //  gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE,DELTAVOL, LAKEVOL, LAKEVAP);
                     //}
                     XYFileReader.Read(myModel, xyFileName);
-                    accuracy = Math.Pow(10.0, (double)myModel.accuracy);
+                    accuracy = myModel.ScaleFactor;// Math.Pow(10.0, (double)myModel.accuracy);
                     if (Model_mode != 13)  // MODSIM-only mode
                     {
                         PrepareMODSIMNetwork(map_FileName);
@@ -259,6 +259,7 @@ public static class SurfGWModule
         m_SyncTblRES = GetTableFromDB(m_TblPath, m_Sql, "ReservoirSync");
 
         // Get the settings from the database
+        m_Sql = "SELECT * FROM [Settings];";
         m_Sql = "SELECT * FROM [Settings];";
         m_SyncTblSettings = GetTableFromDB(m_TblPath, m_Sql, "Settings");
 
@@ -823,7 +824,7 @@ public static class SurfGWModule
                 //Link LK6_in = myModel.FindLink("198");
                 //Link LK6_out1 = myModel.FindLink("lake_6_out_1");
                 //Link LK6_out_2 = myModel.FindLink("517");
-                
+
                 //LK5_in_val = (double)LK5_in.mlInfo.flow / accuracy * uConvToMODFLOW;
                 //LK7_out2 = (double)LK7_out_2.mlInfo.flow / accuracy * uConvToMODFLOW;
                 //LK5_out_val1 = (double)LK5_out1.mlInfo.flow / accuracy * uConvToMODFLOW;
@@ -866,7 +867,8 @@ public static class SurfGWModule
                         Link expLink = myModel.FindLink(MS_Links[i].name);
                         //all_links.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + MS_Links[i].name + " " + "iter_" + txtiter.ToString() + " " + (double)expLink.mlInfo.flow / accuracy * uConvToMODFLOW);
                         //all_links.Flush();
-                    } else
+                    }
+                    else
                     {
                         //all_links.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + (i +1).ToString() + " " + "iter_" + txtiter.ToString() + " 0.0");
                         //all_links.Flush();
@@ -899,68 +901,72 @@ public static class SurfGWModule
                     update_lake_synchronization();
                 }
 
-                if (!MS_GSF_converge || iterCount <2)
-                {
-                    afr = false;
-                    MFRunYet = true;
-                    //MODFLOWConverge = CheckOscillating(MF_Segs);
-                    //MODSIM converged but we are sending it back to iterate with MODFLOW values.
-                                       
-                    MS_GSF_converge = false;
-
-                    //Processing Deamnds from Ag.Package
-                    for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
-                    {
-                        //Setting the MODSIM demand to the value set from GSFLOW
-                        //   Using the diversions array 
-                        if (Convert.ToInt16(m_SyncTblSEG.Rows[i]["Diversion"]) > 0 && agDemand[i] >= 0)
-                        {
-                            //Assumes that the demand is connected to the link mapped to the segment.
-                            Node demNode = MS_Links[i].from.InflowLinks.link.from;
-                            if (demNode.nodeType == NodeType.Demand)
-                            {
-                                int hydState = demNode.mnInfo.hydStateIndex;
-                                demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * myModel.ScaleFactor, 0);
-                                Console.WriteLine($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
-                            }
-                        }
-
-                    }
-
-                }
-                else if(Model_mode == 11)
+                if (Model_mode == 0 || Model_mode == 1 || Model_mode == 2 || Model_mode == 3)
                 {
                     afr = true;
                     iterCount = 0;
                 }
                 else
                 {
-                    gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand); // converged mode
-                    afr = true;
-                    Console.WriteLine("           MS_GSF Last Iteration: " + iterCount + " Stress Period: " + myModel.mInfo.CurrentModelTimeStepIndex);
-                    iterCount = 0;
-                    MFRunYet = false;
-
-                    // Reset adjusted link.hi's
-                    // Restore original link capacities
-                    for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
+                    //For modes MODSIM-GSFLOW, MODSIM-MODFLOW, MODSIM_PRMS(AG)
+                    if (!MS_GSF_converge || iterCount < 2)
                     {
-                        if (Convert.ToInt32(m_SyncTblSEG.Rows[i]["adjted"]) > 0)
+                        afr = false;
+                        MFRunYet = true;
+                        //MODFLOWConverge = CheckOscillating(MF_Segs);
+                        //MODSIM converged but we are sending it back to iterate with MODFLOW values.
+
+                        MS_GSF_converge = false;
+
+                        //Processing Deamnds from Ag.Package
+                        for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
                         {
-                            Link resRelLink = myModel.FindLink(m_SyncTblSEG.Rows[i]["Link Name"].ToString());
-                            //ETS - [TODO] it seems like this array should use i index not 0
-                            //      [TODO] This may need to account for time series of "hi's" 
-                            //             (See Enrique's Notes from 8/22/2021 for more information)
-                            resRelLink.mlInfo.hi = LinkHi_Sv[i];
+                            //Setting the MODSIM demand to the value set from GSFLOW
+                            //   Using the diversions array 
+                            if (Convert.ToInt16(m_SyncTblSEG.Rows[i]["Diversion"]) > 0 && agDemand[i] >= 0)
+                            {
+                                //Assumes that the demand is connected to the link mapped to the segment.
+                                Node demNode = MS_Links[i].from.InflowLinks.link.from;
+                                if (demNode.nodeType == NodeType.Demand)
+                                {
+                                    int hydState = demNode.mnInfo.hydStateIndex;
+                                    demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * accuracy / uConvToMODFLOW, 0);
+                                    Console.WriteLine($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
+                                }
+                            }
 
-                            // Flag row's "adjusted" column back to not adjusted
-                            m_SyncTblSEG.Rows[i]["adjted"] = 0;
                         }
-                    }
 
-                    //Set local MODSIM iteration count
-                    localMODSIMIter = 0;
-                    myModel.mInfo.Iteration = 0;
+                    }
+                    else
+                    {
+                        gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand); // converged mode
+                        afr = true;
+                        Console.WriteLine("           MS_GSF Last Iteration: " + iterCount + " Stress Period: " + myModel.mInfo.CurrentModelTimeStepIndex);
+                        iterCount = 0;
+                        MFRunYet = false;
+
+                        // Reset adjusted link.hi's
+                        // Restore original link capacities
+                        for (int i = 0; i < m_SyncTblSEG.Rows.Count; i++)
+                        {
+                            if (Convert.ToInt32(m_SyncTblSEG.Rows[i]["adjted"]) > 0)
+                            {
+                                Link resRelLink = myModel.FindLink(m_SyncTblSEG.Rows[i]["Link Name"].ToString());
+                                //ETS - [TODO] it seems like this array should use i index not 0
+                                //      [TODO] This may need to account for time series of "hi's" 
+                                //             (See Enrique's Notes from 8/22/2021 for more information)
+                                resRelLink.mlInfo.hi = LinkHi_Sv[i];
+
+                                // Flag row's "adjusted" column back to not adjusted
+                                m_SyncTblSEG.Rows[i]["adjted"] = 0;
+                            }
+                        }
+
+                        //Set local MODSIM iteration count
+                        localMODSIMIter = 0;
+                        myModel.mInfo.Iteration = 0;
+                    }
                 }
             }
             //Set local MODSIM iteration count
