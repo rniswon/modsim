@@ -155,10 +155,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>REM COPY /Y  "$(SolutionDir)\$(Configuration)\GSFLOW_MODSIM.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
+    <PreBuildEvent>REM What Rich Uses: COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\GSFLOW_MODSIM.dll" "$(TargetDir)GSFLOW_MODSIM.dll"
+REM What Eric Uses: COPY /Y  "$(SolutionDir)\..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
+REM What Eric Uses: COPY /Y  "$(SolutionDir)\..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.exp" "$(TargetDir)\GSFLOW_MODSIM.exp"
+REM What Eric Uses: COPY /Y  "$(SolutionDir)\..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.pdb" "$(TargetDir)\GSFLOW_MODSIM.pdb"
+REM What Eric Uses: COPY /Y  "$(SolutionDir)\..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.lib" "$(TargetDir)\GSFLOW_MODSIM.lib"
+REM Currently setup for Rich:
 COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\GSFLOW_MODSIM.dll" "$(TargetDir)GSFLOW_MODSIM.dll"
-REM COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\GSFLOW_MODSIM.pdb" "$(TargetDir)GSFLOW_MODSIM.pdb"
-REM COPY /Y  "$(SolutionDir)GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll" "$(TargetDir)GSFLOW_MODSIM.dll"
 </PreBuildEvent>
   </PropertyGroup>
   <Import Project="..\..\gsflow_v2\gsflow_develop\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('..\..\gsflow_v2\gsflow_develop\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
