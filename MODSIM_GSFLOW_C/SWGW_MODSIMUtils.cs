@@ -7,7 +7,7 @@ using System.Text;
 
 namespace MODSIM_GSFLOW_C
 {
-    class SWGW_MODSIMUtils
+    public class SWGW_MODSIMUtils
     {
         public DataTable m_SyncTblSEG, m_SyncTblRES, m_SyncTblSettings; //, m_SyncTblDIV;
         public Int32 maxNoIterations, iterCount;
@@ -72,6 +72,7 @@ namespace MODSIM_GSFLOW_C
             Utils.ConnectToNode(m_Link, m_Sink);
             m_Link.name = "MF_SINK_TO_SOURCE";
             m_Link.m.cost = -1;
+            m_Link.m.lLayer = "GSFLOW_AccDep";
 
             // Create Depletion Links
             count = 0;
@@ -117,6 +118,7 @@ namespace MODSIM_GSFLOW_C
             Utils.ConnectToNode(m_DepLink, m_Sink);
             m_DepLink.name = "MF_Dep_" + baseName;
             m_DepLink.m.cost = -500000 - count;
+            m_DepLink.m.lLayer = "GSFLOW_AccDep";
             DataTable m_TSTbl = m_DepLink.m.maxVariable.dataTable;
             SetDefaultTableValue(ref m_TSTbl, 0);
             //Create Accretion Link
@@ -125,6 +127,7 @@ namespace MODSIM_GSFLOW_C
             Utils.ConnectToNode(m_AccLink, m_Node);
             m_AccLink.name = "MF_Acc_" + baseName;
             m_AccLink.m.cost = -500000 - count;
+            m_AccLink.m.lLayer = "GSFLOW_AccDep";
             m_TSTbl = m_AccLink.m.maxVariable.dataTable;
             SetDefaultTableValue(ref m_TSTbl, 0);
             count++;
