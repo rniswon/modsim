@@ -133,8 +133,11 @@ namespace MODSIM_GSFLOW_C
                 //End simulation using Numts
                 xyFileName = new string(xyPathChars);
                 map_FileName = new string(mapPathChars);
+
                 map_FileName = GetFullPath(map_FileName);
+                messageOut($"\tUsing DB:{map_FileName}");
                 xyFileName = GetFullPath(xyFileName);
+                messageOut($"\tUsing xy File:{xyFileName}");
 
                 //These are the options to add in the .control file to run different versions
                 // 0=GSFLOW; 1=PRMS; 2=MODFLOW; 10=MODSIM-GSFLOW; 11=MODSIM-PRMS; 12=MODSIM-MODFLOW; 13=MODSIM
