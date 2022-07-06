@@ -18,8 +18,10 @@ namespace MODSIM_GSFLOW_C
             myModel = m_Model;
         }
 
-        public void PrepareMODSIMNetwork(string m_TblPath, double EXCHNGVol_Tolerance, double LAKEVol_Tolerance)
+        public void PrepareMODSIMNetwork(string m_TblPath, out double EXCHNGVol_Tolerance, out double LAKEVol_Tolerance)
         {
+            EXCHNGVol_Tolerance = 0;
+            LAKEVol_Tolerance = 0;
             SqliteHelper sqliteHelper = new SqliteHelper(m_TblPath);
             //MWH.MWHUtils.GeneralUtils.MyDBUtils m_DBUtils = new MWH.MWHUtils.GeneralUtils.MyDBUtils(m_TblPath);
             string m_Sql = "SELECT [MS-GSF_mapping_info].[Link Name], [MS-GSF_mapping_info].[iseg], [MS-GSF_mapping_info].[Diversion], [MS-GSF_mapping_info].ResRelease, [MS-GSF_mapping_info].AssocRes FROM [MS-GSF_mapping_info] ORDER BY [MS-GSF_mapping_info].iseg;";

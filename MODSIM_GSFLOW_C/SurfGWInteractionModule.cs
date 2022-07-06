@@ -219,7 +219,7 @@ namespace MODSIM_GSFLOW_C
                 swgwUtils = new SWGW_MODSIMUtils(ref myModel);
                 if (Model_mode != 13)  // MODSIM-only mode
                 {
-                    swgwUtils.PrepareMODSIMNetwork(map_FileName, EXCHNGVol_Tolerance, LAKEVol_Tolerance);
+                    swgwUtils.PrepareMODSIMNetwork(map_FileName, out EXCHNGVol_Tolerance, out LAKEVol_Tolerance);
                 }
 
                 XYFileWriter.Write(myModel, xyFileName.Replace(".xy", "MSGSF.xy"));
@@ -1002,7 +1002,8 @@ namespace MODSIM_GSFLOW_C
                 // Convergence checked in MODFLOW units.
                 converge = converge && ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) <= EXCHNGVol_Tolerance);  // (double)(Math.Abs(MS_FlowsPREV[i]) * percent_diff));
                 converge = converge && ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) <= EXCHNGVol_Tolerance); // (double)(Math.Abs(EXCHANGEPREV[i]) * percent_diff));
-                if ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) > EXCHNGVol_Tolerance) messageOut("For iseg: " + (i + 1).ToString() + " difference between MODSIM & MF is: " + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
+                if ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) > EXCHNGVol_Tolerance) 
+                    messageOut("For iseg: " + (i + 1).ToString() + " difference between MODSIM & MF is: " + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
                 //if ((i == 18 || i == 19) && myModel.mInfo.CurrentModelTimeStepIndex >= 364) messageOut("Diver:" + i + ":" + MS_Flows[i] + "Exch: " + EXCHANGE[i]);
                 // if ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > EXCHNGVol_Tolerance) messageOut("GW-SW Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
                 // myModel.mInfo.CurrentModelTimeStepIndex
@@ -1027,7 +1028,8 @@ namespace MODSIM_GSFLOW_C
                     //if (i == 2 && myModel.mInfo.CurrentModelTimeStepIndex >= 364) messageOut("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
                     if (MS_Reservoirs[i] != null)
                     {
-                        if ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i]) > LAKEVol_Tolerance) messageOut("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
+                        if ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i]) > LAKEVol_Tolerance) 
+                            messageOut("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
                     }
                 }
                 if (converge)
