@@ -51,18 +51,24 @@ namespace MODSIM_GSFLOW_C
                 if ((string)mrow["Key"] == "VolumeTolerance") { LAKEVol_Tolerance = Convert.ToDouble(mrow["Value"]); }
             }
 
+
+            Dictionary<string, float> coord = GetCoordFrame(myModel);
             // Create GW-SW Sink Node
-            Node m_Sink = myModel.AddNewNode(true);
+            Node m_Sink = myModel.FindNode("MF_SINK");
+            if (m_Sink==null)
+                m_Sink = myModel.AddNewNode(true);
             m_Sink.nodeType = NodeType.Sink;
-            //m_Sink.graphics.point.X = -1150;
-            //m_Sink.graphics.point.Y = 5000;
+            m_Sink.graphics.nodeLoc.X = coord["minX"] - (coord["maxX"]-coord["minX"])*0.01f;
+            m_Sink.graphics.nodeLoc.Y = coord["minY"] - (coord["maxY"] - coord["minY"]) * 0.01f;
             m_Sink.name = "MF_SINK";
 
             // Create GW-SW Source Node
-            Node m_Source = myModel.AddNewNode(true);
+            Node m_Source = myModel.FindNode("MF_SOURCE");
+            if (m_Source == null)
+                m_Source = myModel.AddNewNode(true);
             m_Source.nodeType = NodeType.NonStorage;
-            //m_Source.graphics.point.X = 7200;
-            //m_Source.graphics.point.Y = 180;
+            m_Source.graphics.nodeLoc.X = coord["maxX"] + (coord["maxX"] - coord["minX"]) * 0.010f;
+            m_Source.graphics.nodeLoc.Y = coord["maxY"] + (coord["maxY"] - coord["minY"]) * 0.010f; ;
             m_Source.name = "MF_SOURCE";
             DataTable m_TSTbl = m_Source.m.adaInflowsM.dataTable;
             SetDefaultTableValue(ref m_TSTbl, 9900000000);
@@ -109,6 +115,28 @@ namespace MODSIM_GSFLOW_C
                     CreateDepAccLinks(m_Sink, m_Source, m_res, m_res.name);
                 }
             }
+        }
+
+        private Dictionary<string, float> GetCoordFrame(Model myModel)
+        {
+            Dictionary<string,float> coord = new Dictionary<string, float>();
+            float minX= float.MaxValue, minY= float.MaxValue, maxX=float.MinValue, maxY= float.MinValue;
+            foreach(Node n in myModel.Nodes_All)
+            {
+                if (n.graphics.nodeLoc.X < minX)
+                    minX = n.graphics.nodeLoc.X;
+                if (n.graphics.nodeLoc.X > maxX)
+                    maxX = n.graphics.nodeLoc.X;
+                if (n.graphics.nodeLoc.Y < minY)
+                    minY = n.graphics.nodeLoc.Y;
+                if (n.graphics.nodeLoc.Y > maxY)
+                    maxY = n.graphics.nodeLoc.Y;
+            }
+            coord.Add("minX", minX);
+            coord.Add("minY", minY);
+            coord.Add("maxY", maxY);
+            coord.Add("maxX", maxX);
+            return coord;
         }
 
         private int count;
