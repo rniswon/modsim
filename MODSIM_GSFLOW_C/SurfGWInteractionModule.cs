@@ -82,6 +82,9 @@ namespace MODSIM_GSFLOW_C
         public static extern void gsflow_prms(ref int Process_mode, ref bool afr, ref bool MS_GSF_converge, ref int Nsegshold, ref int nlakeshold, [In, Out] double[] Diversions, [In, Out] int[] IDivert, [In, Out] double[] EXCHANGE, [In, Out] double[] DELTAVOL, [In, Out] double[] LAKEVOL, [In, Out] double[] LAKEVAP, [In, Out] double[] agDemand);
 
         [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void put_prms_control_file([In] ref char[] command_line_args);
+
+        [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void gsflow_prmsSettings([In, Out] ref int Numts, ref int Model_mode, ref int startTime, ref int File1_length, [In, Out] char[] FileName1, ref int File2_length, [In, Out] char[] FileName2);
 
         [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -102,6 +105,7 @@ namespace MODSIM_GSFLOW_C
 
                 xyFileName = new String(' ', 80);
                 mappingFileName = new String(' ', 80);
+                char[] command_line_args = String.Join(" ", CmdArgs).PadRight(256).ToCharArray();
                 len_xyname = xyFileName.Length;
                 len_mapname = mappingFileName.Length;
 
@@ -115,6 +119,7 @@ namespace MODSIM_GSFLOW_C
                 Nlakeshold = 1;  //initialize temporarily
                 try
                 {
+                    put_prms_control_file(ref command_line_args);
                     gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
                 }
                 catch (Exception ex)

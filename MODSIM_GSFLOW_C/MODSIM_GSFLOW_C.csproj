@@ -168,10 +168,10 @@ if %25USERNAME%25 ==  etriana (
 COPY /Y  "$(SolutionDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
 )
 if %25USERNAME%25 ==  rsregan (
-COPY /Y  "$(SolutionDir)..\modsim_fortran\$(ConfigurationName)\modsim_fortran.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
-COPY /Y  "$(SolutionDir)..\modsim_fortran\$(ConfigurationName)\modsim_fortran.exp" "$(TargetDir)\GSFLOW_MODSIM.exp"
-COPY /Y  "$(SolutionDir)..\modsim_fortran\$(ConfigurationName)\modsim_fortran.pdb" "$(TargetDir)\GSFLOW_MODSIM.pdb"
-COPY /Y  "$(SolutionDir)..\modsim_fortran\$(ConfigurationName)\modsim_fortran.lib" "$(TargetDir)\GSFLOW_MODSIM.lib"
+COPY /Y  "$(SolutionDir)..\modsim_fortran\$(PlatformName)\$(ConfigurationName)\modsim_fortran.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
+COPY /Y  "$(SolutionDir)..\modsim_fortran\$(PlatformName)\$(ConfigurationName)\modsim_fortran.exp" "$(TargetDir)\GSFLOW_MODSIM.exp"
+COPY /Y  "$(SolutionDir)..\modsim_fortran\$(PlatformName)\$(ConfigurationName)\modsim_fortran.pdb" "$(TargetDir)\GSFLOW_MODSIM.pdb"
+COPY /Y  "$(SolutionDir)..\modsim_fortran\$(PlatformName)\$(ConfigurationName)\modsim_fortran.lib" "$(TargetDir)\GSFLOW_MODSIM.lib"
 )</PreBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
