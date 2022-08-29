@@ -882,7 +882,7 @@ public static class SurfGWModule
                 MS_GSF_converge = MS_GSF_converge && MFRunYet;
                 if (Model_mode != 12)   //Different flow of console output in MODSIM-MODFLOW mode, don't want the '.' in this case 
                 {
-                    Console.Write(".");
+                    Console.Write("."+iterCount+"Dem:"+agDemand[24]);
                 }
 
                 iterCount += 1;
@@ -923,10 +923,11 @@ public static class SurfGWModule
                         {
                             //Setting the MODSIM demand to the value set from GSFLOW
                             //   Using the diversions array 
-                            if (Convert.ToInt16(m_SyncTblSEG.Rows[i]["Diversion"]) > 0 && agDemand[i] >= 0)
+                            //if (Convert.ToInt16(m_SyncTblSEG.Rows[i]["Diversion"]) > 0 && agDemand[i] >= 0)
+                            if (agDemand[i] > 0)
                             {
                                 //Assumes that the demand is connected to the link mapped to the segment.
-                                Node demNode = MS_Links[i].from.InflowLinks.link.from;
+                                Node demNode = MS_Links[i].to;
                                 if (demNode.nodeType == NodeType.Demand)
                                 {
                                     int hydState = demNode.mnInfo.hydStateIndex;
