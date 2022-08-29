@@ -151,14 +151,6 @@ namespace MODSIM_GSFLOW_C
                     gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
                 }
 
-                if (Model_mode < 12 | Model_mode > 20) // > 20 means a special PRMS-only mode
-                {
-                    Process_mode = 2; // initialize
-                    gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
-                }
-
-                Process_mode = 0; // run
-
                 // Redimension arrays to equal number of segments and lakes
                 Diversions = (double[])ResizeArray(Diversions, new int[] { Nsegshold });
                 agDemand = (double[])ResizeArray(agDemand, new int[] { Nsegshold });
@@ -175,6 +167,16 @@ namespace MODSIM_GSFLOW_C
                 LAKEVAP = (double[])ResizeArray(LAKEVAP, new int[] { Nlakeshold });
                 LinkHi = (long[])ResizeArray(LinkHi, new int[] { Nsegshold });
                 LinkHi_Sv = (long[])ResizeArray(LinkHi, new int[] { Nsegshold });
+
+                if (Model_mode < 12 | Model_mode > 20) // > 20 means a special PRMS-only mode
+                {
+                    Process_mode = 2; // initialize
+                    gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
+                }
+
+                Process_mode = 0; // run
+
+
 
             }
             catch (Exception ex)

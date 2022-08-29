@@ -5,14 +5,13 @@ using System.Text;
 using Csu.Modsim.ModsimIO;
 using Csu.Modsim.ModsimModel;
 using MODSIM_GSFLOW_C;
-//using SurfGWModule;
 
-namespace MODSIM_GSFLOW_C
+namespace MODSIM_GSFLOW
 {
 	class Program
 	{
 		public static Model myModel = new Model();
-		
+
 		static void Main(string[] CmdArgs)
 		{
 			try
