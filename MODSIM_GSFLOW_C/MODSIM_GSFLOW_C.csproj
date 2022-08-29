@@ -114,8 +114,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.SQLite, Version=1.0.116.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\lib\net40\System.Data.SQLite.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\gsflow_v2\gsflow_develop\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\lib\net40\System.Data.SQLite.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
@@ -156,8 +155,8 @@
 echo user: %25USERNAME%25
 
 if %25USERNAME%25  ==  rniswon (
-COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\GSFLOW_MODSIM.dll" "$(TargetDir)GSFLOW_MODSIM.dll"
-COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\GSFLOW_MODSIM.dll" "$(ProjectDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll"
+COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\gsflow_modsim.dll" "$(TargetDir)GSFLOW_MODSIM.dll"
+COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\gsflow_modsim.dll" "$(ProjectDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll"
 )
 if %25USERNAME%25 ==  emorway (
 COPY /Y  "$(SolutionDir)\..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
@@ -177,7 +176,13 @@ COPY /Y  "$(SolutionDir)..\modsim_fortran\$(PlatformName)\$(ConfigurationName)\m
 COPY /Y  "$(SolutionDir)..\modsim_fortran\$(PlatformName)\$(ConfigurationName)\modsim_fortran.dll" "$(ProjectDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll"
 )</PreBuildEvent>
   </PropertyGroup>
-  <Import Project="$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
+  <Import Project="$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
