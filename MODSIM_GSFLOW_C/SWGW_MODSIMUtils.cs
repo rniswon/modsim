@@ -54,7 +54,7 @@ namespace MODSIM_GSFLOW_C
 
             Dictionary<string, float> coord = GetCoordFrame(myModel);
             // Create GW-SW Sink Node
-            Node m_Sink = myModel.FindNode("MF_SINK");
+            Node m_Sink = myModel.FindNode("MF_SINK",silent:true);
             if (m_Sink==null)
                 m_Sink = myModel.AddNewNode(true);
             m_Sink.nodeType = NodeType.Sink;
@@ -63,7 +63,7 @@ namespace MODSIM_GSFLOW_C
             m_Sink.name = "MF_SINK";
 
             // Create GW-SW Source Node
-            Node m_Source = myModel.FindNode("MF_SOURCE");
+            Node m_Source = myModel.FindNode("MF_SOURCE",silent:true);
             if (m_Source == null)
                 m_Source = myModel.AddNewNode(true);
             m_Source.nodeType = NodeType.NonStorage;

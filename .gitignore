@@ -20,3 +20,4 @@ MODSIM_GSFLOW_C/bin/Debug/GSFLOW_MODSIM.dll
 /.vs
 /MODSIM_GSFLOW_Run/bin
 /MODSIM_GSFLOW_Run/obj
+*.user
