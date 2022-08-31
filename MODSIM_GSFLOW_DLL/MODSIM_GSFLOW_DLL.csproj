@@ -101,19 +101,19 @@
   <ItemGroup>
     <Reference Include="A2CM, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\MODSIMLibraries\$(Platform)\A2CM.dll</HintPath>
+      <HintPath>..\MODSIMLibraries\$(Platform)\A2CM.dll</HintPath>
     </Reference>
     <Reference Include="libsim, Version=8.6.0.1, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\MODSIMLibraries\$(Platform)\libsim.dll</HintPath>
+      <HintPath>..\MODSIMLibraries\$(Platform)\libsim.dll</HintPath>
     </Reference>
     <Reference Include="ModsimModel, Version=8.6.0.1, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\MODSIMLibraries\$(Platform)\ModsimModel.dll</HintPath>
+      <HintPath>..\MODSIMLibraries\$(Platform)\ModsimModel.dll</HintPath>
     </Reference>
     <Reference Include="NetworkUtils, Version=8.4.5.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\MODSIMLibraries\$(Platform)\NetworkUtils.dll</HintPath>
+      <HintPath>..\MODSIMLibraries\$(Platform)\NetworkUtils.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -128,7 +128,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="XYFile, Version=8.4.5.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\MODSIMLibraries\$(Platform)\XYFile.dll</HintPath>
+      <HintPath>..\MODSIMLibraries\$(Platform)\XYFile.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -163,11 +163,11 @@ COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\gsflow_modsim.dll" "$(Targe
 COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\gsflow_modsim.dll" "$(ProjectDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll"
 )
 if %25USERNAME%25 ==  emorway (
-COPY /Y  "$(SolutionDir)\..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
-COPY /Y  "$(SolutionDir)\..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.exp" "$(TargetDir)\GSFLOW_MODSIM.exp"
-COPY /Y  "$(SolutionDir)\..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.pdb" "$(TargetDir)\GSFLOW_MODSIM.pdb"
-COPY /Y  "$(SolutionDir)\..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.lib" "$(TargetDir)\GSFLOW_MODSIM.lib"
-COPY /Y  "$(SolutionDir)..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.dll" "$(ProjectDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll"
+COPY /Y  "$(SolutionDir)..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.dll" "$(TargetDir)GSFLOW_MODSIM.dll"
+COPY /Y  "$(SolutionDir)..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.exp" "$(TargetDir)GSFLOW_MODSIM.exp"
+COPY /Y  "$(SolutionDir)..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.pdb" "$(TargetDir)GSFLOW_MODSIM.pdb"
+COPY /Y  "$(SolutionDir)..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.lib" "$(TargetDir)GSFLOW_MODSIM.lib"
+COPY /Y  "$(SolutionDir)..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.dll" "$(ProjectDir)\GSFlowLibraries\$(Platform)GSFLOW_MODSIM.dll"
 )
 if %25USERNAME%25 ==  etriana (
 COPY /Y  "$(ProjectDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
