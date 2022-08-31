@@ -122,7 +122,7 @@ namespace MODSIM_GSFLOW_C
                     put_prms_control_file(ref command_line_args);
                     gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
                 }
-                catch (Exception ex)
+                catch 
                 {
 
                 }
@@ -430,7 +430,7 @@ namespace MODSIM_GSFLOW_C
                         }
 
                     }
-                    catch (NullReferenceException ex)
+                    catch 
                     {
                         continue;
                     }
@@ -446,7 +446,7 @@ namespace MODSIM_GSFLOW_C
                     {
                         assignDepAcc(MS_Reservoirs[i].name, m_value);
                     }
-                    catch (NullReferenceException ex)
+                    catch 
                     {
                         continue;
                     }
@@ -709,7 +709,7 @@ namespace MODSIM_GSFLOW_C
 
                     //
                     // Lake 1 (inline lake)
-                    double LK5_in_val;
+                    //double LK5_in_val;
                     //double LK6_in_val;
                     //double up1_val;
                     //double up2_val;

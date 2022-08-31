@@ -214,6 +214,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\MODSIM_GSFLOW_DLL\MODSIM_GSFLOW_DLL.csproj">
+      <Project>{b23549e7-3c1b-43b5-867c-ba30112bead6}</Project>
+      <Name>MODSIM_GSFLOW_DLL</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MWC_MODSIM\MWC_MODSIMUtils.csproj">
       <Project>{934db78e-6254-4053-9fa4-29e39c00e6d1}</Project>
       <Name>MWC_MODSIMUtils</Name>
