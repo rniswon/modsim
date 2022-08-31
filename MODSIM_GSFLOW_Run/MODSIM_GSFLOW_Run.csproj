@@ -101,7 +101,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MODSIM_GSFLOW_C\MODSIM_GSFLOW_DLL.csproj">
+    <ProjectReference Include="..\MODSIM_GSFLOW_DLL\MODSIM_GSFLOW_DLL.csproj">
       <Project>{b23549e7-3c1b-43b5-867c-ba30112bead6}</Project>
       <Name>MODSIM_GSFLOW_DLL</Name>
     </ProjectReference>
@@ -114,7 +114,7 @@
   <PropertyGroup>
     <PreBuildEvent>REM uses the windows user name to copy files from the user location
 echo user: %25USERNAME%25
-COPY /Y  "$(ProjectDir)\..\MODSIM_GSFLOW_C\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll" "$(TargetDir)GSFLOW_MODSIM.dll"</PreBuildEvent>
+COPY /Y  "$(ProjectDir)\..\MODSIM_GSFLOW_DLL\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll" "$(TargetDir)GSFLOW_MODSIM.dll"</PreBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
