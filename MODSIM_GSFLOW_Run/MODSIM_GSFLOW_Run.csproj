@@ -71,16 +71,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="A2CM">
-      <HintPath>..\MODSIM_GSFLOW_C\MODSIMLibraries\$(Platform)\A2CM.dll</HintPath>
+      <HintPath>..\MODSIMLibraries\$(Platform)\A2CM.dll</HintPath>
     </Reference>
     <Reference Include="libsim">
-      <HintPath>..\MODSIM_GSFLOW_C\MODSIMLibraries\$(Platform)\libsim.dll</HintPath>
+      <HintPath>..\MODSIMLibraries\$(Platform)\libsim.dll</HintPath>
     </Reference>
     <Reference Include="ModsimModel">
-      <HintPath>..\MODSIM_GSFLOW_C\MODSIMLibraries\$(Platform)\ModsimModel.dll</HintPath>
+      <HintPath>..\MODSIMLibraries\$(Platform)\ModsimModel.dll</HintPath>
     </Reference>
     <Reference Include="NetworkUtils">
-      <HintPath>..\MODSIM_GSFLOW_C\MODSIMLibraries\$(Platform)\NetworkUtils.dll</HintPath>
+      <HintPath>..\MODSIMLibraries\$(Platform)\NetworkUtils.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -93,7 +93,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="XYFile">
-      <HintPath>..\MODSIM_GSFLOW_C\MODSIMLibraries\$(Platform)\XYFile.dll</HintPath>
+      <HintPath>..\MODSIMLibraries\$(Platform)\XYFile.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
