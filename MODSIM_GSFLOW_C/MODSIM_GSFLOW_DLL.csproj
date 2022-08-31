@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B23549E7-3C1B-43B5-867C-BA30112BEAD6}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MODSIM_GSFLOW_C</RootNamespace>
+    <AssemblyName>MODSIM_GSFLOW_DLL</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>
+    </StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="A2CM">
+      <HintPath>MODSIMLibraries\$(Platform)\A2CM.dll</HintPath>
+    </Reference>
+    <Reference Include="libsim">
+      <HintPath>MODSIMLibraries\$(Platform)\libsim.dll</HintPath>
+    </Reference>
+    <Reference Include="ModsimModel, Version=8.5.1.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>MODSIMLibraries\$(Platform)\ModsimModel.dll</HintPath>
+    </Reference>
+    <Reference Include="NetworkUtils">
+      <HintPath>MODSIMLibraries\$(Platform)\NetworkUtils.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.SQLite, Version=1.0.116.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\lib\net40\System.Data.SQLite.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="XYFile">
+      <HintPath>MODSIMLibraries\$(Platform)\XYFile.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqliteHelper.cs" />
+    <Compile Include="SurfGWInteractionModule.cs" />
+    <Compile Include="SWGW_MODSIMUtils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>REM uses the windows user name to copy files from the user location
+echo user: %25USERNAME%25
+
+if %25USERNAME%25  ==  rniswon (
+COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\gsflow_modsim.dll" "$(TargetDir)GSFLOW_MODSIM.dll"
+COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\gsflow_modsim.dll" "$(ProjectDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll"
+)
+if %25USERNAME%25 ==  emorway (
+COPY /Y  "$(SolutionDir)\..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
+COPY /Y  "$(SolutionDir)\..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.exp" "$(TargetDir)\GSFLOW_MODSIM.exp"
+COPY /Y  "$(SolutionDir)\..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.pdb" "$(TargetDir)\GSFLOW_MODSIM.pdb"
+COPY /Y  "$(SolutionDir)\..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.lib" "$(TargetDir)\GSFLOW_MODSIM.lib"
+COPY /Y  "$(SolutionDir)..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.dll" "$(ProjectDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll"
+)
+if %25USERNAME%25 ==  etriana (
+COPY /Y  "$(ProjectDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
+)
+if %25USERNAME%25 ==  rsregan (
+COPY /Y  "$(SolutionDir)..\modsim_fortran\$(PlatformName)\$(ConfigurationName)\modsim_fortran.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
+COPY /Y  "$(SolutionDir)..\modsim_fortran\$(PlatformName)\$(ConfigurationName)\modsim_fortran.exp" "$(TargetDir)\GSFLOW_MODSIM.exp"
+COPY /Y  "$(SolutionDir)..\modsim_fortran\$(PlatformName)\$(ConfigurationName)\modsim_fortran.pdb" "$(TargetDir)\GSFLOW_MODSIM.pdb"
+COPY /Y  "$(SolutionDir)..\modsim_fortran\$(PlatformName)\$(ConfigurationName)\modsim_fortran.lib" "$(TargetDir)\GSFLOW_MODSIM.lib"
+COPY /Y  "$(SolutionDir)..\modsim_fortran\$(PlatformName)\$(ConfigurationName)\modsim_fortran.dll" "$(ProjectDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll"
+)</PreBuildEvent>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

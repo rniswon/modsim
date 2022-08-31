@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <StartWorkingDirectory>C:\Users\etriana\source\repos\rniswon\gsflow_examples\sagehen_3lay_modsim\windows\</StartWorkingDirectory>
+    <StartArguments>gsflow.control -set model_mode MODSIM-PRMS</StartArguments>
+  </PropertyGroup>
+</Project>
