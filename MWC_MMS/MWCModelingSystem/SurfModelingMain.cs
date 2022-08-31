@@ -1,0 +1,248 @@
+﻿using RTI.CWR.MMS_Support;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace RRModelingSystem
+{
+    public partial class RRSurfModelingMain : Form
+    {
+        private Simulation m_SimUserControl;
+        private DataProcessing m_DataProcessing;
+        private RRPreferences m_RRPreferences;
+        private string MMSDatabase { get; set; }
+        public RRSurfModelingMain()
+        {
+            InitializeComponent();
+            //Initialize user controls
+            //m_SimUserControl = new Simulation();
+            //m_DataProcessing = new DataProcessing();
+            //m_RRPreferences = new RRPreferences();
+        }
+
+        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            splitContainer1.Panel2.Controls.Clear();
+            if (m_RRPreferences != null)
+            {
+                switch (treeView1.SelectedNode.Text)
+                {
+                    case "Preferences":
+                        splitContainer1.Panel2.Controls.Add(m_RRPreferences);
+                        m_RRPreferences.Dock = DockStyle.Fill;
+                        if (m_DataProcessing != null)
+                            m_RRPreferences.textBoxPREFSRiparianCost.Text = m_DataProcessing.textBoxRiparianCost.Text;
+                        break;
+                    case "Pre-Processing":
+                        if (m_DataProcessing == null || m_RRPreferences.hasChanges)
+                        {
+                            m_DataProcessing = new DataProcessing(Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMMSDatabase.Text),
+                                                                  Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMODSIMFile.Text),
+                                                                  Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxControlFile.Text),
+                                                                  Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxSyncingDB.Text));
+                            m_DataProcessing.messageOut += ProcessMessage;
+                            ProcessMessage($"Active MODSIM File: {m_RRPreferences.textBoxMODSIMFile.Text}");
+                        }
+                        //m_DataProcessing.ProjectDB = //@"C:\Users\etrianasanchez\Research Triangle Institute\USGS Russian River MODSIM Model - Documents\Modeling\MODSIM_GSFLOW\RRMS_Database.mdb";
+                        m_DataProcessing.textBoxRiparianCost.Text = m_RRPreferences.textBoxPREFSRiparianCost.Text;
+                        splitContainer1.Panel2.Controls.Add(m_DataProcessing);
+                        m_DataProcessing.Dock = DockStyle.Fill;
+                        break;
+                    case "Coupled Simulation":
+                        if (m_SimUserControl == null || m_RRPreferences.hasChanges)
+                        {
+                            m_SimUserControl = new Simulation(Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMODSIMFile.Text),
+                                                                Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxSyncingDB.Text),
+                                                                int.Parse(m_RRPreferences.textBoxPREFSRiparianCost.Text),
+                                                                Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMMSDatabase.Text));
+                            m_SimUserControl.messageOut += ProcessMessage;
+                            ProcessMessage($"Base MODSIM File: {m_RRPreferences.textBoxMODSIMFile.Text}");
+                            ProcessMessage($"Active MODSIM-GSFLOW Sync Database: {m_RRPreferences.textBoxSyncingDB.Text}");
+                        }
+
+                        splitContainer1.Panel2.Controls.Add(m_SimUserControl);
+                        m_SimUserControl.Dock = DockStyle.Fill;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private void ProcessMessage(string msg)
+        {
+            if (richTextBoxMsgs != null)
+            {
+                richTextBoxMsgs.BeginInvoke((Action)(() =>
+                {
+                    richTextBoxMsgs.SelectionStart = richTextBoxMsgs.TextLength;
+                    richTextBoxMsgs.SelectionColor = richTextBoxMsgs.ForeColor;
+                    if (msg.ToLower().Contains("error"))
+                        richTextBoxMsgs.SelectionColor = System.Drawing.Color.Red;
+                    if (msg.ToLower().StartsWith("warning"))
+                        richTextBoxMsgs.SelectionColor = System.Drawing.Color.Orange;
+                    richTextBoxMsgs.AppendText(DateTime.Now.ToString() + " " + msg + Environment.NewLine);
+                    richTextBoxMsgs.ScrollToCaret();
+                }));
+            }
+            else
+            {
+                Console.WriteLine(msg);
+            }
+            //richTextBoxMsgs.SelectionColor = richTextBoxMsgs.ForeColor;
+            //if (msg.ToLower().Contains("error"))
+            //    richTextBoxMsgs.SelectionColor = System.Drawing.Color.Red;
+            //richTextBoxMsgs.AppendText(msg + Environment.NewLine);
+            //richTextBoxMsgs.SelectionStart = richTextBoxMsgs.Text.Length;
+            //// scroll it automatically
+            //richTextBoxMsgs.ScrollToCaret();
+            ////richTextBoxMsgs.AppendText(String.Format("[{0}] {1} {2}", (includeTime ? DateTime.Now.ToString() : ""), msg, (isnewline ? Environment.NewLine : null)));
+
+        }
+
+        private void loadProjectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog dlg = new OpenFileDialog())
+            {
+                dlg.Filter = "SQLite Database File (*.sqlite)|*.sqlite|All files (*.*)|*.*";
+                dlg.RestoreDirectory = true;
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    LoadProject(dlg.FileName);
+                   
+                }
+            }
+        }
+
+        private void LoadProject(string fileName)
+        {
+            this.Text = $"RTI-USGS Conjunctive SW-GW Modeling System - {fileName}";
+            MMSDatabase = fileName;
+            m_RRPreferences = new RRPreferences(MMSDatabase);
+            treeView1.SelectedNode = treeView1.Nodes["Node0"];
+            treeView1_AfterSelect(null, null);
+        }
+
+        private void saveProjectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(m_RRPreferences != null)
+            {
+                m_RRPreferences.SavePreferencesToDatabase();
+                ProcessMessage("Project preferences saved to the MMS database.");
+            }
+        }
+
+        private void newMMSProjectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Set the help text description for the FolderBrowserDialog.
+            FolderBrowserDialog folderBrowserDialog1 = new FolderBrowserDialog();
+            folderBrowserDialog1.Description =
+                "Select the workspace location for the new project.";
+
+            // Do not allow the user to create new files via the FolderBrowserDialog.
+            folderBrowserDialog1.ShowNewFolderButton = true;
+
+            // Default to the My Documents folder.
+            //this.folderBrowserDialog1.RootFolder = Environment.SpecialFolder.Personal;
+
+
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                string pName = "New Project";
+                if (InputBox("New MMS Project", "New project name:", ref pName) == DialogResult.OK)
+                {
+                    this.Cursor = Cursors.WaitCursor;
+                    string newProject = folderBrowserDialog1.SelectedPath + $"\\{pName}.sqlite";
+                    if(CreateProjectDatabase(newProject))
+                    {
+                        ProcessMessage($"INFO: project database created sucessfully.");
+                        LoadProject(newProject);
+                    }
+                    else
+                    {
+                        ProcessMessage($"WARNING: project creation not completed.");
+                    }
+                    this.Cursor = Cursors.Default;
+                }
+            }
+
+        }
+
+        private bool CreateProjectDatabase(string db_file)
+        {
+            try
+            {
+                if (File.Exists(db_file))
+                {
+                    if (MessageBox.Show("The project file already exist. Do you want to ovewrite the project file?", "New project name", MessageBoxButtons.YesNo) == DialogResult.No)
+                        return false;
+                    File.Delete(db_file);
+                }
+                if (!File.Exists(db_file))
+                {
+                    using (MyDBSqlite sqhelper = new MyDBSqlite())
+                    {
+                        sqhelper.messageOut += ProcessMessage;
+                        sqhelper.SetupDatabase(db_file);
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ProcessMessage("ERROR [DATABASE_SETUP]: " + ex.Message + ex.StackTrace);
+                return false;
+            }
+        }
+
+        public DialogResult InputBox(string title, string promptText, ref string value)
+        {
+            Form form = new Form();
+            Label label = new Label();
+            TextBox textBox = new TextBox();
+            Button buttonOk = new Button();
+            Button buttonCancel = new Button();
+
+            form.Text = title;
+            label.Text = promptText;
+            textBox.Text = value;
+
+            buttonOk.Text = "OK";
+            buttonCancel.Text = "Cancel";
+            buttonOk.DialogResult = DialogResult.OK;
+            buttonCancel.DialogResult = DialogResult.Cancel;
+
+            label.SetBounds(9, 20, 372, 13);
+            textBox.SetBounds(12, 36, 372, 20);
+            buttonOk.SetBounds(228, 72, 75, 23);
+            buttonCancel.SetBounds(309, 72, 75, 23);
+
+            label.AutoSize = true;
+            textBox.Anchor = textBox.Anchor | AnchorStyles.Right;
+            buttonOk.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+
+            form.ClientSize = new System.Drawing.Size(396, 107);
+            form.Controls.AddRange(new Control[] { label, textBox, buttonOk, buttonCancel });
+            form.ClientSize = new System.Drawing.Size(Math.Max(300, label.Right + 10), form.ClientSize.Height);
+            form.FormBorderStyle = FormBorderStyle.FixedDialog;
+            form.StartPosition = FormStartPosition.CenterScreen;
+            form.MinimizeBox = false;
+            form.MaximizeBox = false;
+            form.AcceptButton = buttonOk;
+            form.CancelButton = buttonCancel;
+
+            DialogResult dialogResult = form.ShowDialog();
+            value = textBox.Text;
+            return dialogResult;
+        }
+    }
+
+}
