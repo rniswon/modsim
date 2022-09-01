@@ -838,18 +838,18 @@ namespace MODSIM_GSFLOW_C
                                 //Setting the MODSIM demand to the value set from GSFLOW
                                 //   Using the diversions array 
                                 //if (Convert.ToInt16(swgwUtils.m_SyncTblSEG.Rows[i]["Diversion"]) > 0 && agDemand[i] >= 0)
-                                if (agDemand[i] > 0)
-                                {
+                                //if (agDemand[i] > 0)
+                                //{
                                     //Assumes that the demand is connected to the link mapped to the segment.
                                     //Node demNode = MS_Links[i].from.InflowLinks.link.from;
                                     Node demNode = MS_Links[i].to;
-                                    if (demNode.nodeType == NodeType.Demand)
-                                    {
-                                        int hydState = demNode.mnInfo.hydStateIndex;
-                                        demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * accuracy / uConvToMODFLOW, 0);
-                                        messageOut($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
-                                    }
+                                if (demNode.nodeType == NodeType.Demand)
+                                {
+                                    int hydState = demNode.mnInfo.hydStateIndex;
+                                    demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * accuracy / uConvToMODFLOW, 0);
+                                    messageOut($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
                                 }
+                                //}
 
                             }
 
