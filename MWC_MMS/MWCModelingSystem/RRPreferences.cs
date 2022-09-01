@@ -152,7 +152,8 @@ namespace RRModelingSystem
                     MessageBox.Show("The selected path is not in the MMS database. Select a database parent directory of the MMS database or create a new MMS project/database in a different location.", "Path Error", MessageBoxButtons.OK);
                     return;
                 }
-                textBoxWorkspace.Text = folderBrowserDialog1.SelectedPath;
+                textBoxWorkspace.Text = folderBrowserDialog1.SelectedPath + "\\";
+                UpdatePreferences("Workspace", textBoxWorkspace.Text);
             }
 
         }
