@@ -69,12 +69,18 @@
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>MODSIM_GSFLOW.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="A2CM">
       <HintPath>..\MODSIMLibraries\$(Platform)\A2CM.dll</HintPath>
     </Reference>
     <Reference Include="libsim">
       <HintPath>..\MODSIMLibraries\$(Platform)\libsim.dll</HintPath>
+    </Reference>
+    <Reference Include="ModelStatistics">
+      <HintPath>..\MODSIMLibraries\x64\ModelStatistics.dll</HintPath>
     </Reference>
     <Reference Include="ModsimModel">
       <HintPath>..\MODSIMLibraries\$(Platform)\ModsimModel.dll</HintPath>
@@ -114,7 +120,7 @@
   <PropertyGroup>
     <PreBuildEvent>REM uses the windows user name to copy files from the user location
 echo user: %25USERNAME%25
-COPY /Y  "$(ProjectDir)\..\MODSIM_GSFLOW_DLL\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll" "$(TargetDir)GSFLOW_MODSIM.dll"</PreBuildEvent>
+COPY /Y  "$(ProjectDir)..\MODSIM_GSFLOW_DLL\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll" "$(TargetDir)GSFLOW_MODSIM.dll"</PreBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
