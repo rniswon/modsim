@@ -107,6 +107,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\MODSIMLibraries\$(Platform)\libsim.dll</HintPath>
     </Reference>
+    <Reference Include="ModelStatistics">
+      <HintPath>..\MODSIMLibraries\x64\ModelStatistics.dll</HintPath>
+    </Reference>
     <Reference Include="ModsimModel, Version=8.6.0.1, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\MODSIMLibraries\$(Platform)\ModsimModel.dll</HintPath>
