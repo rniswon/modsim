@@ -796,6 +796,7 @@ namespace MODSIM_GSFLOW_C
                     if (Model_mode != 12)   //Different flow of console output in MODSIM-MODFLOW mode, don't want the '.' in this case 
                     {
                         messageOut(".");
+                        messageOut("." + swgwUtils.iterCount + "Dem:" + agDemand[24]);
                     }
 
                     swgwUtils.iterCount += 1;
@@ -836,10 +837,12 @@ namespace MODSIM_GSFLOW_C
                             {
                                 //Setting the MODSIM demand to the value set from GSFLOW
                                 //   Using the diversions array 
-                                if (Convert.ToInt16(swgwUtils.m_SyncTblSEG.Rows[i]["Diversion"]) > 0 && agDemand[i] >= 0)
+                                //if (Convert.ToInt16(swgwUtils.m_SyncTblSEG.Rows[i]["Diversion"]) > 0 && agDemand[i] >= 0)
+                                if (agDemand[i] > 0)
                                 {
                                     //Assumes that the demand is connected to the link mapped to the segment.
-                                    Node demNode = MS_Links[i].from.InflowLinks.link.from;
+                                    //Node demNode = MS_Links[i].from.InflowLinks.link.from;
+                                    Node demNode = MS_Links[i].to;
                                     if (demNode.nodeType == NodeType.Demand)
                                     {
                                         int hydState = demNode.mnInfo.hydStateIndex;
