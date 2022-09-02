@@ -858,7 +858,7 @@ namespace MODSIM_GSFLOW_C
                         {
                             gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand); // converged mode
                             afr = true;
-                            messageOut("           MS_GSF Last Iteration: " + swgwUtils.iterCount + " Stress Period: " + myModel.mInfo.CurrentModelTimeStepIndex);
+                            messageOut("           MS_GSF Last Iteration: " + swgwUtils.iterCount + " Total time steps: " + myModel.mInfo.CurrentModelTimeStepIndex);
                             swgwUtils.iterCount = 0;
                             MFRunYet = false;
 
