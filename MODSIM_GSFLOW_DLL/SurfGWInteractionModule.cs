@@ -777,7 +777,7 @@ namespace MODSIM_GSFLOW_C
                     {
                         if (MS_Links[i] != null)
                         {
-                            Link expLink = myModel.FindLink(MS_Links[i].name);
+                            //Link expLink = myModel.FindLink(MS_Links[i].name);
                             //all_links.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + MS_Links[i].name + " " + "iter_" + txtiter.ToString() + " " + (double)expLink.mlInfo.flow / accuracy * uConvToMODFLOW);
                             //all_links.Flush();
                         }
@@ -1005,7 +1005,8 @@ namespace MODSIM_GSFLOW_C
 
             bool converge = true;
             // double percent_diff = 0.005;
-
+            double maxExchDiff = 0;
+            int maxSeg = -1;
             for (int i = 0; i < MS_Flows.Length; i++)
             {
                 // Check for changes in the MODSIM flows in the diversion links.
@@ -1013,7 +1014,12 @@ namespace MODSIM_GSFLOW_C
                 converge = converge && ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) <= EXCHNGVol_Tolerance);  // (double)(Math.Abs(MS_FlowsPREV[i]) * percent_diff));
                 converge = converge && ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) <= EXCHNGVol_Tolerance); // (double)(Math.Abs(EXCHANGEPREV[i]) * percent_diff));
                 if ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) > EXCHNGVol_Tolerance) 
-                    messageOut("For iseg: " + (i + 1).ToString() + " difference between MODSIM & MF is: " + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
+                    messageOut("For iseg (diversion): " + (i + 1).ToString() + " difference between MODSIM & MF is: " + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
+                if(maxExchDiff<(double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]))
+                {
+                    maxExchDiff = (double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]);
+                    maxSeg = i;
+                }
                 //if ((i == 18 || i == 19) && myModel.mInfo.CurrentModelTimeStepIndex >= 364) messageOut("Diver:" + i + ":" + MS_Flows[i] + "Exch: " + EXCHANGE[i]);
                 // if ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > EXCHNGVol_Tolerance) messageOut("GW-SW Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
                 // myModel.mInfo.CurrentModelTimeStepIndex
@@ -1021,6 +1027,10 @@ namespace MODSIM_GSFLOW_C
                 //Here is what the header looks like: sw.WriteLine("TS iseg Exchange_Prev Exchange");
                 //sw.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + Convert.ToInt32(i + 1) + " " + Convert.ToSingle(EXCHANGEPREV[i]) + " " + Convert.ToSingle(EXCHANGE[i]));
                 //sw.Flush();
+            }
+            if(maxExchDiff>0)
+            {
+                messageOut($"\tAcc/Dep Exchange max: {maxExchDiff} segment {maxSeg}.");
             }
 
             if (Model_mode != 11)
