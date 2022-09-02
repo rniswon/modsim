@@ -1038,7 +1038,7 @@ namespace RRModelingSystem
 
             //Set WR extention active
             myModel.ExtWaterRightsActive = true;
-
+            long ripCount = 0;
             try
             {
 
@@ -1185,8 +1185,12 @@ namespace RRModelingSystem
                                 m_Link.description = m_Link.m.waterRightsDate.ToShortTimeString();
 
                                 if (dr["WR_Type"].ToString() == "Riparian")
-                                    m_Link.m.cost = long.Parse(textBoxRiparianCost.Text);
-
+                                {
+                                    m_Link.m.cost = long.Parse(textBoxRiparianCost.Text) + ripCount;
+                                    //setting unique riparian cost.
+                                    if (radioButtonUniqueRiparian.Checked)
+                                        ripCount++;
+                                }
                                 wrCount += 1;
                             }
                         }

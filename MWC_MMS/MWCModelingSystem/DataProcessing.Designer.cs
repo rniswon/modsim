@@ -90,6 +90,8 @@
             this.tabControl2 = new System.Windows.Forms.TabControl();
             this.tabPage5 = new System.Windows.Forms.TabPage();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.comboBoxMODSIMFile2 = new System.Windows.Forms.ComboBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.checkBoxIncludeAccDep = new System.Windows.Forms.CheckBox();
             this.dataGridViewFeat = new System.Windows.Forms.DataGridView();
@@ -107,8 +109,8 @@
             this.cbTSTypeID = new System.Windows.Forms.ComboBox();
             this.buttonImportTS = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.comboBoxMODSIMFile2 = new System.Windows.Forms.ComboBox();
-            this.label2 = new System.Windows.Forms.Label();
+            this.radioButton1 = new System.Windows.Forms.RadioButton();
+            this.radioButtonUniqueRiparian = new System.Windows.Forms.RadioButton();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -574,12 +576,14 @@
             this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox5.Controls.Add(this.radioButtonUniqueRiparian);
+            this.groupBox5.Controls.Add(this.radioButton1);
             this.groupBox5.Controls.Add(this.textBoxCostTo);
             this.groupBox5.Controls.Add(this.label6);
+            this.groupBox5.Controls.Add(this.label1);
             this.groupBox5.Controls.Add(this.textBoxCostFrom);
             this.groupBox5.Controls.Add(this.label5);
             this.groupBox5.Controls.Add(this.textBoxRiparianCost);
-            this.groupBox5.Controls.Add(this.label1);
             this.groupBox5.Controls.Add(this.groupBox6);
             this.groupBox5.Controls.Add(this.textBox3);
             this.groupBox5.Controls.Add(this.buttonProcessWR);
@@ -592,7 +596,7 @@
             // 
             // textBoxCostTo
             // 
-            this.textBoxCostTo.Location = new System.Drawing.Point(413, 55);
+            this.textBoxCostTo.Location = new System.Drawing.Point(498, 58);
             this.textBoxCostTo.Name = "textBoxCostTo";
             this.textBoxCostTo.Size = new System.Drawing.Size(61, 20);
             this.textBoxCostTo.TabIndex = 17;
@@ -601,7 +605,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(386, 58);
+            this.label6.Location = new System.Drawing.Point(471, 61);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(19, 13);
             this.label6.TabIndex = 16;
@@ -609,7 +613,7 @@
             // 
             // textBoxCostFrom
             // 
-            this.textBoxCostFrom.Location = new System.Drawing.Point(319, 55);
+            this.textBoxCostFrom.Location = new System.Drawing.Point(404, 58);
             this.textBoxCostFrom.Name = "textBoxCostFrom";
             this.textBoxCostFrom.Size = new System.Drawing.Size(61, 20);
             this.textBoxCostFrom.TabIndex = 15;
@@ -619,7 +623,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(250, 58);
+            this.label5.Location = new System.Drawing.Point(335, 61);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(72, 13);
             this.label5.TabIndex = 14;
@@ -627,7 +631,7 @@
             // 
             // textBoxRiparianCost
             // 
-            this.textBoxRiparianCost.Location = new System.Drawing.Point(84, 54);
+            this.textBoxRiparianCost.Location = new System.Drawing.Point(86, 58);
             this.textBoxRiparianCost.Name = "textBoxRiparianCost";
             this.textBoxRiparianCost.Size = new System.Drawing.Size(61, 20);
             this.textBoxRiparianCost.TabIndex = 13;
@@ -636,7 +640,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(11, 57);
+            this.label1.Location = new System.Drawing.Point(7, 61);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(73, 13);
             this.label1.TabIndex = 12;
@@ -892,6 +896,29 @@
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Update Database Features";
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(446, 273);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(50, 13);
+            this.label2.TabIndex = 13;
+            this.label2.Text = "Network:";
+            // 
+            // comboBoxMODSIMFile2
+            // 
+            this.comboBoxMODSIMFile2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBoxMODSIMFile2.FormattingEnabled = true;
+            this.comboBoxMODSIMFile2.Items.AddRange(new object[] {
+            "Base Network(*.xy)",
+            "Diversion Network (*_DIV.xy)",
+            "Water Rights Network (*_DIV_WR.xy)"});
+            this.comboBoxMODSIMFile2.Location = new System.Drawing.Point(445, 292);
+            this.comboBoxMODSIMFile2.Name = "comboBoxMODSIMFile2";
+            this.comboBoxMODSIMFile2.Size = new System.Drawing.Size(135, 21);
+            this.comboBoxMODSIMFile2.TabIndex = 12;
+            // 
             // textBox1
             // 
             this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -1108,28 +1135,27 @@
             this.tabPage2.Text = "Export Time Series";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // comboBoxMODSIMFile2
+            // radioButton1
             // 
-            this.comboBoxMODSIMFile2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBoxMODSIMFile2.FormattingEnabled = true;
-            this.comboBoxMODSIMFile2.Items.AddRange(new object[] {
-            "Base Network(*.xy)",
-            "Diversion Network (*_DIV.xy)",
-            "Water Rights Network (*_DIV_WR.xy)"});
-            this.comboBoxMODSIMFile2.Location = new System.Drawing.Point(445, 292);
-            this.comboBoxMODSIMFile2.Name = "comboBoxMODSIMFile2";
-            this.comboBoxMODSIMFile2.Size = new System.Drawing.Size(135, 21);
-            this.comboBoxMODSIMFile2.TabIndex = 12;
+            this.radioButton1.AutoSize = true;
+            this.radioButton1.Checked = true;
+            this.radioButton1.Location = new System.Drawing.Point(154, 50);
+            this.radioButton1.Name = "radioButton1";
+            this.radioButton1.Size = new System.Drawing.Size(129, 17);
+            this.radioButton1.TabIndex = 18;
+            this.radioButton1.TabStop = true;
+            this.radioButton1.Text = "Set riparian rights cost";
+            this.radioButton1.UseVisualStyleBackColor = true;
             // 
-            // label2
+            // radioButtonUniqueRiparian
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(446, 273);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(50, 13);
-            this.label2.TabIndex = 13;
-            this.label2.Text = "Network:";
+            this.radioButtonUniqueRiparian.AutoSize = true;
+            this.radioButtonUniqueRiparian.Location = new System.Drawing.Point(154, 67);
+            this.radioButtonUniqueRiparian.Name = "radioButtonUniqueRiparian";
+            this.radioButtonUniqueRiparian.Size = new System.Drawing.Size(164, 17);
+            this.radioButtonUniqueRiparian.TabIndex = 19;
+            this.radioButtonUniqueRiparian.Text = "Set unique riparian rights cost";
+            this.radioButtonUniqueRiparian.UseVisualStyleBackColor = true;
             // 
             // DataProcessing
             // 
@@ -1265,5 +1291,7 @@
         private System.Windows.Forms.TextBox textBox5;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox comboBoxMODSIMFile2;
+        private System.Windows.Forms.RadioButton radioButtonUniqueRiparian;
+        private System.Windows.Forms.RadioButton radioButton1;
     }
 }
