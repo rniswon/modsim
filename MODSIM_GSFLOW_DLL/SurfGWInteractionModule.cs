@@ -103,9 +103,9 @@ namespace MODSIM_GSFLOW_C
                 Numts = 1;
                 int len_xyname, len_mapname;
 
-                xyFileName = new String(' ', 80);
-                mappingFileName = new String(' ', 80);
-                char[] command_line_args = String.Join(" ", CmdArgs).PadRight(256).ToCharArray();
+                xyFileName = new String(' ', 256);
+                mappingFileName = new String(' ', 256);
+                char[] command_line_args = String.Join(" ", CmdArgs).PadRight(512).ToCharArray();
                 len_xyname = xyFileName.Length;
                 len_mapname = mappingFileName.Length;
 
@@ -796,7 +796,7 @@ namespace MODSIM_GSFLOW_C
                     if (Model_mode != 12)   //Different flow of console output in MODSIM-MODFLOW mode, don't want the '.' in this case 
                     {
                         messageOut(".");
-                        messageOut("." + swgwUtils.iterCount + "Dem:" + agDemand[24]);
+                        //messageOut("." + swgwUtils.iterCount + "Dem:" + agDemand[24]);
                     }
 
                     swgwUtils.iterCount += 1;
