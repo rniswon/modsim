@@ -112,9 +112,8 @@ namespace RRModelingSystem
                 }
                 hasChanges = true;
                 //find the relative path for workspace 
-                Uri MMSDB = new Uri(_MMSDatabase);
-
-                UpdatePreferences("Workspace", MMSDB.MakeRelativeUri(new Uri(textBoxWorkspace.Text)).ToString());
+                //Uri MMSDB = new Uri(_MMSDatabase);
+                UpdatePreferences("Workspace", textBoxWorkspace.Text);
             }
         }
 
