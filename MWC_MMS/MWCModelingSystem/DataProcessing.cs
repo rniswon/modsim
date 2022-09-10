@@ -107,7 +107,7 @@ namespace RRModelingSystem
                 richTextBoxGSOut.AppendText($"MODFLOW name file:\n  {_MODFLOWName}\n");
 
                 List<string> modOutFileName = TextUtils.ReadControlProperties(_MODFLOWName, new string[] { "DATA", "511" }, 0);
-                baseFolder = Path.GetDirectoryName(_MODFLOWName);
+                //baseFolder = Path.GetDirectoryName(_MODFLOWName);
                 _outFileName = Path.Combine(baseFolder, modOutFileName[0]);
                 richTextBoxGSOut.AppendText($"MODFLOW output file:\n    {_outFileName}\n");
             }
