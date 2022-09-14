@@ -14,19 +14,45 @@ This tool is a C# code that couples a MODSIM network with a corresponding GSFLOW
 The GSFLOW control file requires the following entries:
 
 * Synchronization Database
-
-        DatabaseXXX    
-    This argument includes the name of the synchronization database.
+    
+    ```dos
+    ####
+    mappingFileName
+    1
+    4
+    ..\MMSFiles\MarkWestCreek.sqlite
+    ```
+    
+This argument includes the name of the synchronization database in sqlite format.  The extension of the file can be different than sqlite, for example a WaterALLOC database (*.waprj).
 * MODSIM base file
 
-        MODSIM FILE XXXX
+        
+    ```dos
+    ####
+    xyFileName
+    1
+    4
+    ..\MMSFiles\MODSIM\SRPModelv4_DIV_WRTS.xy
+    ```
+    
 
     The file should include the objects, cost and logic to allocation water in the surface water system according to the required priorities, physical and administrative constraints.
 ### Synchronization Database
 The synchronization table is an SQLite database with tables that allow building a relationship between the MODSIM objects and the GSFLOW objects. The database requires the following tables
 
 * `MS-GSF_mapping_info` - This table contains the relationship between the MODSIM link name and the GSFLOW segment.  Additionally, it has field to flag the segments that are diversions and reservoir outlets.
-* `MS-GSF_Lake_Mapping_Info` This table contains the relationship between the MODSIM reservoirs and the GSFLOW Lakes.
+* `MS-GSF_Lake_Mapping_Info` This table contains the relationship between the MODSIM reservoirs and the GSFLOW Lakes. The following field are required in the table 
+        
+    |Field    |Description  |
+    |---------|---------|
+    |Link Name    |MODSIM name of the link representing the segment         |
+    |iseg         |Segement number in SFR         |
+    |Diversion    |Integer (flag) indicating a diversion flag. When it is 1 indicates that the segment is a diversion segment.         |
+    |ResRelease   |Integer (flag) indicating if the segment is a reservoir release segment.  A value of 1 indicates a reservoir release segment.         |
+    |AssocRes     |Contains the name of the MODSIM reservoir node for which the segment provides the release.          |
+    |AgDem        |Integer (flag) indicating if the diversion segment is linked with and agricultural demand in GSFLOW and MODSIM water demand will be provided/calculated by GSFLOW.        |
+    |AssocDem    |Name of the MODSIM demand node associated with the diversion segment.  This field is required when the MODSIM downstream node of the Link is not the demand node. If *NULL*, the code assumes that the demand node is the to node of the MODSIM link.          |
+    
 * `Settings` This table has general preferences used for the coupling code.  
 
 ## Run Modes
