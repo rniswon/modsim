@@ -71,7 +71,7 @@ namespace MODSIM_GSFLOW_C
 
 
         //Flags for custom project codes
-        private bool WES_ON = false;
+        private bool WES_ON = true;
 
         public event ProcessMessage messageOut;
 
@@ -377,7 +377,7 @@ namespace MODSIM_GSFLOW_C
                     //temporary fix for RR PRMS
                     //                uConvToMODFLOW = 1233.48;
                     //  PRMS will always send evap in inches.  We need to apply the conversion feet in english.
-                    uConvRateToMODSIM = 1 / 12;
+                    uConvRateToMODSIM = (double) 1 / 12;
                 }
 
                 // Write a header row to the streamwriter for evaluating convergence with R
@@ -944,8 +944,9 @@ namespace MODSIM_GSFLOW_C
                             DELTAVOL[i] = 0;
                         }
                     }
-                    breakout = true;
+                    //breakout = true;
                 }
+                breakout = true;
             }
         }
 
