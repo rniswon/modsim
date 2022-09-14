@@ -57,6 +57,7 @@ namespace MODSIM_GSFLOW_C
         public bool afr, MS_GSF_converge;
         public int Model_mode, Nsegshold, Nlakeshold;
         public int[] startTime = new int[6];
+        public int[] endTime = new int[6];
         public int Process_mode;
         public int txtiter = 1;
         public long[] LinkHi = new long[1];
@@ -85,7 +86,7 @@ namespace MODSIM_GSFLOW_C
         public static extern void put_prms_control_file([In] ref char[] command_line_args);
 
         [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void gsflow_prmsSettings([In, Out] ref int Numts, ref int Model_mode, ref int startTime, ref int File1_length, [In, Out] char[] FileName1, ref int File2_length, [In, Out] char[] FileName2);
+        public static extern void gsflow_prmsSettings([In, Out] ref int Numts, ref int Model_mode, ref int[] startTime, ref int[] endTime, ref int File1_length, [In, Out] char[] FileName1, ref int File2_length, [In, Out] char[] FileName2);
 
         [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void LAK2MODSIM_InitLakes([In, Out] double[] DELTAVOL, [In, Out] double[] LAKEVOL, [In, Out] double[] MXLKVOL);
@@ -133,7 +134,7 @@ namespace MODSIM_GSFLOW_C
                 char[] xyPathChars = ToCharacterArrayFortran(xyFileName, len_xyname);
                 char[] mapPathChars = ToCharacterArrayFortran(mappingFileName, len_mapname);
 
-                gsflow_prmsSettings(ref Numts, ref Model_mode, ref startTime[0], ref len_xyname, xyPathChars, ref len_mapname, mapPathChars);
+                gsflow_prmsSettings(ref Numts, ref Model_mode, ref startTime, ref endTime, ref len_xyname, xyPathChars, ref len_mapname, mapPathChars);
                 //Start time is [0]=year [1]=month [2]=day
                 //End simulation using Numts
                 xyFileName = new string(xyPathChars);
