@@ -104,9 +104,9 @@ namespace MODSIM_GSFLOW_C
                 Numts = 1;
                 int len_xyname, len_mapname;
 
-                xyFileName = new String(' ', 80);
-                mappingFileName = new String(' ', 80);
-                char[] command_line_args = String.Join(" ", CmdArgs).PadRight(256).ToCharArray();
+                xyFileName = new String(' ', 256);
+                mappingFileName = new String(' ', 256);
+                char[] command_line_args = String.Join(" ", CmdArgs).PadRight(512).ToCharArray();
                 len_xyname = xyFileName.Length;
                 len_mapname = mappingFileName.Length;
 
@@ -778,7 +778,7 @@ namespace MODSIM_GSFLOW_C
                     {
                         if (MS_Links[i] != null)
                         {
-                            Link expLink = myModel.FindLink(MS_Links[i].name);
+                            //Link expLink = myModel.FindLink(MS_Links[i].name);
                             //all_links.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + MS_Links[i].name + " " + "iter_" + txtiter.ToString() + " " + (double)expLink.mlInfo.flow / accuracy * uConvToMODFLOW);
                             //all_links.Flush();
                         }
@@ -797,7 +797,7 @@ namespace MODSIM_GSFLOW_C
                     if (Model_mode != 12)   //Different flow of console output in MODSIM-MODFLOW mode, don't want the '.' in this case 
                     {
                         messageOut(".");
-                        messageOut("." + swgwUtils.iterCount + "Dem:" + agDemand[24]);
+                        //messageOut("." + swgwUtils.iterCount + "Dem:" + agDemand[24]);
                     }
 
                     swgwUtils.iterCount += 1;
@@ -839,18 +839,18 @@ namespace MODSIM_GSFLOW_C
                                 //Setting the MODSIM demand to the value set from GSFLOW
                                 //   Using the diversions array 
                                 //if (Convert.ToInt16(swgwUtils.m_SyncTblSEG.Rows[i]["Diversion"]) > 0 && agDemand[i] >= 0)
-                                if (agDemand[i] > 0)
-                                {
+                                //if (agDemand[i] > 0)
+                                //{
                                     //Assumes that the demand is connected to the link mapped to the segment.
                                     //Node demNode = MS_Links[i].from.InflowLinks.link.from;
                                     Node demNode = MS_Links[i].to;
-                                    if (demNode.nodeType == NodeType.Demand)
-                                    {
-                                        int hydState = demNode.mnInfo.hydStateIndex;
-                                        demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * accuracy / uConvToMODFLOW, 0);
-                                        messageOut($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
-                                    }
+                                if (demNode.nodeType == NodeType.Demand)
+                                {
+                                    int hydState = demNode.mnInfo.hydStateIndex;
+                                    demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * accuracy / uConvToMODFLOW, 0);
+                                    messageOut($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
                                 }
+                                //}
 
                             }
 
@@ -859,7 +859,7 @@ namespace MODSIM_GSFLOW_C
                         {
                             gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand); // converged mode
                             afr = true;
-                            messageOut("           MS_GSF Last Iteration: " + swgwUtils.iterCount + " Stress Period: " + myModel.mInfo.CurrentModelTimeStepIndex);
+                            messageOut("           MS_GSF Last Iteration: " + swgwUtils.iterCount + " Total time steps: " + myModel.mInfo.CurrentModelTimeStepIndex);
                             swgwUtils.iterCount = 0;
                             MFRunYet = false;
 
@@ -1006,7 +1006,8 @@ namespace MODSIM_GSFLOW_C
 
             bool converge = true;
             // double percent_diff = 0.005;
-
+            double maxExchDiff = 0;
+            int maxSeg = -1;
             for (int i = 0; i < MS_Flows.Length; i++)
             {
                 // Check for changes in the MODSIM flows in the diversion links.
@@ -1014,7 +1015,12 @@ namespace MODSIM_GSFLOW_C
                 converge = converge && ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) <= EXCHNGVol_Tolerance);  // (double)(Math.Abs(MS_FlowsPREV[i]) * percent_diff));
                 converge = converge && ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) <= EXCHNGVol_Tolerance); // (double)(Math.Abs(EXCHANGEPREV[i]) * percent_diff));
                 if ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) > EXCHNGVol_Tolerance) 
-                    messageOut("For iseg: " + (i + 1).ToString() + " difference between MODSIM & MF is: " + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
+                    messageOut("For iseg (diversion): " + (i + 1).ToString() + " difference between MODSIM & MF is: " + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
+                if(maxExchDiff<(double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]))
+                {
+                    maxExchDiff = (double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]);
+                    maxSeg = i;
+                }
                 //if ((i == 18 || i == 19) && myModel.mInfo.CurrentModelTimeStepIndex >= 364) messageOut("Diver:" + i + ":" + MS_Flows[i] + "Exch: " + EXCHANGE[i]);
                 // if ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > EXCHNGVol_Tolerance) messageOut("GW-SW Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
                 // myModel.mInfo.CurrentModelTimeStepIndex
@@ -1022,6 +1028,10 @@ namespace MODSIM_GSFLOW_C
                 //Here is what the header looks like: sw.WriteLine("TS iseg Exchange_Prev Exchange");
                 //sw.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + Convert.ToInt32(i + 1) + " " + Convert.ToSingle(EXCHANGEPREV[i]) + " " + Convert.ToSingle(EXCHANGE[i]));
                 //sw.Flush();
+            }
+            if(maxExchDiff>0)
+            {
+                messageOut($"\tAcc/Dep Exchange max: {maxExchDiff} segment {maxSeg}.");
             }
 
             if (Model_mode != 11)

@@ -472,6 +472,17 @@ namespace RTI.CWR.MMS_Support
 	                                PRIMARY KEY(UnitsID AUTOINCREMENT)
                                 )";
                     ExecuteNonQuery(sql);
+
+                    sql = @"INSERT INTO UnitsInfo ([UnitsID],[Units],[System]) 
+                                VALUES (1,'acre-ft','English'),
+                                 (2,'acre-ft/day','English'),
+                                 (3,'cfs','English'),
+                                 (4,'Dimensionless','N/A'),
+                                 (5,'Default','N/A'),
+                                 (6,'m³/day','Metric'),
+                                 (7,'ft³/day','English'),
+                                 (8,'acre-ft/month','English');";
+                    ExecuteNonQuery(sql);
                 }
 
                 if (!IsTableExist("TSTypes"))

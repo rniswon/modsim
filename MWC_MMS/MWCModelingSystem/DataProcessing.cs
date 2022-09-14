@@ -59,6 +59,9 @@ namespace RRModelingSystem
 
             Load_DBInfo();
 
+            //check for only new option
+            comboBoxTSTypes_SelectedIndexChanged(null, null);
+
             //tabControl1.TabPages.Remove(tabControl1.TabPages[2]);
             //tabControl1.TabPages.Remove(tabControl1.TabPages[1]);
         }
@@ -104,7 +107,7 @@ namespace RRModelingSystem
                 richTextBoxGSOut.AppendText($"MODFLOW name file:\n  {_MODFLOWName}\n");
 
                 List<string> modOutFileName = TextUtils.ReadControlProperties(_MODFLOWName, new string[] { "DATA", "511" }, 0);
-                baseFolder = Path.GetDirectoryName(_MODFLOWName);
+                //baseFolder = Path.GetDirectoryName(_MODFLOWName);
                 _outFileName = Path.Combine(baseFolder, modOutFileName[0]);
                 richTextBoxGSOut.AppendText($"MODFLOW output file:\n    {_outFileName}\n");
             }
@@ -1038,7 +1041,7 @@ namespace RRModelingSystem
 
             //Set WR extention active
             myModel.ExtWaterRightsActive = true;
-
+            long ripCount = 0;
             try
             {
 
@@ -1185,8 +1188,12 @@ namespace RRModelingSystem
                                 m_Link.description = m_Link.m.waterRightsDate.ToShortTimeString();
 
                                 if (dr["WR_Type"].ToString() == "Riparian")
-                                    m_Link.m.cost = long.Parse(textBoxRiparianCost.Text);
-
+                                {
+                                    m_Link.m.cost = long.Parse(textBoxRiparianCost.Text) + ripCount;
+                                    //setting unique riparian cost.
+                                    if (radioButtonUniqueRiparian.Checked)
+                                        ripCount++;
+                                }
                                 wrCount += 1;
                             }
                         }
@@ -1260,8 +1267,12 @@ namespace RRModelingSystem
         private void buttonImportGSData_Click(object sender, EventArgs e)
         {
             this.Cursor = Cursors.WaitCursor;
+            string tempOutFile = _outFileName;
             try
             {
+                if (radioButtonOtherSegFile.Checked)
+                    _outFileName = textBoxSegFlowFile.Text;
+
                 if (comboBoxTSTypes.Text == "<< New >>" && txtNewTSName.Text == "")
                 {
                     MessageBox.Show("Please define a TS Name for the new time series to be imported.");
@@ -1352,6 +1363,8 @@ namespace RRModelingSystem
             }
             finally
             {
+                if (radioButtonOtherSegFile.Checked)
+                    _outFileName = tempOutFile;
                 this.Cursor = Cursors.Default;
             }
         }
@@ -1446,36 +1459,43 @@ namespace RRModelingSystem
         {
             this.Cursor = Cursors.WaitCursor;
             try
-            { 
-            messageOut($"Processing accretion/depletion links and nodes...");
-            string m_FileName = ProcessModsimFile;
-            if (comboBoxMODSIMFile.Text.Contains("_DIV.xy"))
-                m_FileName = m_FileName.Replace(".xy", "_DIV.xy");
-            if (comboBoxMODSIMFile.Text.Contains("_DIV_WR.xy"))
-                m_FileName = m_FileName.Replace(".xy", "_DIV_WR.xy");
-
-            if (File.Exists(m_FileName))
             {
-                messageOut($"     Reading MODSIM file {m_FileName} ...");
+                messageOut($"Processing accretion/depletion links and nodes...");
+                string m_FileName = ProcessModsimFile;
+                if (comboBoxMODSIMFile.Text.Contains("_DIV.xy"))
+                    m_FileName = m_FileName.Replace(".xy", "_DIV.xy");
+                if (comboBoxMODSIMFile.Text.Contains("_DIV_WR.xy"))
+                    m_FileName = m_FileName.Replace(".xy", "_DIV_WR.xy");
+                if (comboBoxMODSIMFile.Text.Contains("_DIV_WRTS.xy"))
+                    m_FileName = m_FileName.Replace(".xy", "_DIV_WRTS.xy");
 
-                myModel = new Model();
-                XYFileReader.Read(myModel, m_FileName);
+                if (File.Exists(m_FileName))
+                {
+                    messageOut($"     Reading MODSIM file {m_FileName} ...");
 
-                // read the model start date
-                DateTime startdate = myModel.TimeStepManager.dataStartDate;
+                    myModel = new Model();
+                    XYFileReader.Read(myModel, m_FileName);
 
-                SWGW_MODSIMUtils swgwUtils = new SWGW_MODSIMUtils(ref myModel);
-                messageOut($"     Creating accretion/depletion construct ...");
-                double vol_tol, lake_Tol;
-                swgwUtils.PrepareMODSIMNetwork(_syncDBFileName, out vol_tol, out lake_Tol);
+                    // read the model start date
+                    DateTime startdate = myModel.TimeStepManager.dataStartDate;
 
-                messageOut($"     Saving MODSIM file ...");
-                XYFileWriter.Write(myModel, m_FileName);
+                    SWGW_MODSIMUtils swgwUtils = new SWGW_MODSIMUtils(ref myModel);
+                    messageOut($"     Creating accretion/depletion construct ...");
+                    double vol_tol, lake_Tol;
+                    swgwUtils.PrepareMODSIMNetwork(_syncDBFileName, out vol_tol, out lake_Tol);
 
-                messageOut($"Done.");
-            }
-            else
-                MessageBox.Show($"File {m_FileName} not found. Please create before continuing.");
+                    messageOut($"     Saving MODSIM file ...");
+                    if (checkBoxSaveMSGSF.Checked)
+                    {
+                        m_FileName = m_FileName.Replace(".xy", "MSGSF.xy");
+                        messageOut($"\t File: {m_FileName}");
+                    }
+                    XYFileWriter.Write(myModel, m_FileName);
+
+                    messageOut($"Done.");
+                }
+                else
+                    MessageBox.Show($"File {m_FileName} not found. Please create before continuing.");
             }
             catch (Exception ex)
             {
@@ -1503,6 +1523,9 @@ namespace RRModelingSystem
                     m_FileName = m_FileName.Replace(".xy", "_DIV.xy");
                 if (comboBoxMODSIMFile.Text.Contains("_DIV_WR.xy"))
                     m_FileName = m_FileName.Replace(".xy", "_DIV_WR.xy");
+                if (comboBoxMODSIMFile.Text.Contains("_DIV_WRTS.xy"))
+                    m_FileName = m_FileName.Replace(".xy", "_DIV_WRTS.xy");
+
                 if (File.Exists(m_FileName))
                 {
                     messageOut($"     Reading MODSIM file {m_FileName} ...");
@@ -1597,6 +1620,30 @@ namespace RRModelingSystem
                 messageOut($"   Deleted entry from the DatasetsTSSet table");
                 treeView1_AfterSelect(null, null);
             }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog dlg = new OpenFileDialog())
+            {
+                dlg.Filter = "Output File (*.out)|*.out|All files (*.*)|*.*";
+                dlg.RestoreDirectory = true;
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    textBoxSegFlowFile.Text =dlg.FileName;
+                }
+            }
+        }
+
+        private void radioButton4_CheckedChanged(object sender, EventArgs e)
+        {
+            textBoxSegFlowFile.Visible = radioButtonOtherSegFile.Checked;
+            buttonBrowseSegFile.Visible = radioButtonOtherSegFile.Checked;
+        }
+
+        private void radioButton3_CheckedChanged(object sender, EventArgs e)
+        {
+            
         }
     }
 }
