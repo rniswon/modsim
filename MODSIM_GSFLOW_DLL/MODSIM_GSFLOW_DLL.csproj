@@ -173,6 +173,7 @@ COPY /Y  "$(SolutionDir)..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName
 COPY /Y  "$(SolutionDir)..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.dll" "$(ProjectDir)GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll"
 )
 if %25USERNAME%25 ==  etriana (
+COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\gsflow_modsim.dll" "$(ProjectDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll"
 COPY /Y  "$(ProjectDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
 )
 if %25USERNAME%25 ==  rsregan (
