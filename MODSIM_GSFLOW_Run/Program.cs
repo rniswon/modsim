@@ -22,20 +22,29 @@ namespace MODSIM_GSFLOW
 				SurfGWModule sSurfGWModule = new SurfGWModule(CmdArgs);
 				sSurfGWModule.messageOut += OnMessage;
 
-				XYFileReader.Read(myModel, sSurfGWModule.xyFileName);
-				myModel.OnMessage += OnMessage;
-				myModel.OnModsimError += OnError;
-
-				sSurfGWModule.InitializeRUN(ref myModel);
-
-				int run = Modsim.RunSolver(myModel);
-
-				sSurfGWModule.FinalizeMODSIM();
-
-				if (run == 0)
+				if ((sSurfGWModule.Model_mode >= 10 && sSurfGWModule.Model_mode <= 13) || sSurfGWModule.Model_mode == 3) // modes with MODSIM
 				{
-					Console.WriteLine("Successful completion of the MODSIM run!");
+					XYFileReader.Read(myModel, sSurfGWModule.xyFileName);
+					myModel.OnMessage += OnMessage;
+					myModel.OnModsimError += OnError;
+
+
+					sSurfGWModule.InitializeRUN(ref myModel);
+
+					int run = Modsim.RunSolver(myModel);
+
+					sSurfGWModule.FinalizeRUN();
+
+					if (run == 0)
+					{
+						Console.WriteLine("Successful completion of the MODSIM run!");
+					}
 				}
+				else
+				{
+					sSurfGWModule.InitializeRUN(ref myModel);
+				}
+				Console.WriteLine("Simulation finished.");
 			}
 			catch (Exception ex)
 			{
