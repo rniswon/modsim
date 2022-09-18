@@ -62,8 +62,14 @@ namespace RRModelingSystem
             //check for only new option
             comboBoxTSTypes_SelectedIndexChanged(null, null);
 
+            for (int i = 1; i<= 12; i++)
+            {
+                dataGridViewMonthlyFactors.Rows.Add(new object[] { i, null });
+            }
+
             //tabControl1.TabPages.Remove(tabControl1.TabPages[2]);
             //tabControl1.TabPages.Remove(tabControl1.TabPages[1]);
+            tabControl2.TabPages.Remove(tabControl2.TabPages["tabPageMODSIMImport"]);
         }
 
         private void Load_DBInfo()
@@ -75,7 +81,7 @@ namespace RRModelingSystem
                 dataGridViewFeat.DataSource = featuresTbl;
 
                 tsQuery = $"SELECT * FROM TSTypes";
-                DataTable TSTypeTbl = m_DBUtils.GetTableFromDB(tsQuery, "Features");
+                DataTable TSTypeTbl = m_DBUtils.GetTableFromDB(tsQuery, "TSTypes");
                 DataRow dr = TSTypeTbl.NewRow();
                 dr["TSName"] = "<< New >>";
                 TSTypeTbl.Rows.Add(dr);
@@ -84,6 +90,15 @@ namespace RRModelingSystem
                 comboBoxTSTypes.DataSource = TSTypeTbl;
                 comboBoxTSTypes.DisplayMember = "TSName";
 
+                comboBoxTSTypes3.DataSource = TSTypeTbl;
+                comboBoxTSTypes3.DisplayMember = "TSName";
+
+                comboBoxTSTypes2.Items.Clear();
+                foreach(DataRow dr2 in TSTypeTbl.Rows)
+                {
+                    comboBoxTSTypes2.Items.Add(dr2["TSName"]);
+                }
+                
                 DataTable TSTypeTbl2 = m_DBUtils.GetTableFromDB(tsQuery, "Features");
                 comboBoxDSetTSTypes.DataSource = TSTypeTbl2;
                 comboBoxDSetTSTypes.DisplayMember = "TSName";
@@ -1644,6 +1659,229 @@ namespace RRModelingSystem
         private void radioButton3_CheckedChanged(object sender, EventArgs e)
         {
             
+        }
+
+        private void comboBoxTSTypes2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            bool mview = comboBoxTSTypes2.Text == "<< New >>";
+            labelTSTypeNew2.Visible = mview;
+            txtNewTSName2.Visible = mview;
+        }
+
+        private void buttonCreateTS_Click(object sender, EventArgs e)
+        {
+            this.Cursor = Cursors.WaitCursor;
+            //string tempOutFile = _outFileName;
+            try
+            {
+                if (comboBoxTSTypes2.Text == "<< New >>" && txtNewTSName2.Text == "")
+                {
+                    MessageBox.Show("Please define a TS Name for the new time series to be imported.");
+                    return;
+                }
+
+                //MyDBSqlite m_DBUtils2 = new MyDBSqlite(_syncDBFileName);
+                //m_DBUtils.messageOut += PrintMessage;
+                //DataTable dt_Segs = m_DBUtils2.GetTableFromDB("SELECT * FROM [MS-GSF_mapping_Info]", "MS-GSF_mapping_Info");
+                //if (dt_Segs == null)
+                //{
+                //    messageOut($"ERROR: [reading sync table.] Unable to read the sync table.");
+                //    return;
+                //}
+
+                DataRow drBase = ((System.Data.DataRowView)comboBoxTSTypes3.SelectedItem).Row;
+                int baseTS = int.Parse(drBase["TSTypeID"].ToString());
+                bool isBasePattern = int.Parse(drBase["IsPattern"].ToString()) == 1;
+
+                string TSTypeID = "NULL";
+                string TSNametxt = txtNewTSName2.Text;
+                if (comboBoxTSTypes2.Text != "<< New >>")
+                {
+                    DataRow[] drs = ((DataTable)dataGridViewTSType.DataSource).Select($"TSName = '{comboBoxTSTypes2.Text}'");
+                    TSTypeID = drs[0]["TSTYpeID"].ToString();
+                    TSNametxt = comboBoxTSTypes2.Text;
+                }
+                string sql = $"INSERT OR REPLACE INTO TSTypes VALUES ({TSTypeID},'{TSNametxt}',{drBase["UnitsID"]},'User calculated time series.'" +
+                    $",'TSTYPE = {drBase["TSTypeID"]}',1,'{drBase["TSInterval"]}','{richTextBoxNewTSNotes.Text}','{drBase["MODSIMTSType"]}'" +
+                    $",{drBase["IsPattern"]},'{DateTime.Now.ToString("yyyy-MM-dd")}')";
+                int newTS = m_DBUtils.ExecuteQuery(sql);
+
+                //Clear time series
+                if (checkBoxDelTSTypeTS.Checked)
+                {
+                    if(isBasePattern)
+                    {
+                        sql = $"DELETE FROM Timeseries WHERE TSTypeID = {newTS}";
+                        PrintMessage($"Deleting time series for TSTypeID = {newTS}");
+                        m_DBUtils.ExecuteQuery(sql);
+                    }
+                    else
+                    {
+                        sql = $"DELETE FROM Timeseries WHERE TSTypeID = {newTS}";
+                        PrintMessage($"Deleting time series for TSTypeID = {newTS}");
+                        m_DBUtils.ExecuteQuery(sql);
+                    }
+                  
+                }
+
+                //Create factors table in the database
+                CreateFactorsInDB();
+
+                string tsQuery;
+                if (isBasePattern)
+                {
+                    tsQuery = $@"INSERT INTO TSPatterns
+                                SELECT {newTS} AS TSTypeID, TSPatterns.FeatureID, [Index] , TSValue * _Factors.Factor
+                                FROM TSPatterns
+                                JOIN Features ON Features.FeatureID = TSPatterns.FeatureID
+                                JOIN _Factors ON _Factors.MonthIndex = TSPatterns.[Index]
+                                WHERE TSPatterns.TSTypeID = {baseTS} {filterString()}
+                            ";
+                }
+                else
+                {
+                    tsQuery = $@"INSERT INTO Timeseries 
+                                SELECT TSDate, Timeseries.FeatureID, {newTS} AS TSTypeID, TSValue * _Factors.Factor
+                                FROM Timeseries
+                                JOIN Features ON Features.FeatureID = Timeseries.FeatureID
+                                JOIN _Factors ON _Factors.MonthIndex = strftime('%m', TSDate)
+                                WHERE Timeseries.TSTypeID = {baseTS} {filterString()}
+                            ";
+                }
+
+                
+                messageOut("Updating the database time series...");
+                m_DBUtils.ExecuteQuery(tsQuery);
+                Load_DBInfo();
+                messageOut("Done.");
+            }
+            catch (Exception ex)
+            {
+                PrintMessage(ex.Message);
+            }
+            finally
+            {
+                m_DBUtils.ExecuteQuery("DROP TABLE IF EXISTS [_Factors]; ");
+                this.Cursor = Cursors.Default;
+            }
+        }
+
+        private void CreateFactorsInDB()
+        {
+            DataTable dt = new DataTable("_Factors");
+            foreach (DataGridViewColumn col in dataGridViewMonthlyFactors.Columns)
+            {
+                dt.Columns.Add(col.Name);
+            }
+
+            foreach (DataGridViewRow row in dataGridViewMonthlyFactors.Rows)
+            {
+                DataRow dRow = dt.NewRow();
+                foreach (DataGridViewCell cell in row.Cells)
+                {
+                    if (cell.Value == null || cell.Value == "")
+                        throw new Exception($"\t ERROR: Factor for month {dRow[0]} not specified.");
+                    dRow[cell.ColumnIndex] = cell.Value;
+                }
+                dt.Rows.Add(dRow);
+            }
+            if (m_DBUtils.IsTableExist("_Factors"))
+                m_DBUtils.ExecuteQuery("DROP TABLE IF EXISTS [_Factors]; ");
+            m_DBUtils.ExecuteNonQuery(@"CREATE TABLE [_Factors] (
+                                        [MonthIndex]   INTEGER,
+                                        [Factor]    REAL,
+                                        PRIMARY KEY([MonthIndex])
+                                        ); ");
+            m_DBUtils.UpdateTableFromDB(dt);
+        }
+
+        private void LoadFeaturesFiltered()
+        {
+            try
+            {
+                DataRow drBase = ((System.Data.DataRowView)comboBoxTSTypes3.SelectedItem).Row;
+                bool isBasePattern = int.Parse(drBase["IsPattern"].ToString()) == 1;
+
+                string tsQuery;
+                if (isBasePattern)
+                {
+                    tsQuery = $@"SELECT TSPatterns.FeatureID, TSTypeID, MOD_Name, 'Pattern' as Type
+                            FROM TSPatterns
+                            JOIN Features ON Features.FeatureID = TSPatterns.FeatureID
+                            WHERE TSPatterns.TSTypeID = {drBase["TSTypeID"]} {filterString()}
+                            GROUP BY TSPatterns.FeatureID ";
+                }
+                else
+                {
+                    tsQuery = $@"SELECT Timeseries.FeatureID, TSTypeID, MOD_Name,'Varies by Year' as Type
+                            FROM Timeseries
+                            JOIN Features ON Features.FeatureID = Timeseries.FeatureID
+                            WHERE Timeseries.TSTypeID = {drBase["TSTypeID"]} {filterString()}
+                            GROUP BY Timeseries.FeatureID ";
+                }
+
+                DataTable dt = m_DBUtils.GetTableFromDB(tsQuery, "FeatTSType");//ExecuteCommand(cmdtxt);
+
+                // add to colllection
+                dataGridViewFilteredFeats.DataSource = dt;
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        private string filterString()
+        {
+            string filter = "";
+            if(radioButtonStartWith.Checked)
+            {
+                return $" AND Features.MOD_Name LIKE '{comboBoxFilterName.Text}%'";
+            }
+            if (radioButtonEndsWith.Checked)
+            {
+                return $" AND Features.MOD_Name LIKE '%{comboBoxFilterName.Text}'";
+            }
+            if (radioButtonContains.Checked)
+            {
+                return $" AND Features.MOD_Name LIKE '%{comboBoxFilterName.Text}%'";
+            }
+            return filter;
+        }
+
+        private void radioButton5_CheckedChanged(object sender, EventArgs e)
+        {
+            LoadFeaturesFiltered();
+        }
+
+        private void radioButtonStartWith_CheckedChanged(object sender, EventArgs e)
+        {
+            LoadFeaturesFiltered();
+        }
+
+        private void radioButtonEndsWith_CheckedChanged(object sender, EventArgs e)
+        {
+            LoadFeaturesFiltered();
+        }
+
+        private void radioButtonContains_CheckedChanged(object sender, EventArgs e)
+        {
+            LoadFeaturesFiltered();
+        }
+
+        private void comboBoxFilterName_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            LoadFeaturesFiltered();
+        }
+
+        private void comboBoxTSTypes3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            LoadFeaturesFiltered();
+        }
+
+        private void comboBoxFilterName_TextUpdate(object sender, EventArgs e)
+        {
+            LoadFeaturesFiltered();
         }
     }
 }

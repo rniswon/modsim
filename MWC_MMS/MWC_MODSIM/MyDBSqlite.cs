@@ -61,7 +61,7 @@ namespace RTI.CWR.MMS_Support
             return conn.ConnectionString;
         }
 
-       private bool IsTableExist(string tablename)
+       public bool IsTableExist(string tablename)
         {
             bool isexist = false;
             using (SQLiteConnection c = new SQLiteConnection(ConnectionString))
