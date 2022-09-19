@@ -66,7 +66,7 @@
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.Controls.Add(this.treeView1);
-            this.splitContainer1.Size = new System.Drawing.Size(759, 602);
+            this.splitContainer1.Size = new System.Drawing.Size(759, 571);
             this.splitContainer1.SplitterDistance = 144;
             this.splitContainer1.TabIndex = 0;
             // 
@@ -89,7 +89,7 @@
             treeNode2,
             treeNode3,
             treeNode4});
-            this.treeView1.Size = new System.Drawing.Size(144, 602);
+            this.treeView1.Size = new System.Drawing.Size(144, 571);
             this.treeView1.TabIndex = 0;
             this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
             // 
@@ -194,8 +194,8 @@
             // 
             this.splitContainer2.Panel2.Controls.Add(this.richTextBoxMsgs);
             this.splitContainer2.Panel2.Controls.Add(this.label1);
-            this.splitContainer2.Size = new System.Drawing.Size(759, 788);
-            this.splitContainer2.SplitterDistance = 626;
+            this.splitContainer2.Size = new System.Drawing.Size(759, 749);
+            this.splitContainer2.SplitterDistance = 595;
             this.splitContainer2.TabIndex = 1;
             // 
             // richTextBoxMsgs
@@ -203,7 +203,7 @@
             this.richTextBoxMsgs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.richTextBoxMsgs.Location = new System.Drawing.Point(0, 13);
             this.richTextBoxMsgs.Name = "richTextBoxMsgs";
-            this.richTextBoxMsgs.Size = new System.Drawing.Size(759, 145);
+            this.richTextBoxMsgs.Size = new System.Drawing.Size(759, 137);
             this.richTextBoxMsgs.TabIndex = 0;
             this.richTextBoxMsgs.Text = "";
             // 
@@ -221,7 +221,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(759, 788);
+            this.ClientSize = new System.Drawing.Size(759, 749);
             this.Controls.Add(this.splitContainer2);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "RRSurfModelingMain";
