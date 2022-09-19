@@ -748,10 +748,10 @@ namespace RRModelingSystem
                 // get TSTypeIDs
                 //string cmdtxt = $"Select TSType From DatasetsTSSet Where Scenario = {treeView1.SelectedNode.Name};";
                 //Assume that the units label is the text to set the MODSIM units 
-                string cmdtxt = "SELECT DatasetsTSSet.Order,DatasetsTSSet.TSType, UnitsInfo.Units, TSTypes.MODSIMTSType, TSTypes.IsPattern, TSTypes.TSInterval" +
+                string cmdtxt = "SELECT DatasetsTSSet.[Order],DatasetsTSSet.TSType, UnitsInfo.Units, TSTypes.MODSIMTSType, TSTypes.IsPattern, TSTypes.TSInterval" +
                          " FROM UnitsInfo INNER JOIN (DatasetsTSSet INNER JOIN TSTypes ON DatasetsTSSet.TSType = TSTypes.TSTypeID) ON UnitsInfo.UnitsID = TSTypes.UnitsID" +
                         $" WHERE(((DatasetsTSSet.[Dataset]) =  {treeViewDatasets.SelectedNode.Name}))" +
-                        $"ORDER BY DatasetsTSSet.Order;";
+                        $"ORDER BY DatasetsTSSet.[Order];";
                 DataTable Datasetdt = m_DBUtils.GetTableFromDB(cmdtxt, "Dataset");//ExecuteCommand(cmdtxt);
 
                 // for each TSTypeID
@@ -983,7 +983,7 @@ namespace RRModelingSystem
         }
 
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
-        {☻
+        {
             this.Cursor = Cursors.WaitCursor;
             LoadFeaturesAndTSTypes();
             groupBoxSelDSet.Text = "Selected Dataset: " + treeViewDatasets.SelectedNode.Text + $"  (ID:{treeViewDatasets.SelectedNode.Name})";
