@@ -73,6 +73,16 @@ namespace RRModelingSystem.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_down_25 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-down-25", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_error_64 {
             get {
                 object obj = ResourceManager.GetObject("icons8-error-64", resourceCulture);
@@ -96,6 +106,16 @@ namespace RRModelingSystem.Properties {
         internal static System.Drawing.Bitmap icons8_ok_40 {
             get {
                 object obj = ResourceManager.GetObject("icons8-ok-40", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_up_25 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-up-25", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

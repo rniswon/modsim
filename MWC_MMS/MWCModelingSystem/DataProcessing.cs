@@ -37,7 +37,7 @@ namespace RRModelingSystem
         private DateTime dtMODFLOWstart;
         private DataTable featuresTbl;
 
-        public DataProcessing(string dbFile,string MODSIMFile,string controlFile, string syncingDB)
+        public DataProcessing(string dbFile, string MODSIMFile, string controlFile, string syncingDB)
         {
             InitializeComponent();
 
@@ -52,17 +52,17 @@ namespace RRModelingSystem
 
             //ModsimFile = textBox1.Text;
             ProcessModsimFile = MODSIMFile;
-                        
+
             Load_ControlFileInfo(controlFile);
 
-            Simulation_Load(null,null);
+            Simulation_Load(null, null);
 
             Load_DBInfo();
 
             //check for only new option
             comboBoxTSTypes_SelectedIndexChanged(null, null);
 
-            for (int i = 1; i<= 12; i++)
+            for (int i = 1; i <= 12; i++)
             {
                 dataGridViewMonthlyFactors.Rows.Add(new object[] { i, null });
             }
@@ -94,11 +94,11 @@ namespace RRModelingSystem
                 comboBoxTSTypes3.DisplayMember = "TSName";
 
                 comboBoxTSTypes2.Items.Clear();
-                foreach(DataRow dr2 in TSTypeTbl.Rows)
+                foreach (DataRow dr2 in TSTypeTbl.Rows)
                 {
                     comboBoxTSTypes2.Items.Add(dr2["TSName"]);
                 }
-                
+
                 DataTable TSTypeTbl2 = m_DBUtils.GetTableFromDB(tsQuery, "Features");
                 comboBoxDSetTSTypes.DataSource = TSTypeTbl2;
                 comboBoxDSetTSTypes.DisplayMember = "TSName";
@@ -198,7 +198,7 @@ namespace RRModelingSystem
                             Utils.DisConnectFromNode(l);
                             Utils.DisConnectToNode(l);
 
-                            
+
                             if (info[1].Contains("AG_FLG:1"))
                             {
                                 //Process Ag demand
@@ -252,8 +252,8 @@ namespace RRModelingSystem
                                 Utils.ConnectToNode(l, segNode_);// segNode1);
 
                                 //Create the demand connection
-                                CreateDEMLink(demNode, segNode1,-4);
-                                CreateDEMLink(demNode1, segNode2,-3);
+                                CreateDEMLink(demNode, segNode1, -4);
+                                CreateDEMLink(demNode1, segNode2, -3);
 
                                 //Create the diversion link
                                 CreateConnectionLink(wrNode, segNode);
@@ -322,9 +322,9 @@ namespace RRModelingSystem
                                 Node segNode4 = ProcessNode(POU + "_NOAG3", xstep: 3, yPosition: 4, x1y1, x2y2, NodeType.NonStorage);
 
                                 //Create the demand connections
-                                CreateDEMLink(demNode, segNode2,-3);
-                                CreateDEMLink(demNode2, segNode3,-2);
-                                CreateDEMLink(demNode3, segNode4,-5);
+                                CreateDEMLink(demNode, segNode2, -3);
+                                CreateDEMLink(demNode2, segNode3, -2);
+                                CreateDEMLink(demNode3, segNode4, -5);
 
                                 //Create NonSto-NoAG connections
                                 CreateConnectionLink(segNode_, segNode2);
@@ -344,7 +344,7 @@ namespace RRModelingSystem
                                 resNode.m.resBalance.incrPriorities = new long[] { 1 };
                                 resNode.m.resBalance.targetPercentages = new double[] { 100 };
                                 resNode.m.resBalance.PercentBasedOnMaxCapacity = true;
-                                
+
 
                                 Node segNode = ProcessNode(POU + "_STO", xstep: 1, yPosition: 0, x1y1, x2y2, NodeType.NonStorage);
 
@@ -451,7 +451,7 @@ namespace RRModelingSystem
             }
         }
 
-        private void CreateConnectionLink(Node diversionNode, Node segNode, string nameOverwrite="")
+        private void CreateConnectionLink(Node diversionNode, Node segNode, string nameOverwrite = "")
         {
             string lName = $"{diversionNode.name}_{segNode.name}";
             if (nameOverwrite != "")
@@ -466,7 +466,7 @@ namespace RRModelingSystem
             }
         }
 
-        private void CreateDEMLink(Node demNode, Node segNode,int cost)
+        private void CreateDEMLink(Node demNode, Node segNode, int cost)
         {
             Link m_Link3 = myModel.FindLink($"{demNode.name}_Cost");
             if (m_Link3 == null)
@@ -597,7 +597,7 @@ namespace RRModelingSystem
 
         private void buttonProcessData_Click(object sender, EventArgs e)
         {
-            if (treeView1.SelectedNode == null)
+            if (treeViewDatasets.SelectedNode == null)
             {
                 PrintMessage("Error: select a timeseries dataset.");
                 return;
@@ -612,7 +612,7 @@ namespace RRModelingSystem
             ProcessTimeSeriesDataSet();
             PrintMessage("Completed.");
         }
-        
+
 
 
 
@@ -642,10 +642,10 @@ namespace RRModelingSystem
                 string cmdtxt = "SELECT ID, DSName FROM DatasetsInfo;";
                 DataTable dt = m_DBUtils.GetTableFromDB(cmdtxt, "Scns"); //ExecuteCommand(cmdtxt);
 
-                treeView1.Nodes.Clear();
+                treeViewDatasets.Nodes.Clear();
                 foreach (DataRow r in dt.Rows)
                 {
-                    treeView1.Nodes.Add(r["ID"].ToString(), r["DSName"].ToString());
+                    treeViewDatasets.Nodes.Add(r["ID"].ToString(), r["DSName"].ToString());
                 }
             }
         }
@@ -662,7 +662,7 @@ namespace RRModelingSystem
             OleDbConnection conn = null;
             try
             {
-                string sql =  "INSERT INTO TimeSeries " +
+                string sql = "INSERT INTO TimeSeries " +
                         $"SELECT T.TSDate AS TSDate, '{featureid}' AS FeatureID, '{tstypeid}' AS TSTypeID, L.Flow AS TSValue FROM " +
                         "(" +
                         $"(SELECT* FROM LinksOutput IN '{ModsimFile}') AS L " +
@@ -702,7 +702,7 @@ namespace RRModelingSystem
                 }
             }
         }
-        
+
         private void ProcessTimeSeriesDataSet()
         {
 
@@ -710,7 +710,7 @@ namespace RRModelingSystem
             string m_FileName = ProcessModsimFile;
             try
             {
-                
+
                 if (comboBoxTSFile.Text.Contains("_DIV.xy"))
                     ProcessModsimFile = ProcessModsimFile.Replace(".xy", "_DIV.xy");
                 if (comboBoxTSFile.Text.Contains("_DIV_WR.xy"))
@@ -748,9 +748,10 @@ namespace RRModelingSystem
                 // get TSTypeIDs
                 //string cmdtxt = $"Select TSType From DatasetsTSSet Where Scenario = {treeView1.SelectedNode.Name};";
                 //Assume that the units label is the text to set the MODSIM units 
-                string cmdtxt = "SELECT DatasetsTSSet.TSType, UnitsInfo.Units, TSTypes.MODSIMTSType, TSTypes.IsPattern, TSTypes.TSInterval" +
+                string cmdtxt = "SELECT DatasetsTSSet.Order,DatasetsTSSet.TSType, UnitsInfo.Units, TSTypes.MODSIMTSType, TSTypes.IsPattern, TSTypes.TSInterval" +
                          " FROM UnitsInfo INNER JOIN (DatasetsTSSet INNER JOIN TSTypes ON DatasetsTSSet.TSType = TSTypes.TSTypeID) ON UnitsInfo.UnitsID = TSTypes.UnitsID" +
-                        $" WHERE(((DatasetsTSSet.[Dataset]) =  {treeView1.SelectedNode.Name}));";
+                        $" WHERE(((DatasetsTSSet.[Dataset]) =  {treeViewDatasets.SelectedNode.Name}))" +
+                        $"ORDER BY DatasetsTSSet.Order;";
                 DataTable Datasetdt = m_DBUtils.GetTableFromDB(cmdtxt, "Dataset");//ExecuteCommand(cmdtxt);
 
                 // for each TSTypeID
@@ -860,7 +861,7 @@ namespace RRModelingSystem
                                     break;
                                 case "Demand":
                                     // assign time-series to MODSIM Node
-                                    Node dem = modsim.FindNode(fr["MOD_Name"].ToString());                                   
+                                    Node dem = modsim.FindNode(fr["MOD_Name"].ToString());
                                     if (dem != null) PopulateTS(dem, dem.m.adaDemandsM, tsdt, units, _VariesByYear);
                                     if (fr["Cost"].ToString() != "" && dem.InflowLinks != null)
                                     {
@@ -912,10 +913,10 @@ namespace RRModelingSystem
                 ProcessModsimFile = m_FileName;
 
                 checkBoxResetTSFile.Checked = false;
-            }            
+            }
         }
 
-        private void PopulateTS(Node m_Node, TimeSeries m_TimeSeries, DataTable tsdt, string units,bool variesByYear = true)
+        private void PopulateTS(Node m_Node, TimeSeries m_TimeSeries, DataTable tsdt, string units, bool variesByYear = true)
         {
             if (m_Node != null)
             {
@@ -975,49 +976,60 @@ namespace RRModelingSystem
 
         private void PrintMessage(string msg)
         {
-            if(messageOut!=null)
+            if (messageOut != null)
                 messageOut.Invoke(msg);
             //richTextBox1.Text += msg + '\n';
             //this.Refresh();
         }
 
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
-        {
+        {☻
             this.Cursor = Cursors.WaitCursor;
             LoadFeaturesAndTSTypes();
+            groupBoxSelDSet.Text = "Selected Dataset: " + treeViewDatasets.SelectedNode.Text + $"  (ID:{treeViewDatasets.SelectedNode.Name})";
             this.Cursor = Cursors.Default;
         }
 
         private void LoadFeaturesAndTSTypes()
         {
-            string cmdtxt = $"SELECT TSTypes.TSTypeID,MOD_Name,MODSIMTSType, f.Type"+
-                            " FROM DatasetsTSSet"+
-                            " JOIN TSTypes ON DatasetsTSSet.TSType = TSTypes.TSTypeID"+
-                            " JOIN( {0} ) as f"+
-                            "    ON f.TSTypeID = DatasetsTSSet.TSType"+
-                            $" WHERE DatasetsTSSet.Dataset =  {treeView1.SelectedNode.Name}";
+            string cmdtxt = $"SELECT DatasetsTSSet.[Order], TSTypes.TSTypeID,MOD_Name,MODSIMTSType, f.Type" +
+                            " FROM DatasetsTSSet" +
+                            " JOIN TSTypes ON DatasetsTSSet.TSType = TSTypes.TSTypeID" +
+                            " JOIN( {0} ) as f" +
+                            "    ON f.TSTypeID = DatasetsTSSet.TSType" +
+                            $" WHERE DatasetsTSSet.Dataset =  {treeViewDatasets.SelectedNode.Name}";
             string TSQuery;
             TSQuery = @"SELECT TSPatterns.FeatureID, TSTypeID, MOD_Name, 'Pattern' as Type
                             FROM TSPatterns
                             JOIN Features ON Features.FeatureID = TSPatterns.FeatureID
-                            GROUP BY TSPatterns.FeatureID ";
+                            GROUP BY TSPatterns.FeatureID, TSTypeID ";
             string sql = string.Format(cmdtxt, TSQuery);
             sql += " UNION ALL ";
             TSQuery = @"SELECT Timeseries.FeatureID, TSTypeID, MOD_Name,'Varies by Year' as Type
                             FROM Timeseries
                             JOIN Features ON Features.FeatureID = Timeseries.FeatureID
-                            GROUP BY Timeseries.FeatureID ";
+                            GROUP BY Timeseries.FeatureID, TSTypeID ";
             sql += string.Format(cmdtxt, TSQuery);
 
+            //applying order/layer logic
+            string layers = @"SELECT max(d.[Order]) as [Order],d.TSTypeID,d.MOD_Name,d.MODSIMTSType, d.Type
+                                FROM
+                                ({0})as d
+                                GROUP BY d.MOD_Name,d.MODSIMTSType, d.Type
+                                ORDER BY [Order];";
+            sql = string.Format(layers, sql);     
+
             DataTable dt = m_DBUtils.GetTableFromDB(sql, "FeatTSType");//ExecuteCommand(cmdtxt);
+
+            
 
             // add to colllection
             dataGridView1.DataSource = dt;
 
-            cmdtxt = string.Format(@"SELECT TSType,TSName FROM DatasetsTSSet
+            cmdtxt = string.Format(@"SELECT DatasetsTSSet.[Order], TSType,TSName FROM DatasetsTSSet
                                     JOIN DatasetsInfo ON DatasetsInfo.ID=DatasetsTSSet.Dataset
                                     JOIN TSTypes ON TSTypes.TSTypeID=DatasetsTSSet.TSType
-                                    WHERE DatasetsInfo.ID = '{0}'", treeView1.SelectedNode.Name);
+                                    WHERE DatasetsInfo.ID = '{0}' ORDER BY DatasetsTSSet.[Order]", treeViewDatasets.SelectedNode.Name);
             DataTable dt2 = m_DBUtils.GetTableFromDB(cmdtxt, "FeatTSType");//ExecuteCommand(cmdtxt);
 
             // add to colllection
@@ -1089,7 +1101,7 @@ namespace RRModelingSystem
                             List<Node> connectedNodes = new List<Node>();
 
                             int wrCount = 0;
-                            
+
                             foreach (DataRow dr in drs)
                             {
                                 string WRL_Name;
@@ -1114,7 +1126,7 @@ namespace RRModelingSystem
                                         m_lnks.Add(lout.name);
                                         connectedNodes.Add(lout.to);
                                         lout.name = $"{inNode.name}-{lout.to.name}";
-                                        
+
 
                                         //Set Storage
                                         if (lout.to.name.EndsWith("_STO"))
@@ -1171,7 +1183,7 @@ namespace RRModelingSystem
                                         {
                                             Node resNode = myModel.FindNode(POUName + "_RES");
                                             resNode.m.max_volume += (long)Math.Round(double.Parse(dr["StorageAmount_AF"].ToString()) * myModel.ScaleFactor, 0);
-                                            SettingResTarget(ref resNode, resNode.m.max_volume, myModel.TimeStepManager.Index2Date(1,TypeIndexes.DataIndex));
+                                            SettingResTarget(ref resNode, resNode.m.max_volume, myModel.TimeStepManager.Index2Date(1, TypeIndexes.DataIndex));
                                             resNode.description += $" { dr["Application ID"]}+{dr["StorageAmount_AF"]} :";
                                             //SetMonthlyStorage(ref m_Link, dr, startdate);
                                         }
@@ -1180,7 +1192,7 @@ namespace RRModelingSystem
 
                                 //Create the link
                                 WRL_Name = $"WR_{dr["Application ID"]}";
-                                m_Link = myModel.FindLink(defaultWRLnk != null?defaultWRLnk: WRL_Name);
+                                m_Link = myModel.FindLink(defaultWRLnk != null ? defaultWRLnk : WRL_Name);
                                 if (m_Link == null)
                                 {
                                     m_Link = myModel.AddNewLink(true);
@@ -1189,8 +1201,8 @@ namespace RRModelingSystem
                                 }
                                 m_Link.name = WRL_Name;
                                 m_Link.m.waterRightsDate = DateTime.Parse(dr["Priority Date"].ToString());
-                                long maxCapacity =  (long)Math.Round(double.Parse(dr["Face Value"].ToString()) * myModel.ScaleFactor, 0);
-                                
+                                long maxCapacity = (long)Math.Round(double.Parse(dr["Face Value"].ToString()) * myModel.ScaleFactor, 0);
+
                                 // Ignoring tthe entries with Face Value = 0 since it's a reporting issue (missing)
                                 //
                                 //if (maxCapacity == 0)
@@ -1219,7 +1231,7 @@ namespace RRModelingSystem
                 DataRow[] wrdrs = wrTbl.Select($"[WR_Type] <> 'Riparian'", "Priority Date");
                 int upperCost = int.Parse(textBoxCostFrom.Text) > int.Parse(textBoxCostTo.Text) ? int.Parse(textBoxCostFrom.Text) : int.Parse(textBoxCostTo.Text);
                 int lowerCost = int.Parse(textBoxCostFrom.Text) > int.Parse(textBoxCostTo.Text) ? int.Parse(textBoxCostTo.Text) : int.Parse(textBoxCostFrom.Text);
-                int increment = (int)Math.Round((double)(upperCost - lowerCost) / wrdrs.Length,0);
+                int increment = (int)Math.Round((double)(upperCost - lowerCost) / wrdrs.Length, 0);
                 if (increment < 10)
                     throw new Exception("   ERROR: [Assigning costs] Diversion structure internal cost needs at least 10 units of cost between water rights.");
                 PrintMessage($"     Assigning cost to {wrdrs.Length} water rights between {upperCost} and {lowerCost} with {increment} increment.");
@@ -1240,10 +1252,10 @@ namespace RRModelingSystem
 
                 PrintMessage($"Finished. \n Saved file as: {myModel.fname}");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 PrintMessage($"ERROR processing water rights. \n{ex.Message} \n {ex.StackTrace}");
-                
+
             }
             finally
             {
@@ -1253,7 +1265,7 @@ namespace RRModelingSystem
 
         private void SettingResTarget(ref Node resNode, long volume, DateTime startDate)
         {
-            if(resNode.m.adaTargetsM.dataTable.Rows.Count==0)
+            if (resNode.m.adaTargetsM.dataTable.Rows.Count == 0)
             {
                 resNode.m.adaTargetsM.dataTable.Rows.Add(new object[] { startDate, volume });
             }
@@ -1261,22 +1273,22 @@ namespace RRModelingSystem
             {
                 resNode.m.adaTargetsM.dataTable.Rows[0][1] = volume;
             }
-            
+
         }
 
         private void SetMonthlyStorage(ref Link m_Link, DataRow dr, DateTime startdate)
         {
             DataTable tsdt = m_Link.m.maxVariable.dataTable.Clone();
             DateTime m_dt = startdate;
-            for (int i =0;i<12;i++)
+            for (int i = 0; i < 12; i++)
             {
                 string monColName = $"{m_dt.ToString("MMM")}_Allwd_DivStor";
-                tsdt.Rows.Add(new object[] { m_dt, (long)Math.Round(double.Parse(dr[monColName].ToString()) * myModel.ScaleFactor, 0)});
+                tsdt.Rows.Add(new object[] { m_dt, (long)Math.Round(double.Parse(dr[monColName].ToString()) * myModel.ScaleFactor, 0) });
                 m_dt = m_dt.AddMonths(1);
             }
             m_Link.m.maxVariable.dataTable = tsdt;
             m_Link.m.maxVariable.VariesByYear = false;
-            m_Link.m.maxVariable.units = new ModsimUnits(VolumeUnitsType.AF,ModsimTimeStep.FromLabel("Monthly"));
+            m_Link.m.maxVariable.units = new ModsimUnits(VolumeUnitsType.AF, ModsimTimeStep.FromLabel("Monthly"));
         }
 
         private void buttonImportGSData_Click(object sender, EventArgs e)
@@ -1587,7 +1599,7 @@ namespace RRModelingSystem
         {
             int TSTypeID = int.Parse(dataGridViewTSType.SelectedRows[0].Cells["TSTypeID"].Value.ToString());
             string TSName = dataGridViewTSType.SelectedRows[0].Cells["TSName"].Value.ToString();
-            if (MessageBox.Show($"Do you want to delete all data for TSType: {TSName}?","Delete Data",MessageBoxButtons.YesNo)==DialogResult.Yes)
+            if (MessageBox.Show($"Do you want to delete all data for TSType: {TSName}?", "Delete Data", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
                 string sql = $"DELETE FROM Timeseries WHERE TSTypeID = {TSTypeID}";
                 int delted = m_DBUtils.ExecuteQuery(sql);
@@ -1610,12 +1622,13 @@ namespace RRModelingSystem
         private void buttonAddTSType_Click(object sender, EventArgs e)
         {
             int TS = int.Parse(((System.Data.DataRowView)comboBoxDSetTSTypes.SelectedItem).Row.ItemArray[0].ToString());
+            int newOrder = dataGridViewDSetTSTypes.Rows.Count + 1;
             string cmdtxt = $@"INSERT INTO DatasetsTSSet
-                               VALUES ({treeView1.SelectedNode.Name},{TS},'User added {DateTime.Now.ToShortDateString()}')";
-            
+                               VALUES ({treeViewDatasets.SelectedNode.Name},{newOrder},{TS},'User added {DateTime.Now.ToShortDateString()}')";
+                                    //(SELECT Max([Order])+1 AS NewOrder FROM DatasetsTSSet WHERE Dataset={treeViewDatasets.SelectedNode.Name})
             int added = m_DBUtils.ExecuteQuery(cmdtxt);
-            if(added>0)
-                messageOut($"Added TSType {TS} to Dataset {treeView1.SelectedNode.Name}");
+            if (added > 0)
+                messageOut($"Added TSType {TS} to Dataset {treeViewDatasets.SelectedNode.Name}");
             treeView1_AfterSelect(null, null);
 
         }
@@ -1628,9 +1641,9 @@ namespace RRModelingSystem
         private void buttonDelDSetTSType_Click(object sender, EventArgs e)
         {
             int TSTypeID = int.Parse(dataGridViewDSetTSTypes.SelectedRows[0].Cells["TSType"].Value.ToString());
-            if (MessageBox.Show($"Do you want to remove TSType: {TSTypeID} from Dataset {treeView1.SelectedNode.Text}?", "Delete Data", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (MessageBox.Show($"Do you want to remove TSType: {TSTypeID} from Dataset {treeViewDatasets.SelectedNode.Text}?", "Delete Data", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                string sql = $"DELETE FROM DatasetsTSSet WHERE TSType = {TSTypeID} AND Dataset = {treeView1.SelectedNode.Name}";
+                string sql = $"DELETE FROM DatasetsTSSet WHERE TSType = {TSTypeID} AND Dataset = {treeViewDatasets.SelectedNode.Name}";
                 m_DBUtils.ExecuteQuery(sql);
                 messageOut($"   Deleted entry from the DatasetsTSSet table");
                 treeView1_AfterSelect(null, null);
@@ -1645,7 +1658,7 @@ namespace RRModelingSystem
                 dlg.RestoreDirectory = true;
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
-                    textBoxSegFlowFile.Text =dlg.FileName;
+                    textBoxSegFlowFile.Text = dlg.FileName;
                 }
             }
         }
@@ -1658,7 +1671,7 @@ namespace RRModelingSystem
 
         private void radioButton3_CheckedChanged(object sender, EventArgs e)
         {
-            
+
         }
 
         private void comboBoxTSTypes2_SelectedIndexChanged(object sender, EventArgs e)
@@ -1709,7 +1722,7 @@ namespace RRModelingSystem
                 //Clear time series
                 if (checkBoxDelTSTypeTS.Checked)
                 {
-                    if(isBasePattern)
+                    if (isBasePattern)
                     {
                         sql = $"DELETE FROM Timeseries WHERE TSTypeID = {newTS}";
                         PrintMessage($"Deleting time series for TSTypeID = {newTS}");
@@ -1721,7 +1734,7 @@ namespace RRModelingSystem
                         PrintMessage($"Deleting time series for TSTypeID = {newTS}");
                         m_DBUtils.ExecuteQuery(sql);
                     }
-                  
+
                 }
 
                 //Create factors table in the database
@@ -1749,7 +1762,7 @@ namespace RRModelingSystem
                             ";
                 }
 
-                
+
                 messageOut("Updating the database time series...");
                 m_DBUtils.ExecuteQuery(tsQuery);
                 Load_DBInfo();
@@ -1834,7 +1847,7 @@ namespace RRModelingSystem
         private string filterString()
         {
             string filter = "";
-            if(radioButtonStartWith.Checked)
+            if (radioButtonStartWith.Checked)
             {
                 return $" AND Features.MOD_Name LIKE '{comboBoxFilterName.Text}%'";
             }
@@ -1882,6 +1895,89 @@ namespace RRModelingSystem
         private void comboBoxFilterName_TextUpdate(object sender, EventArgs e)
         {
             LoadFeaturesFiltered();
+        }
+
+        private void splitContainer1_Panel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void buttonMoveTSUp_Click(object sender, EventArgs e)
+        {
+            if (dataGridViewDSetTSTypes.SelectedRows.Count > 0)
+            {
+                int datasetSel = int.Parse(treeViewDatasets.SelectedNode.Name);
+                int orderSel = int.Parse(dataGridViewDSetTSTypes.SelectedRows[0].Cells["Order"].Value.ToString());
+                int tsTypeSel = int.Parse(dataGridViewDSetTSTypes.SelectedRows[0].Cells["TSType"].Value.ToString());
+
+                if (orderSel > 1)
+                {
+                    this.Cursor = Cursors.WaitCursor;
+                    m_DBUtils.ExecuteNonQuery($"UPDATE DatasetsTSSet SET [Order] = [Order] + 1 " +
+                        $"WHERE [Dataset] = {datasetSel} AND [Order] = {orderSel}-1");
+                    m_DBUtils.ExecuteNonQuery($"UPDATE DatasetsTSSet SET [Order] = {orderSel - 1} " +
+                        $"WHERE [Dataset] = {datasetSel} AND [TSType]={tsTypeSel}");
+                    LoadFeaturesAndTSTypes();
+                    this.Cursor = Cursors.Default;
+                }
+            }
+            else
+                messageOut("ERROR: Please select a TSType row to move up.");
+        }
+
+        private void buttonNewDSet_Click(object sender, EventArgs e)
+        {
+            if(textBoxNewDSName.Text=="")
+            {
+                messageOut("ERROR: Please type a name for the new Dataset.");
+                return;
+            }
+            string TSTypeID = "NULL";
+            string TSNametxt = textBoxNewDSName.Text;
+            string sql = $"INSERT OR REPLACE INTO DatasetsInfo VALUES ({TSTypeID},'{TSNametxt}','User added Dataset.')";
+            int newDS = m_DBUtils.ExecuteQuery(sql);
+            LoadScenarios();
+            messageOut($"\tDataset {TSNametxt} created in the database.");
+            textBoxNewDSName.Text = "";
+        }
+
+        private void buttonMoveTSDown_Click(object sender, EventArgs e)
+        {
+            if (dataGridViewDSetTSTypes.SelectedRows.Count > 0)
+            {
+                int datasetSel = int.Parse(treeViewDatasets.SelectedNode.Name);
+                int orderSel = int.Parse(dataGridViewDSetTSTypes.SelectedRows[0].Cells["Order"].Value.ToString());
+                int tsTypeSel = int.Parse(dataGridViewDSetTSTypes.SelectedRows[0].Cells["TSType"].Value.ToString());
+
+                if (orderSel < dataGridViewDSetTSTypes.Rows.Count)
+                {
+                    this.Cursor = Cursors.WaitCursor;
+                    m_DBUtils.ExecuteNonQuery($"UPDATE DatasetsTSSet SET [Order] = [Order] - 1 " +
+                        $"WHERE [Dataset] = {datasetSel} AND [Order] = {orderSel}+1");
+                    m_DBUtils.ExecuteNonQuery($"UPDATE DatasetsTSSet SET [Order] = {orderSel + 1} " +
+                        $"WHERE [Dataset] = {datasetSel} AND [TSType]={tsTypeSel}");
+                    LoadFeaturesAndTSTypes();
+                    this.Cursor = Cursors.Default;
+                }
+            }
+            else
+                messageOut("ERROR: Please select a TSType row to move up.");
+        }
+
+        private void buttonDelTSet_Click(object sender, EventArgs e)
+        {
+            if(MessageBox.Show($"Are you sure you want to delete dataset {treeViewDatasets.SelectedNode.Text}?", "Delete Dataset", MessageBoxButtons.YesNo)==DialogResult.Yes)
+            {
+                string sql = $"DELETE FROM DatasetsTSSet WHERE Dataset = {treeViewDatasets.SelectedNode.Name}";
+                m_DBUtils.ExecuteQuery(sql);
+                messageOut($"   Deleted entries from the DatasetsTSSet table for Dataset {treeViewDatasets.SelectedNode.Text}.");
+                sql = $"DELETE FROM DatasetsInfo WHERE ID = {treeViewDatasets.SelectedNode.Name}";
+                m_DBUtils.ExecuteQuery(sql);
+                messageOut($"   Deleted entry from the DatasetsInfo table.");
+
+                LoadScenarios();
+                treeViewDatasets.SelectedNode = treeViewDatasets.Nodes[0];
+            }
         }
     }
 }

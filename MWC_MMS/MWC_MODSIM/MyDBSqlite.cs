@@ -439,11 +439,12 @@ namespace RTI.CWR.MMS_Support
                 if (!IsTableExist("DatasetsTSSet"))
                 {
                     string sql = @"CREATE TABLE DatasetsTSSet (
-	                                Dataset	INTEGER,
-	                                TSType	INTEGER,
-	                                Notes	TEXT,
-	                                PRIMARY KEY(Dataset,TSType)
-                                )";
+                                        Dataset   INTEGER,
+	                                    [Order] INTEGER,
+	                                    TSType    INTEGER,
+	                                    Notes TEXT,
+	                                    PRIMARY KEY(Dataset,TSType,[Order])
+                                    );";
                     ExecuteNonQuery(sql);
                 }
 

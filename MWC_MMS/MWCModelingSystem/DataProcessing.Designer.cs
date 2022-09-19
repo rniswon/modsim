@@ -28,15 +28,20 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.treeView1 = new System.Windows.Forms.TreeView();
+            this.buttonDelTSet = new System.Windows.Forms.Button();
+            this.textBoxNewDSName = new System.Windows.Forms.TextBox();
+            this.buttonNewDSet = new System.Windows.Forms.Button();
+            this.treeViewDatasets = new System.Windows.Forms.TreeView();
             this.tabControl3 = new System.Windows.Forms.TabControl();
             this.tabPage7 = new System.Windows.Forms.TabPage();
+            this.buttonMoveTSDown = new System.Windows.Forms.Button();
+            this.buttonMoveTSUp = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.comboBoxDSetTSTypes = new System.Windows.Forms.ComboBox();
             this.buttonDelDSetTSType = new System.Windows.Forms.Button();
@@ -134,18 +139,20 @@
             this.label10 = new System.Windows.Forms.Label();
             this.buttonCreateTS = new System.Windows.Forms.Button();
             this.groupBox13 = new System.Windows.Forms.GroupBox();
+            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.radioButton6 = new System.Windows.Forms.RadioButton();
+            this.radioButton4 = new System.Windows.Forms.RadioButton();
             this.dataGridViewMonthlyFactors = new System.Windows.Forms.DataGridView();
+            this.MonthIndex = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Factor = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.comboBoxTSTypes2 = new System.Windows.Forms.ComboBox();
             this.labelTSTypeNew2 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.txtNewTSName2 = new System.Windows.Forms.TextBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.radioButton4 = new System.Windows.Forms.RadioButton();
-            this.radioButton6 = new System.Windows.Forms.RadioButton();
-            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
-            this.MonthIndex = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Factor = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.textBox6 = new System.Windows.Forms.TextBox();
+            this.groupBoxSelDSet = new System.Windows.Forms.GroupBox();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -190,9 +197,10 @@
             this.groupBox12.SuspendLayout();
             this.groupBox10.SuspendLayout();
             this.groupBox13.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewMonthlyFactors)).BeginInit();
             this.tabPage2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            this.groupBoxSelDSet.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -222,39 +230,78 @@
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.treeView1);
+            this.splitContainer1.Panel1.Controls.Add(this.buttonDelTSet);
+            this.splitContainer1.Panel1.Controls.Add(this.textBoxNewDSName);
+            this.splitContainer1.Panel1.Controls.Add(this.buttonNewDSet);
+            this.splitContainer1.Panel1.Controls.Add(this.treeViewDatasets);
+            this.splitContainer1.Panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer1_Panel1_Paint);
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.tabControl3);
+            this.splitContainer1.Panel2.Controls.Add(this.groupBoxSelDSet);
             this.splitContainer1.Size = new System.Drawing.Size(572, 388);
             this.splitContainer1.SplitterDistance = 157;
             this.splitContainer1.SplitterWidth = 3;
             this.splitContainer1.TabIndex = 14;
             // 
-            // treeView1
+            // buttonDelTSet
             // 
-            this.treeView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeView1.HideSelection = false;
-            this.treeView1.Location = new System.Drawing.Point(0, 0);
-            this.treeView1.Name = "treeView1";
-            this.treeView1.Size = new System.Drawing.Size(157, 388);
-            this.treeView1.TabIndex = 0;
-            this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
+            this.buttonDelTSet.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonDelTSet.Location = new System.Drawing.Point(63, 337);
+            this.buttonDelTSet.Name = "buttonDelTSet";
+            this.buttonDelTSet.Size = new System.Drawing.Size(91, 23);
+            this.buttonDelTSet.TabIndex = 3;
+            this.buttonDelTSet.Text = "Delete Selected";
+            this.buttonDelTSet.UseVisualStyleBackColor = true;
+            this.buttonDelTSet.Click += new System.EventHandler(this.buttonDelTSet_Click);
+            // 
+            // textBoxNewDSName
+            // 
+            this.textBoxNewDSName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxNewDSName.Location = new System.Drawing.Point(4, 364);
+            this.textBoxNewDSName.Name = "textBoxNewDSName";
+            this.textBoxNewDSName.Size = new System.Drawing.Size(104, 20);
+            this.textBoxNewDSName.TabIndex = 2;
+            // 
+            // buttonNewDSet
+            // 
+            this.buttonNewDSet.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonNewDSet.Location = new System.Drawing.Point(114, 362);
+            this.buttonNewDSet.Name = "buttonNewDSet";
+            this.buttonNewDSet.Size = new System.Drawing.Size(40, 23);
+            this.buttonNewDSet.TabIndex = 1;
+            this.buttonNewDSet.Text = "New DS";
+            this.buttonNewDSet.UseVisualStyleBackColor = true;
+            this.buttonNewDSet.Click += new System.EventHandler(this.buttonNewDSet_Click);
+            // 
+            // treeViewDatasets
+            // 
+            this.treeViewDatasets.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.treeViewDatasets.HideSelection = false;
+            this.treeViewDatasets.Location = new System.Drawing.Point(0, 0);
+            this.treeViewDatasets.Name = "treeViewDatasets";
+            this.treeViewDatasets.Size = new System.Drawing.Size(157, 337);
+            this.treeViewDatasets.TabIndex = 0;
+            this.treeViewDatasets.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
             // 
             // tabControl3
             // 
             this.tabControl3.Controls.Add(this.tabPage7);
             this.tabControl3.Controls.Add(this.tabPage8);
             this.tabControl3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl3.Location = new System.Drawing.Point(0, 0);
+            this.tabControl3.Location = new System.Drawing.Point(3, 16);
             this.tabControl3.Name = "tabControl3";
             this.tabControl3.SelectedIndex = 0;
-            this.tabControl3.Size = new System.Drawing.Size(412, 388);
+            this.tabControl3.Size = new System.Drawing.Size(406, 369);
             this.tabControl3.TabIndex = 13;
             // 
             // tabPage7
             // 
+            this.tabPage7.Controls.Add(this.buttonMoveTSDown);
+            this.tabPage7.Controls.Add(this.buttonMoveTSUp);
             this.tabPage7.Controls.Add(this.label4);
             this.tabPage7.Controls.Add(this.comboBoxDSetTSTypes);
             this.tabPage7.Controls.Add(this.buttonDelDSetTSType);
@@ -263,16 +310,38 @@
             this.tabPage7.Location = new System.Drawing.Point(4, 22);
             this.tabPage7.Name = "tabPage7";
             this.tabPage7.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage7.Size = new System.Drawing.Size(404, 362);
+            this.tabPage7.Size = new System.Drawing.Size(398, 343);
             this.tabPage7.TabIndex = 0;
             this.tabPage7.Text = "TSTypes";
             this.tabPage7.UseVisualStyleBackColor = true;
+            // 
+            // buttonMoveTSDown
+            // 
+            this.buttonMoveTSDown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonMoveTSDown.Image = global::RRModelingSystem.Properties.Resources.icons8_down_25;
+            this.buttonMoveTSDown.Location = new System.Drawing.Point(366, 44);
+            this.buttonMoveTSDown.Name = "buttonMoveTSDown";
+            this.buttonMoveTSDown.Size = new System.Drawing.Size(29, 32);
+            this.buttonMoveTSDown.TabIndex = 15;
+            this.buttonMoveTSDown.UseVisualStyleBackColor = true;
+            this.buttonMoveTSDown.Click += new System.EventHandler(this.buttonMoveTSDown_Click);
+            // 
+            // buttonMoveTSUp
+            // 
+            this.buttonMoveTSUp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonMoveTSUp.Image = global::RRModelingSystem.Properties.Resources.icons8_up_25;
+            this.buttonMoveTSUp.Location = new System.Drawing.Point(366, 6);
+            this.buttonMoveTSUp.Name = "buttonMoveTSUp";
+            this.buttonMoveTSUp.Size = new System.Drawing.Size(29, 32);
+            this.buttonMoveTSUp.TabIndex = 14;
+            this.buttonMoveTSUp.UseVisualStyleBackColor = true;
+            this.buttonMoveTSUp.Click += new System.EventHandler(this.buttonMoveTSUp_Click);
             // 
             // label4
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(4, 341);
+            this.label4.Location = new System.Drawing.Point(4, 322);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(54, 13);
             this.label4.TabIndex = 13;
@@ -285,15 +354,15 @@
             this.comboBoxDSetTSTypes.FormattingEnabled = true;
             this.comboBoxDSetTSTypes.Items.AddRange(new object[] {
             "<< New >>"});
-            this.comboBoxDSetTSTypes.Location = new System.Drawing.Point(59, 338);
+            this.comboBoxDSetTSTypes.Location = new System.Drawing.Point(59, 319);
             this.comboBoxDSetTSTypes.Name = "comboBoxDSetTSTypes";
-            this.comboBoxDSetTSTypes.Size = new System.Drawing.Size(157, 21);
+            this.comboBoxDSetTSTypes.Size = new System.Drawing.Size(151, 21);
             this.comboBoxDSetTSTypes.TabIndex = 12;
             // 
             // buttonDelDSetTSType
             // 
             this.buttonDelDSetTSType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonDelDSetTSType.Location = new System.Drawing.Point(308, 338);
+            this.buttonDelDSetTSType.Location = new System.Drawing.Point(302, 319);
             this.buttonDelDSetTSType.Name = "buttonDelDSetTSType";
             this.buttonDelDSetTSType.Size = new System.Drawing.Size(93, 23);
             this.buttonDelDSetTSType.TabIndex = 7;
@@ -304,7 +373,7 @@
             // buttonAddTSType
             // 
             this.buttonAddTSType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAddTSType.Location = new System.Drawing.Point(216, 338);
+            this.buttonAddTSType.Location = new System.Drawing.Point(210, 319);
             this.buttonAddTSType.Name = "buttonAddTSType";
             this.buttonAddTSType.Size = new System.Drawing.Size(93, 23);
             this.buttonAddTSType.TabIndex = 8;
@@ -321,14 +390,17 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridViewDSetTSTypes.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewDSetTSTypes.Location = new System.Drawing.Point(6, 6);
+            this.dataGridViewDSetTSTypes.MultiSelect = false;
             this.dataGridViewDSetTSTypes.Name = "dataGridViewDSetTSTypes";
+            this.dataGridViewDSetTSTypes.ReadOnly = true;
             this.dataGridViewDSetTSTypes.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridViewDSetTSTypes.Size = new System.Drawing.Size(395, 332);
+            this.dataGridViewDSetTSTypes.Size = new System.Drawing.Size(356, 313);
             this.dataGridViewDSetTSTypes.TabIndex = 0;
             // 
             // tabPage8
             // 
             this.tabPage8.Controls.Add(this.dataGridView1);
+            this.tabPage8.Controls.Add(this.textBox6);
             this.tabPage8.Location = new System.Drawing.Point(4, 22);
             this.tabPage8.Name = "tabPage8";
             this.tabPage8.Padding = new System.Windows.Forms.Padding(3);
@@ -341,7 +413,7 @@
             // 
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridView1.Location = new System.Drawing.Point(3, 3);
+            this.dataGridView1.Location = new System.Drawing.Point(3, 21);
             this.dataGridView1.Margin = new System.Windows.Forms.Padding(2);
             this.dataGridView1.MultiSelect = false;
             this.dataGridView1.Name = "dataGridView1";
@@ -349,7 +421,7 @@
             this.dataGridView1.RowHeadersVisible = false;
             this.dataGridView1.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
             this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.Size = new System.Drawing.Size(398, 356);
+            this.dataGridView1.Size = new System.Drawing.Size(398, 338);
             this.dataGridView1.TabIndex = 0;
             // 
             // radioButtonClearTS
@@ -892,23 +964,23 @@
             // 
             this.dataGridViewTSType.AllowUserToAddRows = false;
             this.dataGridViewTSType.AllowUserToDeleteRows = false;
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridViewTSType.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewTSType.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.dataGridViewTSType.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridViewTSType.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewTSType.DefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridViewTSType.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewTSType.Location = new System.Drawing.Point(3, 16);
             this.dataGridViewTSType.Name = "dataGridViewTSType";
@@ -1034,23 +1106,23 @@
             this.dataGridViewFeat.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridViewFeat.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewFeat.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridViewFeat.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle8.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle8.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridViewFeat.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewFeat.DefaultCellStyle = dataGridViewCellStyle4;
             this.dataGridViewFeat.Location = new System.Drawing.Point(6, 19);
             this.dataGridViewFeat.Name = "dataGridViewFeat";
             this.dataGridViewFeat.ReadOnly = true;
@@ -1503,6 +1575,41 @@
             this.groupBox13.TabStop = false;
             this.groupBox13.Text = "Time series factors";
             // 
+            // numericUpDown1
+            // 
+            this.numericUpDown1.DecimalPlaces = 3;
+            this.numericUpDown1.Location = new System.Drawing.Point(60, 19);
+            this.numericUpDown1.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.numericUpDown1.Name = "numericUpDown1";
+            this.numericUpDown1.Size = new System.Drawing.Size(83, 20);
+            this.numericUpDown1.TabIndex = 3;
+            // 
+            // radioButton6
+            // 
+            this.radioButton6.AutoSize = true;
+            this.radioButton6.Location = new System.Drawing.Point(149, 19);
+            this.radioButton6.Name = "radioButton6";
+            this.radioButton6.Size = new System.Drawing.Size(62, 17);
+            this.radioButton6.TabIndex = 2;
+            this.radioButton6.Text = "Monthly";
+            this.radioButton6.UseVisualStyleBackColor = true;
+            // 
+            // radioButton4
+            // 
+            this.radioButton4.AutoSize = true;
+            this.radioButton4.Checked = true;
+            this.radioButton4.Location = new System.Drawing.Point(6, 19);
+            this.radioButton4.Name = "radioButton4";
+            this.radioButton4.Size = new System.Drawing.Size(58, 17);
+            this.radioButton4.TabIndex = 1;
+            this.radioButton4.TabStop = true;
+            this.radioButton4.Text = "Annual";
+            this.radioButton4.UseVisualStyleBackColor = true;
+            // 
             // dataGridViewMonthlyFactors
             // 
             this.dataGridViewMonthlyFactors.AllowUserToAddRows = false;
@@ -1519,6 +1626,17 @@
             this.dataGridViewMonthlyFactors.RowHeadersVisible = false;
             this.dataGridViewMonthlyFactors.Size = new System.Drawing.Size(208, 128);
             this.dataGridViewMonthlyFactors.TabIndex = 0;
+            // 
+            // MonthIndex
+            // 
+            this.MonthIndex.HeaderText = "Month Index";
+            this.MonthIndex.Name = "MonthIndex";
+            this.MonthIndex.ReadOnly = true;
+            // 
+            // Factor
+            // 
+            this.Factor.HeaderText = "Factor";
+            this.Factor.Name = "Factor";
             // 
             // comboBoxTSTypes2
             // 
@@ -1587,51 +1705,29 @@
             this.tabPage2.Text = "Export Time Series";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // radioButton4
+            // textBox6
             // 
-            this.radioButton4.AutoSize = true;
-            this.radioButton4.Checked = true;
-            this.radioButton4.Location = new System.Drawing.Point(6, 19);
-            this.radioButton4.Name = "radioButton4";
-            this.radioButton4.Size = new System.Drawing.Size(58, 17);
-            this.radioButton4.TabIndex = 1;
-            this.radioButton4.TabStop = true;
-            this.radioButton4.Text = "Annual";
-            this.radioButton4.UseVisualStyleBackColor = true;
+            this.textBox6.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.textBox6.Dock = System.Windows.Forms.DockStyle.Top;
+            this.textBox6.Location = new System.Drawing.Point(3, 3);
+            this.textBox6.Multiline = true;
+            this.textBox6.Name = "textBox6";
+            this.textBox6.ReadOnly = true;
+            this.textBox6.Size = new System.Drawing.Size(398, 18);
+            this.textBox6.TabIndex = 16;
+            this.textBox6.TabStop = false;
+            this.textBox6.Text = "Features include the layer processing of the TSTypes in the dataset.";
             // 
-            // radioButton6
+            // groupBoxSelDSet
             // 
-            this.radioButton6.AutoSize = true;
-            this.radioButton6.Location = new System.Drawing.Point(149, 19);
-            this.radioButton6.Name = "radioButton6";
-            this.radioButton6.Size = new System.Drawing.Size(62, 17);
-            this.radioButton6.TabIndex = 2;
-            this.radioButton6.Text = "Monthly";
-            this.radioButton6.UseVisualStyleBackColor = true;
-            // 
-            // numericUpDown1
-            // 
-            this.numericUpDown1.DecimalPlaces = 3;
-            this.numericUpDown1.Location = new System.Drawing.Point(60, 19);
-            this.numericUpDown1.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(83, 20);
-            this.numericUpDown1.TabIndex = 3;
-            // 
-            // MonthIndex
-            // 
-            this.MonthIndex.HeaderText = "Month Index";
-            this.MonthIndex.Name = "MonthIndex";
-            this.MonthIndex.ReadOnly = true;
-            // 
-            // Factor
-            // 
-            this.Factor.HeaderText = "Factor";
-            this.Factor.Name = "Factor";
+            this.groupBoxSelDSet.Controls.Add(this.tabControl3);
+            this.groupBoxSelDSet.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBoxSelDSet.Location = new System.Drawing.Point(0, 0);
+            this.groupBoxSelDSet.Name = "groupBoxSelDSet";
+            this.groupBoxSelDSet.Size = new System.Drawing.Size(412, 388);
+            this.groupBoxSelDSet.TabIndex = 14;
+            this.groupBoxSelDSet.TabStop = false;
+            this.groupBoxSelDSet.Text = "Selected Dataset: ";
             // 
             // DataProcessing
             // 
@@ -1644,6 +1740,7 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel1.PerformLayout();
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
@@ -1652,6 +1749,7 @@
             this.tabPage7.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewDSetTSTypes)).EndInit();
             this.tabPage8.ResumeLayout(false);
+            this.tabPage8.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
@@ -1699,9 +1797,10 @@
             this.groupBox10.PerformLayout();
             this.groupBox13.ResumeLayout(false);
             this.groupBox13.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewMonthlyFactors)).EndInit();
             this.tabPage2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+            this.groupBoxSelDSet.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -1709,7 +1808,7 @@
         #endregion
 
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.TreeView treeView1;
+        private System.Windows.Forms.TreeView treeViewDatasets;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Button buttonProcessData;
         private System.Windows.Forms.RadioButton radioButton2;
@@ -1822,5 +1921,12 @@
         private System.Windows.Forms.RadioButton radioButton4;
         private System.Windows.Forms.DataGridViewTextBoxColumn MonthIndex;
         private System.Windows.Forms.DataGridViewTextBoxColumn Factor;
+        private System.Windows.Forms.Button buttonDelTSet;
+        private System.Windows.Forms.TextBox textBoxNewDSName;
+        private System.Windows.Forms.Button buttonNewDSet;
+        private System.Windows.Forms.Button buttonMoveTSUp;
+        private System.Windows.Forms.Button buttonMoveTSDown;
+        private System.Windows.Forms.TextBox textBox6;
+        private System.Windows.Forms.GroupBox groupBoxSelDSet;
     }
 }
