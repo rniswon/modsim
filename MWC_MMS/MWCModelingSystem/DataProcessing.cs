@@ -1191,7 +1191,7 @@ namespace RRModelingSystem
                                 }
 
                                 //Create the link
-                                WRL_Name = $"WR_{dr["Application ID"]}";
+                                WRL_Name = $"WR_{dr["WR_Type"]}_{dr["Application ID"]}";
                                 m_Link = myModel.FindLink(defaultWRLnk != null ? defaultWRLnk : WRL_Name);
                                 if (m_Link == null)
                                 {
@@ -1212,7 +1212,7 @@ namespace RRModelingSystem
                                 //    m_Link.m.maxVariable.dataTable.Rows.Add(new object[] { startdate, 0 });
                                 //}
                                 m_Link.m.lnkallow = maxCapacity; //Face value give per year.
-                                m_Link.description = m_Link.m.waterRightsDate.ToShortTimeString();
+                                m_Link.description = m_Link.m.waterRightsDate.ToShortDateString();
 
                                 if (dr["WR_Type"].ToString() == "Riparian")
                                 {
@@ -1238,7 +1238,7 @@ namespace RRModelingSystem
                 int _cost = lowerCost;
                 foreach (DataRow dr in wrdrs)
                 {
-                    Link wrL = myModel.FindLink($"WR_{dr["Application ID"]}");
+                    Link wrL = myModel.FindLink($"WR_{dr["WR_Type"]}_{dr["Application ID"]}");
                     if (wrL != null)
                     {
                         wrL.m.cost = _cost;
