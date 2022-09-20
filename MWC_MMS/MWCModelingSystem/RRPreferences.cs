@@ -26,6 +26,7 @@ namespace RRModelingSystem
 
         private DataTable prefsTbl;
         private bool loading = true;
+        public static string rutaPumping = "";
 
         public RRPreferences(string MMSDatabase)
         {
@@ -241,6 +242,34 @@ namespace RRModelingSystem
         {
             hasChanges = true;
             UpdatePreferences("Control File", textBoxControlFile.Text);
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog dlg = new OpenFileDialog())
+            {
+                dlg.Filter = "Pumping File (*.wel)|*.wel|All files (*.*)|*.*";
+                dlg.RestoreDirectory = true;
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    textBoxPumpingFile.Text = Uri.UnescapeDataString(dlg.FileName);
+                    if (textBoxPumpingFile.Text.Contains(textBoxWorkspace.Text))
+                        textBoxPumpingFile.Text = textBoxPumpingFile.Text.Replace(textBoxWorkspace.Text, "");
+                    else
+                    {
+                        MessageBox.Show("File not found in the workspace. Please move the file to the specified workspace.");
+                        textBoxPumpingFile.Text = "";
+                    }
+                    textBoxPumpingFile.Text = textBoxPumpingFile.Text.StartsWith("\\") ? textBoxPumpingFile.Text.Substring(1) : textBoxPumpingFile.Text;
+                    rutaPumping = textBoxPumpingFile.Text;
+                }
+            }
+        }
+
+        private void textBoxPumpingFile_TextChanged(object sender, EventArgs e)
+        {
+            hasChanges = true;
+            UpdatePreferences("Pumping File", textBoxPumpingFile.Text);
         }
     }
 }

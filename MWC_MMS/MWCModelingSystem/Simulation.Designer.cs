@@ -49,6 +49,9 @@
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.dataGridViewISF = new System.Windows.Forms.DataGridView();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.txtFactor = new System.Windows.Forms.TextBox();
+            this.checkFactor = new System.Windows.Forms.CheckBox();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
             this.groupBoxRunInfo = new System.Windows.Forms.GroupBox();
             this.checkBoxUseInName = new System.Windows.Forms.CheckBox();
@@ -79,6 +82,7 @@
             this.groupBox7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewISF)).BeginInit();
             this.groupBox4.SuspendLayout();
+            this.groupBox8.SuspendLayout();
             this.groupBox9.SuspendLayout();
             this.groupBoxRunInfo.SuspendLayout();
             this.groupBox6.SuspendLayout();
@@ -90,7 +94,7 @@
             // 
             this.buttonExecuteModel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonExecuteModel.Enabled = false;
-            this.buttonExecuteModel.Location = new System.Drawing.Point(476, 167);
+            this.buttonExecuteModel.Location = new System.Drawing.Point(473, 258);
             this.buttonExecuteModel.Name = "buttonExecuteModel";
             this.buttonExecuteModel.Size = new System.Drawing.Size(98, 23);
             this.buttonExecuteModel.TabIndex = 6;
@@ -330,6 +334,8 @@
             this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox4.Controls.Add(this.groupBox8);
+            this.groupBox4.Controls.Add(this.checkFactor);
             this.groupBox4.Controls.Add(this.groupBox9);
             this.groupBox4.Controls.Add(this.checkBoxRiparianLogic);
             this.groupBox4.Controls.Add(this.groupBox6);
@@ -343,6 +349,39 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Simulation Preferences";
             this.groupBox4.Enter += new System.EventHandler(this.groupBox4_Enter);
+            // 
+            // groupBox8
+            // 
+            this.groupBox8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox8.Controls.Add(this.txtFactor);
+            this.groupBox8.Location = new System.Drawing.Point(442, 194);
+            this.groupBox8.Name = "groupBox8";
+            this.groupBox8.Size = new System.Drawing.Size(183, 55);
+            this.groupBox8.TabIndex = 8;
+            this.groupBox8.TabStop = false;
+            this.groupBox8.Text = "Factor";
+            // 
+            // txtFactor
+            // 
+            this.txtFactor.Location = new System.Drawing.Point(9, 20);
+            this.txtFactor.Name = "txtFactor";
+            this.txtFactor.Size = new System.Drawing.Size(101, 20);
+            this.txtFactor.TabIndex = 0;
+            this.txtFactor.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.txtFactor.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
+            // 
+            // checkFactor
+            // 
+            this.checkFactor.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkFactor.AutoSize = true;
+            this.checkFactor.Checked = true;
+            this.checkFactor.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkFactor.Location = new System.Drawing.Point(442, 173);
+            this.checkFactor.Name = "checkFactor";
+            this.checkFactor.Size = new System.Drawing.Size(191, 17);
+            this.checkFactor.TabIndex = 7;
+            this.checkFactor.Text = "Enable Pumping Adjustment Factor";
+            this.checkFactor.UseVisualStyleBackColor = true;
             // 
             // groupBox9
             // 
@@ -460,7 +499,7 @@
             this.checkBoxRiparianLogic.AutoSize = true;
             this.checkBoxRiparianLogic.Checked = true;
             this.checkBoxRiparianLogic.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxRiparianLogic.Location = new System.Drawing.Point(445, 19);
+            this.checkBoxRiparianLogic.Location = new System.Drawing.Point(442, 19);
             this.checkBoxRiparianLogic.Name = "checkBoxRiparianLogic";
             this.checkBoxRiparianLogic.Size = new System.Drawing.Size(179, 17);
             this.checkBoxRiparianLogic.TabIndex = 3;
@@ -472,7 +511,7 @@
             this.groupBox6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox6.Controls.Add(this.radioButtonAgPckge);
             this.groupBox6.Controls.Add(this.radioButtonWRIMS);
-            this.groupBox6.Location = new System.Drawing.Point(446, 103);
+            this.groupBox6.Location = new System.Drawing.Point(443, 103);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Size = new System.Drawing.Size(183, 55);
             this.groupBox6.TabIndex = 2;
@@ -507,7 +546,7 @@
             this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox5.Controls.Add(this.radioButtonMS_GS);
             this.groupBox5.Controls.Add(this.radioButtonMODSIMOnly);
-            this.groupBox5.Location = new System.Drawing.Point(445, 42);
+            this.groupBox5.Location = new System.Drawing.Point(442, 42);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Size = new System.Drawing.Size(184, 55);
             this.groupBox5.TabIndex = 1;
@@ -607,6 +646,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewISF)).EndInit();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
+            this.groupBox8.ResumeLayout(false);
+            this.groupBox8.PerformLayout();
             this.groupBox9.ResumeLayout(false);
             this.groupBox9.PerformLayout();
             this.groupBoxRunInfo.ResumeLayout(false);
@@ -663,5 +704,8 @@
         private System.Windows.Forms.RadioButton radioButtonMMSRun;
         private System.Windows.Forms.RadioButton radioButtonRunActive;
         private System.Windows.Forms.CheckBox checkBoxUseInName;
+        private System.Windows.Forms.GroupBox groupBox8;
+        private System.Windows.Forms.TextBox txtFactor;
+        private System.Windows.Forms.CheckBox checkFactor;
     }
 }
