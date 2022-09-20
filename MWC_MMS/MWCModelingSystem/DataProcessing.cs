@@ -1979,5 +1979,33 @@ namespace RRModelingSystem
                 treeViewDatasets.SelectedNode = treeViewDatasets.Nodes[0];
             }
         }
+
+        private void radioButton4_CheckedChanged_1(object sender, EventArgs e)
+        {
+            numericUpDownAnnFactor.Visible = radioButton4.Checked;
+            dataGridViewMonthlyFactors.ReadOnly = radioButton4.Checked;
+            numericUpDownAnnFactor_ValueChanged(null, null);
+        }
+
+        private void numericUpDownAnnFactor_ValueChanged(object sender, EventArgs e)
+        {
+            foreach(DataGridViewRow dgvr in dataGridViewMonthlyFactors.Rows)
+            {
+                dgvr.Cells[1].Value = numericUpDownAnnFactor.Value;
+            }
+        }
+
+        private void numericUpDownAnnFactor_KeyDown(object sender, KeyEventArgs e)
+        {
+            
+        }
+
+        private void numericUpDownAnnFactor_KeyUp(object sender, KeyEventArgs e)
+        {
+            foreach (DataGridViewRow dgvr in dataGridViewMonthlyFactors.Rows)
+            {
+                dgvr.Cells[1].Value = numericUpDownAnnFactor.Value;
+            }
+        }
     }
 }

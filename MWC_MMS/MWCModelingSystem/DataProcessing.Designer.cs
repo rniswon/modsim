@@ -28,16 +28,17 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.buttonDelTSet = new System.Windows.Forms.Button();
             this.textBoxNewDSName = new System.Windows.Forms.TextBox();
             this.buttonNewDSet = new System.Windows.Forms.Button();
             this.treeViewDatasets = new System.Windows.Forms.TreeView();
+            this.groupBoxSelDSet = new System.Windows.Forms.GroupBox();
             this.tabControl3 = new System.Windows.Forms.TabControl();
             this.tabPage7 = new System.Windows.Forms.TabPage();
             this.buttonMoveTSDown = new System.Windows.Forms.Button();
@@ -49,6 +50,7 @@
             this.dataGridViewDSetTSTypes = new System.Windows.Forms.DataGridView();
             this.tabPage8 = new System.Windows.Forms.TabPage();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.textBox6 = new System.Windows.Forms.TextBox();
             this.radioButtonClearTS = new System.Windows.Forms.RadioButton();
             this.radioButtonLoadTS = new System.Windows.Forms.RadioButton();
             this.textBox5 = new System.Windows.Forms.TextBox();
@@ -139,7 +141,7 @@
             this.label10 = new System.Windows.Forms.Label();
             this.buttonCreateTS = new System.Windows.Forms.Button();
             this.groupBox13 = new System.Windows.Forms.GroupBox();
-            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.numericUpDownAnnFactor = new System.Windows.Forms.NumericUpDown();
             this.radioButton6 = new System.Windows.Forms.RadioButton();
             this.radioButton4 = new System.Windows.Forms.RadioButton();
             this.dataGridViewMonthlyFactors = new System.Windows.Forms.DataGridView();
@@ -151,13 +153,12 @@
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.txtNewTSName2 = new System.Windows.Forms.TextBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.textBox6 = new System.Windows.Forms.TextBox();
-            this.groupBoxSelDSet = new System.Windows.Forms.GroupBox();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            this.groupBoxSelDSet.SuspendLayout();
             this.tabControl3.SuspendLayout();
             this.tabPage7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewDSetTSTypes)).BeginInit();
@@ -197,10 +198,9 @@
             this.groupBox12.SuspendLayout();
             this.groupBox10.SuspendLayout();
             this.groupBox13.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownAnnFactor)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewMonthlyFactors)).BeginInit();
             this.tabPage2.SuspendLayout();
-            this.groupBoxSelDSet.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -286,6 +286,17 @@
             this.treeViewDatasets.Size = new System.Drawing.Size(157, 337);
             this.treeViewDatasets.TabIndex = 0;
             this.treeViewDatasets.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
+            // 
+            // groupBoxSelDSet
+            // 
+            this.groupBoxSelDSet.Controls.Add(this.tabControl3);
+            this.groupBoxSelDSet.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBoxSelDSet.Location = new System.Drawing.Point(0, 0);
+            this.groupBoxSelDSet.Name = "groupBoxSelDSet";
+            this.groupBoxSelDSet.Size = new System.Drawing.Size(412, 388);
+            this.groupBoxSelDSet.TabIndex = 14;
+            this.groupBoxSelDSet.TabStop = false;
+            this.groupBoxSelDSet.Text = "Selected Dataset: ";
             // 
             // tabControl3
             // 
@@ -404,7 +415,7 @@
             this.tabPage8.Location = new System.Drawing.Point(4, 22);
             this.tabPage8.Name = "tabPage8";
             this.tabPage8.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage8.Size = new System.Drawing.Size(404, 362);
+            this.tabPage8.Size = new System.Drawing.Size(398, 343);
             this.tabPage8.TabIndex = 1;
             this.tabPage8.Text = "Included Features";
             this.tabPage8.UseVisualStyleBackColor = true;
@@ -421,8 +432,21 @@
             this.dataGridView1.RowHeadersVisible = false;
             this.dataGridView1.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
             this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.Size = new System.Drawing.Size(398, 338);
+            this.dataGridView1.Size = new System.Drawing.Size(392, 319);
             this.dataGridView1.TabIndex = 0;
+            // 
+            // textBox6
+            // 
+            this.textBox6.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.textBox6.Dock = System.Windows.Forms.DockStyle.Top;
+            this.textBox6.Location = new System.Drawing.Point(3, 3);
+            this.textBox6.Multiline = true;
+            this.textBox6.Name = "textBox6";
+            this.textBox6.ReadOnly = true;
+            this.textBox6.Size = new System.Drawing.Size(392, 18);
+            this.textBox6.TabIndex = 16;
+            this.textBox6.TabStop = false;
+            this.textBox6.Text = "Features include the layer processing of the TSTypes in the dataset.";
             // 
             // radioButtonClearTS
             // 
@@ -964,23 +988,23 @@
             // 
             this.dataGridViewTSType.AllowUserToAddRows = false;
             this.dataGridViewTSType.AllowUserToDeleteRows = false;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridViewTSType.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle21.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle21.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle21.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle21.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle21.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle21.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle21.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewTSType.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle21;
             this.dataGridViewTSType.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridViewTSType.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle22.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle22.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle22.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle22.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle22.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle22.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle22.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewTSType.DefaultCellStyle = dataGridViewCellStyle22;
             this.dataGridViewTSType.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewTSType.Location = new System.Drawing.Point(3, 16);
             this.dataGridViewTSType.Name = "dataGridViewTSType";
@@ -1106,23 +1130,23 @@
             this.dataGridViewFeat.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridViewFeat.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle23.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle23.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle23.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle23.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle23.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle23.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle23.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewFeat.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle23;
             this.dataGridViewFeat.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridViewFeat.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle24.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle24.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle24.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle24.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle24.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle24.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle24.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewFeat.DefaultCellStyle = dataGridViewCellStyle24;
             this.dataGridViewFeat.Location = new System.Drawing.Point(6, 19);
             this.dataGridViewFeat.Name = "dataGridViewFeat";
             this.dataGridViewFeat.ReadOnly = true;
@@ -1564,7 +1588,7 @@
             this.groupBox13.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox13.Controls.Add(this.numericUpDown1);
+            this.groupBox13.Controls.Add(this.numericUpDownAnnFactor);
             this.groupBox13.Controls.Add(this.radioButton6);
             this.groupBox13.Controls.Add(this.radioButton4);
             this.groupBox13.Controls.Add(this.dataGridViewMonthlyFactors);
@@ -1575,40 +1599,50 @@
             this.groupBox13.TabStop = false;
             this.groupBox13.Text = "Time series factors";
             // 
-            // numericUpDown1
+            // numericUpDownAnnFactor
             // 
-            this.numericUpDown1.DecimalPlaces = 3;
-            this.numericUpDown1.Location = new System.Drawing.Point(60, 19);
-            this.numericUpDown1.Maximum = new decimal(new int[] {
+            this.numericUpDownAnnFactor.DecimalPlaces = 3;
+            this.numericUpDownAnnFactor.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
+            this.numericUpDownAnnFactor.Location = new System.Drawing.Point(70, 19);
+            this.numericUpDownAnnFactor.Maximum = new decimal(new int[] {
             1000,
             0,
             0,
             0});
-            this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(83, 20);
-            this.numericUpDown1.TabIndex = 3;
+            this.numericUpDownAnnFactor.Name = "numericUpDownAnnFactor";
+            this.numericUpDownAnnFactor.Size = new System.Drawing.Size(73, 20);
+            this.numericUpDownAnnFactor.TabIndex = 3;
+            this.numericUpDownAnnFactor.Visible = false;
+            this.numericUpDownAnnFactor.ValueChanged += new System.EventHandler(this.numericUpDownAnnFactor_ValueChanged);
+            this.numericUpDownAnnFactor.KeyDown += new System.Windows.Forms.KeyEventHandler(this.numericUpDownAnnFactor_KeyDown);
+            this.numericUpDownAnnFactor.KeyUp += new System.Windows.Forms.KeyEventHandler(this.numericUpDownAnnFactor_KeyUp);
             // 
             // radioButton6
             // 
             this.radioButton6.AutoSize = true;
+            this.radioButton6.Checked = true;
             this.radioButton6.Location = new System.Drawing.Point(149, 19);
             this.radioButton6.Name = "radioButton6";
             this.radioButton6.Size = new System.Drawing.Size(62, 17);
             this.radioButton6.TabIndex = 2;
+            this.radioButton6.TabStop = true;
             this.radioButton6.Text = "Monthly";
             this.radioButton6.UseVisualStyleBackColor = true;
             // 
             // radioButton4
             // 
             this.radioButton4.AutoSize = true;
-            this.radioButton4.Checked = true;
             this.radioButton4.Location = new System.Drawing.Point(6, 19);
             this.radioButton4.Name = "radioButton4";
-            this.radioButton4.Size = new System.Drawing.Size(58, 17);
+            this.radioButton4.Size = new System.Drawing.Size(54, 17);
             this.radioButton4.TabIndex = 1;
-            this.radioButton4.TabStop = true;
-            this.radioButton4.Text = "Annual";
+            this.radioButton4.Text = "Single";
             this.radioButton4.UseVisualStyleBackColor = true;
+            this.radioButton4.CheckedChanged += new System.EventHandler(this.radioButton4_CheckedChanged_1);
             // 
             // dataGridViewMonthlyFactors
             // 
@@ -1705,30 +1739,6 @@
             this.tabPage2.Text = "Export Time Series";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // textBox6
-            // 
-            this.textBox6.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.textBox6.Dock = System.Windows.Forms.DockStyle.Top;
-            this.textBox6.Location = new System.Drawing.Point(3, 3);
-            this.textBox6.Multiline = true;
-            this.textBox6.Name = "textBox6";
-            this.textBox6.ReadOnly = true;
-            this.textBox6.Size = new System.Drawing.Size(398, 18);
-            this.textBox6.TabIndex = 16;
-            this.textBox6.TabStop = false;
-            this.textBox6.Text = "Features include the layer processing of the TSTypes in the dataset.";
-            // 
-            // groupBoxSelDSet
-            // 
-            this.groupBoxSelDSet.Controls.Add(this.tabControl3);
-            this.groupBoxSelDSet.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBoxSelDSet.Location = new System.Drawing.Point(0, 0);
-            this.groupBoxSelDSet.Name = "groupBoxSelDSet";
-            this.groupBoxSelDSet.Size = new System.Drawing.Size(412, 388);
-            this.groupBoxSelDSet.TabIndex = 14;
-            this.groupBoxSelDSet.TabStop = false;
-            this.groupBoxSelDSet.Text = "Selected Dataset: ";
-            // 
             // DataProcessing
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1744,6 +1754,7 @@
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
+            this.groupBoxSelDSet.ResumeLayout(false);
             this.tabControl3.ResumeLayout(false);
             this.tabPage7.ResumeLayout(false);
             this.tabPage7.PerformLayout();
@@ -1797,10 +1808,9 @@
             this.groupBox10.PerformLayout();
             this.groupBox13.ResumeLayout(false);
             this.groupBox13.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownAnnFactor)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewMonthlyFactors)).EndInit();
             this.tabPage2.ResumeLayout(false);
-            this.groupBoxSelDSet.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -1916,7 +1926,7 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.TextBox txtNewTSName2;
-        private System.Windows.Forms.NumericUpDown numericUpDown1;
+        private System.Windows.Forms.NumericUpDown numericUpDownAnnFactor;
         private System.Windows.Forms.RadioButton radioButton6;
         private System.Windows.Forms.RadioButton radioButton4;
         private System.Windows.Forms.DataGridViewTextBoxColumn MonthIndex;
