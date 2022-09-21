@@ -61,17 +61,20 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
+            this.checkBoxSaveMSGSF = new System.Windows.Forms.CheckBox();
             this.button3 = new System.Windows.Forms.Button();
             this.comboBoxMODSIMFile = new System.Windows.Forms.ComboBox();
             this.textBox4 = new System.Windows.Forms.TextBox();
             this.buttonAddAccDep = new System.Windows.Forms.Button();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.radioButtonUniqueRiparian = new System.Windows.Forms.RadioButton();
+            this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.textBoxCostTo = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.textBoxCostFrom = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.textBoxRiparianCost = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.button2 = new System.Windows.Forms.Button();
             this.textBoxWRFile = new System.Windows.Forms.TextBox();
@@ -90,6 +93,8 @@
             this.tabControl2 = new System.Windows.Forms.TabControl();
             this.tabPage5 = new System.Windows.Forms.TabPage();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.comboBoxMODSIMFile2 = new System.Windows.Forms.ComboBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.checkBoxIncludeAccDep = new System.Windows.Forms.CheckBox();
             this.dataGridViewFeat = new System.Windows.Forms.DataGridView();
@@ -107,8 +112,10 @@
             this.cbTSTypeID = new System.Windows.Forms.ComboBox();
             this.buttonImportTS = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.comboBoxMODSIMFile2 = new System.Windows.Forms.ComboBox();
-            this.label2 = new System.Windows.Forms.Label();
+            this.radioButton3 = new System.Windows.Forms.RadioButton();
+            this.radioButtonOtherSegFile = new System.Windows.Forms.RadioButton();
+            this.textBoxSegFlowFile = new System.Windows.Forms.TextBox();
+            this.buttonBrowseSegFile = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -508,21 +515,33 @@
             // 
             this.groupBox9.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox9.Controls.Add(this.checkBoxSaveMSGSF);
             this.groupBox9.Controls.Add(this.button3);
             this.groupBox9.Controls.Add(this.comboBoxMODSIMFile);
             this.groupBox9.Controls.Add(this.textBox4);
             this.groupBox9.Controls.Add(this.buttonAddAccDep);
-            this.groupBox9.Location = new System.Drawing.Point(6, 518);
+            this.groupBox9.Location = new System.Drawing.Point(6, 500);
             this.groupBox9.Name = "groupBox9";
-            this.groupBox9.Size = new System.Drawing.Size(598, 75);
+            this.groupBox9.Size = new System.Drawing.Size(598, 93);
             this.groupBox9.TabIndex = 5;
             this.groupBox9.TabStop = false;
             this.groupBox9.Text = "Creating Acreetion Depletion";
             // 
+            // checkBoxSaveMSGSF
+            // 
+            this.checkBoxSaveMSGSF.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkBoxSaveMSGSF.AutoSize = true;
+            this.checkBoxSaveMSGSF.Location = new System.Drawing.Point(378, 42);
+            this.checkBoxSaveMSGSF.Name = "checkBoxSaveMSGSF";
+            this.checkBoxSaveMSGSF.Size = new System.Drawing.Size(113, 17);
+            this.checkBoxSaveMSGSF.TabIndex = 13;
+            this.checkBoxSaveMSGSF.Text = "Save with MSGSF";
+            this.checkBoxSaveMSGSF.UseVisualStyleBackColor = true;
+            // 
             // button3
             // 
             this.button3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button3.Location = new System.Drawing.Point(492, 46);
+            this.button3.Location = new System.Drawing.Point(492, 64);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(103, 23);
             this.button3.TabIndex = 12;
@@ -538,8 +557,9 @@
             this.comboBoxMODSIMFile.Items.AddRange(new object[] {
             "Base Network(*.xy)",
             "Diversion Network (*_DIV.xy)",
-            "Water Rights Network (*_DIV_WR.xy)"});
-            this.comboBoxMODSIMFile.Location = new System.Drawing.Point(77, 48);
+            "Water Rights Network (*_DIV_WR.xy)",
+            "Time Series Network (*_DIV_WRTS.xy)"});
+            this.comboBoxMODSIMFile.Location = new System.Drawing.Point(74, 41);
             this.comboBoxMODSIMFile.Name = "comboBoxMODSIMFile";
             this.comboBoxMODSIMFile.Size = new System.Drawing.Size(293, 21);
             this.comboBoxMODSIMFile.TabIndex = 11;
@@ -561,7 +581,7 @@
             // buttonAddAccDep
             // 
             this.buttonAddAccDep.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAddAccDep.Location = new System.Drawing.Point(381, 46);
+            this.buttonAddAccDep.Location = new System.Drawing.Point(492, 39);
             this.buttonAddAccDep.Name = "buttonAddAccDep";
             this.buttonAddAccDep.Size = new System.Drawing.Size(103, 23);
             this.buttonAddAccDep.TabIndex = 6;
@@ -574,25 +594,49 @@
             this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox5.Controls.Add(this.radioButtonUniqueRiparian);
+            this.groupBox5.Controls.Add(this.radioButton1);
             this.groupBox5.Controls.Add(this.textBoxCostTo);
             this.groupBox5.Controls.Add(this.label6);
+            this.groupBox5.Controls.Add(this.label1);
             this.groupBox5.Controls.Add(this.textBoxCostFrom);
             this.groupBox5.Controls.Add(this.label5);
             this.groupBox5.Controls.Add(this.textBoxRiparianCost);
-            this.groupBox5.Controls.Add(this.label1);
             this.groupBox5.Controls.Add(this.groupBox6);
             this.groupBox5.Controls.Add(this.textBox3);
             this.groupBox5.Controls.Add(this.buttonProcessWR);
             this.groupBox5.Location = new System.Drawing.Point(9, 117);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(592, 411);
+            this.groupBox5.Size = new System.Drawing.Size(592, 377);
             this.groupBox5.TabIndex = 4;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Step 2 - Creating Water Rights";
             // 
+            // radioButtonUniqueRiparian
+            // 
+            this.radioButtonUniqueRiparian.AutoSize = true;
+            this.radioButtonUniqueRiparian.Location = new System.Drawing.Point(154, 67);
+            this.radioButtonUniqueRiparian.Name = "radioButtonUniqueRiparian";
+            this.radioButtonUniqueRiparian.Size = new System.Drawing.Size(164, 17);
+            this.radioButtonUniqueRiparian.TabIndex = 19;
+            this.radioButtonUniqueRiparian.Text = "Set unique riparian rights cost";
+            this.radioButtonUniqueRiparian.UseVisualStyleBackColor = true;
+            // 
+            // radioButton1
+            // 
+            this.radioButton1.AutoSize = true;
+            this.radioButton1.Checked = true;
+            this.radioButton1.Location = new System.Drawing.Point(154, 50);
+            this.radioButton1.Name = "radioButton1";
+            this.radioButton1.Size = new System.Drawing.Size(129, 17);
+            this.radioButton1.TabIndex = 18;
+            this.radioButton1.TabStop = true;
+            this.radioButton1.Text = "Set riparian rights cost";
+            this.radioButton1.UseVisualStyleBackColor = true;
+            // 
             // textBoxCostTo
             // 
-            this.textBoxCostTo.Location = new System.Drawing.Point(413, 55);
+            this.textBoxCostTo.Location = new System.Drawing.Point(498, 58);
             this.textBoxCostTo.Name = "textBoxCostTo";
             this.textBoxCostTo.Size = new System.Drawing.Size(61, 20);
             this.textBoxCostTo.TabIndex = 17;
@@ -601,15 +645,24 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(386, 58);
+            this.label6.Location = new System.Drawing.Point(471, 61);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(19, 13);
             this.label6.TabIndex = 16;
             this.label6.Text = "to:";
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(7, 61);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(73, 13);
+            this.label1.TabIndex = 12;
+            this.label1.Text = "Riparian Cost:";
+            // 
             // textBoxCostFrom
             // 
-            this.textBoxCostFrom.Location = new System.Drawing.Point(319, 55);
+            this.textBoxCostFrom.Location = new System.Drawing.Point(404, 58);
             this.textBoxCostFrom.Name = "textBoxCostFrom";
             this.textBoxCostFrom.Size = new System.Drawing.Size(61, 20);
             this.textBoxCostFrom.TabIndex = 15;
@@ -619,7 +672,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(250, 58);
+            this.label5.Location = new System.Drawing.Point(335, 61);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(72, 13);
             this.label5.TabIndex = 14;
@@ -627,20 +680,11 @@
             // 
             // textBoxRiparianCost
             // 
-            this.textBoxRiparianCost.Location = new System.Drawing.Point(84, 54);
+            this.textBoxRiparianCost.Location = new System.Drawing.Point(86, 58);
             this.textBoxRiparianCost.Name = "textBoxRiparianCost";
             this.textBoxRiparianCost.Size = new System.Drawing.Size(61, 20);
             this.textBoxRiparianCost.TabIndex = 13;
             this.textBoxRiparianCost.Text = "-49999";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(11, 57);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(73, 13);
-            this.label1.TabIndex = 12;
-            this.label1.Text = "Riparian Cost:";
             // 
             // groupBox6
             // 
@@ -652,7 +696,7 @@
             this.groupBox6.ForeColor = System.Drawing.SystemColors.ControlText;
             this.groupBox6.Location = new System.Drawing.Point(4, 86);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(580, 290);
+            this.groupBox6.Size = new System.Drawing.Size(580, 256);
             this.groupBox6.TabIndex = 11;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Water Rights Source File";
@@ -676,7 +720,7 @@
             this.textBoxWRFile.Location = new System.Drawing.Point(6, 20);
             this.textBoxWRFile.Multiline = true;
             this.textBoxWRFile.Name = "textBoxWRFile";
-            this.textBoxWRFile.Size = new System.Drawing.Size(503, 264);
+            this.textBoxWRFile.Size = new System.Drawing.Size(503, 230);
             this.textBoxWRFile.TabIndex = 0;
             this.textBoxWRFile.Text = "C:\\Users\\etriana\\Research Triangle Institute\\Mark West Creek Modeling - Documents" +
     "\\MMS-Data\\MWC_WRs_Final.csv";
@@ -699,7 +743,7 @@
             // buttonProcessWR
             // 
             this.buttonProcessWR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonProcessWR.Location = new System.Drawing.Point(483, 379);
+            this.buttonProcessWR.Location = new System.Drawing.Point(483, 345);
             this.buttonProcessWR.Name = "buttonProcessWR";
             this.buttonProcessWR.Size = new System.Drawing.Size(103, 23);
             this.buttonProcessWR.TabIndex = 6;
@@ -892,6 +936,30 @@
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Update Database Features";
             // 
+            // label2
+            // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(446, 273);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(50, 13);
+            this.label2.TabIndex = 13;
+            this.label2.Text = "Network:";
+            // 
+            // comboBoxMODSIMFile2
+            // 
+            this.comboBoxMODSIMFile2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBoxMODSIMFile2.FormattingEnabled = true;
+            this.comboBoxMODSIMFile2.Items.AddRange(new object[] {
+            "Base Network(*.xy)",
+            "Diversion Network (*_DIV.xy)",
+            "Water Rights Network (*_DIV_WR.xy)"});
+            this.comboBoxMODSIMFile2.Location = new System.Drawing.Point(445, 292);
+            this.comboBoxMODSIMFile2.Name = "comboBoxMODSIMFile2";
+            this.comboBoxMODSIMFile2.Size = new System.Drawing.Size(135, 21);
+            this.comboBoxMODSIMFile2.TabIndex = 12;
+            // 
             // textBox1
             // 
             this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -971,6 +1039,10 @@
             this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox3.Controls.Add(this.buttonBrowseSegFile);
+            this.groupBox3.Controls.Add(this.textBoxSegFlowFile);
+            this.groupBox3.Controls.Add(this.radioButtonOtherSegFile);
+            this.groupBox3.Controls.Add(this.radioButton3);
             this.groupBox3.Controls.Add(this.labelTSTypeNew);
             this.groupBox3.Controls.Add(this.checkBoxDelTSTypeTS);
             this.groupBox3.Controls.Add(this.comboBoxTSTypes);
@@ -1036,10 +1108,10 @@
             this.richTextBoxGSOut.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.richTextBoxGSOut.Location = new System.Drawing.Point(2, 15);
+            this.richTextBoxGSOut.Location = new System.Drawing.Point(26, 42);
             this.richTextBoxGSOut.Name = "richTextBoxGSOut";
             this.richTextBoxGSOut.ReadOnly = true;
-            this.richTextBoxGSOut.Size = new System.Drawing.Size(571, 305);
+            this.richTextBoxGSOut.Size = new System.Drawing.Size(547, 254);
             this.richTextBoxGSOut.TabIndex = 8;
             this.richTextBoxGSOut.Text = "";
             // 
@@ -1108,28 +1180,49 @@
             this.tabPage2.Text = "Export Time Series";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // comboBoxMODSIMFile2
+            // radioButton3
             // 
-            this.comboBoxMODSIMFile2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBoxMODSIMFile2.FormattingEnabled = true;
-            this.comboBoxMODSIMFile2.Items.AddRange(new object[] {
-            "Base Network(*.xy)",
-            "Diversion Network (*_DIV.xy)",
-            "Water Rights Network (*_DIV_WR.xy)"});
-            this.comboBoxMODSIMFile2.Location = new System.Drawing.Point(445, 292);
-            this.comboBoxMODSIMFile2.Name = "comboBoxMODSIMFile2";
-            this.comboBoxMODSIMFile2.Size = new System.Drawing.Size(135, 21);
-            this.comboBoxMODSIMFile2.TabIndex = 12;
+            this.radioButton3.AutoSize = true;
+            this.radioButton3.Location = new System.Drawing.Point(6, 19);
+            this.radioButton3.Name = "radioButton3";
+            this.radioButton3.Size = new System.Drawing.Size(145, 17);
+            this.radioButton3.TabIndex = 14;
+            this.radioButton3.TabStop = true;
+            this.radioButton3.Text = "Use MODFLOW nam file ";
+            this.radioButton3.UseVisualStyleBackColor = true;
+            this.radioButton3.CheckedChanged += new System.EventHandler(this.radioButton3_CheckedChanged);
             // 
-            // label2
+            // radioButtonOtherSegFile
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(446, 273);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(50, 13);
-            this.label2.TabIndex = 13;
-            this.label2.Text = "Network:";
+            this.radioButtonOtherSegFile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.radioButtonOtherSegFile.AutoSize = true;
+            this.radioButtonOtherSegFile.Location = new System.Drawing.Point(6, 303);
+            this.radioButtonOtherSegFile.Name = "radioButtonOtherSegFile";
+            this.radioButtonOtherSegFile.Size = new System.Drawing.Size(105, 17);
+            this.radioButtonOtherSegFile.TabIndex = 15;
+            this.radioButtonOtherSegFile.TabStop = true;
+            this.radioButtonOtherSegFile.Text = "Use another file: ";
+            this.radioButtonOtherSegFile.UseVisualStyleBackColor = true;
+            this.radioButtonOtherSegFile.CheckedChanged += new System.EventHandler(this.radioButton4_CheckedChanged);
+            // 
+            // textBoxSegFlowFile
+            // 
+            this.textBoxSegFlowFile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxSegFlowFile.Location = new System.Drawing.Point(107, 302);
+            this.textBoxSegFlowFile.Name = "textBoxSegFlowFile";
+            this.textBoxSegFlowFile.Size = new System.Drawing.Size(403, 20);
+            this.textBoxSegFlowFile.TabIndex = 16;
+            // 
+            // buttonBrowseSegFile
+            // 
+            this.buttonBrowseSegFile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonBrowseSegFile.Location = new System.Drawing.Point(515, 302);
+            this.buttonBrowseSegFile.Name = "buttonBrowseSegFile";
+            this.buttonBrowseSegFile.Size = new System.Drawing.Size(58, 20);
+            this.buttonBrowseSegFile.TabIndex = 17;
+            this.buttonBrowseSegFile.Text = "Browse";
+            this.buttonBrowseSegFile.UseVisualStyleBackColor = true;
+            this.buttonBrowseSegFile.Click += new System.EventHandler(this.button4_Click);
             // 
             // DataProcessing
             // 
@@ -1265,5 +1358,12 @@
         private System.Windows.Forms.TextBox textBox5;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox comboBoxMODSIMFile2;
+        private System.Windows.Forms.RadioButton radioButtonUniqueRiparian;
+        private System.Windows.Forms.RadioButton radioButton1;
+        private System.Windows.Forms.CheckBox checkBoxSaveMSGSF;
+        private System.Windows.Forms.TextBox textBoxSegFlowFile;
+        private System.Windows.Forms.RadioButton radioButtonOtherSegFile;
+        private System.Windows.Forms.RadioButton radioButton3;
+        private System.Windows.Forms.Button buttonBrowseSegFile;
     }
 }

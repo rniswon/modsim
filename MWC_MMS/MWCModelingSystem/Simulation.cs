@@ -15,6 +15,7 @@ using System.IO;
 using RTI.CWR.MWC_MODSIMUtils;
 using RRModelingSystem.Properties;
 using RTI.CWR.MMS_Support;
+using MODSIM_GSFLOW_C;
 
 namespace RRModelingSystem
 {
@@ -23,7 +24,8 @@ namespace RRModelingSystem
     {
         private string _OpsDB { get; set; }
         private string _ModsimFile { get; set; }
-        
+        private string _controlFile { get; set; }
+
         private RiparianAllocation allocationTool;
         private int _riparianCost;
         private Dictionary<string,long> costRange;
@@ -37,13 +39,14 @@ namespace RRModelingSystem
         private static MyDBSqlite sqliteDB { get; set; }
 
 
-        public Simulation(string ModsimFile, string opsDB, int riparianCost, string MMS_db)
+        public Simulation(string ModsimFile, string opsDB, int riparianCost, string MMS_db, string controlFile)
         {
             InitializeComponent();
 
             _ModsimFile = ModsimFile;
             _OpsDB = opsDB;
             _riparianCost = riparianCost;
+            _controlFile = controlFile;
             modelReady = false;
             sqliteDB = new MyDBSqlite(MMS_db);
             sqliteDB.messageOut += ProcessMessageOut;
@@ -138,11 +141,19 @@ namespace RRModelingSystem
                 }
 
                 //Adding 'plug-ins'
-                if (checkBoxRiparianLogic.Checked)
+                if (radioButtonMS_GS.Checked)
                 {
                     messageOut("\tActivating MODSIM-GSFLOW simulation mode...");
-                    allocationTool = new RiparianAllocation(ref m_ActiveModel, _riparianCost);
-                    allocationTool.messageOut += OnMessageOut;
+                    string[] CmdArgs = new string[] { "\"" + _controlFile + "\"" };
+                    SurfGWModule sSurfGWModule = new SurfGWModule(CmdArgs);
+                    sSurfGWModule.messageOut += OnMessageOut;
+
+                    //XYFileReader.Read(myModel, sSurfGWModule.xyFileName);
+                    m_ActiveModel.OnMessage += OnMessageOut;
+                    m_ActiveModel.OnModsimError += OnMessageOut;
+
+                    sSurfGWModule.InitializeRUN(ref m_ActiveModel);
+
                 }
 
                 messageOut("\tExecuting MODSIM model...");
