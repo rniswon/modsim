@@ -35,6 +35,9 @@
             this.button2 = new System.Windows.Forms.Button();
             this.textBoxMODSIMFile = new System.Windows.Forms.TextBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.button5 = new System.Windows.Forms.Button();
+            this.textBoxPumpingFile = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.button4 = new System.Windows.Forms.Button();
             this.textBoxControlFile = new System.Windows.Forms.TextBox();
@@ -46,9 +49,6 @@
             this.textBoxPREFSRiparianCost = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.button5 = new System.Windows.Forms.Button();
-            this.textBoxPumpingFile = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -153,6 +153,38 @@
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "MODSIM - GSFLOW";
+            // 
+            // button5
+            // 
+            this.button5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button5.Location = new System.Drawing.Point(475, 78);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(58, 20);
+            this.button5.TabIndex = 8;
+            this.button5.Text = "Browse";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
+            // textBoxPumpingFile
+            // 
+            this.textBoxPumpingFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxPumpingFile.Location = new System.Drawing.Point(132, 79);
+            this.textBoxPumpingFile.Multiline = true;
+            this.textBoxPumpingFile.Name = "textBoxPumpingFile";
+            this.textBoxPumpingFile.Size = new System.Drawing.Size(336, 20);
+            this.textBoxPumpingFile.TabIndex = 7;
+            this.textBoxPumpingFile.Text = "MMS-Data\\input\\MODFLOW\\SRP_mf_strm_dpl.wel";
+            this.textBoxPumpingFile.TextChanged += new System.EventHandler(this.textBoxPumpingFile_TextChanged);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(6, 82);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(97, 13);
+            this.label4.TabIndex = 6;
+            this.label4.Text = "Base Pumping File:";
             // 
             // label2
             // 
@@ -275,38 +307,6 @@
             this.groupBox5.TabIndex = 16;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "MODSIM";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 82);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(70, 13);
-            this.label4.TabIndex = 6;
-            this.label4.Text = "Pumping File:";
-            // 
-            // button5
-            // 
-            this.button5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button5.Location = new System.Drawing.Point(475, 78);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(58, 20);
-            this.button5.TabIndex = 8;
-            this.button5.Text = "Browse";
-            this.button5.UseVisualStyleBackColor = true;
-            this.button5.Click += new System.EventHandler(this.button5_Click);
-            // 
-            // textBoxPumpingFile
-            // 
-            this.textBoxPumpingFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxPumpingFile.Location = new System.Drawing.Point(132, 79);
-            this.textBoxPumpingFile.Multiline = true;
-            this.textBoxPumpingFile.Name = "textBoxPumpingFile";
-            this.textBoxPumpingFile.Size = new System.Drawing.Size(336, 20);
-            this.textBoxPumpingFile.TabIndex = 7;
-            this.textBoxPumpingFile.Text = "MMS-Data\\input\\MODFLOW\\SRP_mf_strm_dpl.wel";
-            this.textBoxPumpingFile.TextChanged += new System.EventHandler(this.textBoxPumpingFile_TextChanged);
             // 
             // RRPreferences
             // 
