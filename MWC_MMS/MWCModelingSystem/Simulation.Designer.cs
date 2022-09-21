@@ -49,7 +49,6 @@
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.dataGridViewISF = new System.Windows.Forms.DataGridView();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.groupBox8 = new System.Windows.Forms.GroupBox();
             this.txtFactor = new System.Windows.Forms.TextBox();
             this.checkFactor = new System.Windows.Forms.CheckBox();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
@@ -82,7 +81,6 @@
             this.groupBox7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewISF)).BeginInit();
             this.groupBox4.SuspendLayout();
-            this.groupBox8.SuspendLayout();
             this.groupBox9.SuspendLayout();
             this.groupBoxRunInfo.SuspendLayout();
             this.groupBox6.SuspendLayout();
@@ -94,7 +92,7 @@
             // 
             this.buttonExecuteModel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonExecuteModel.Enabled = false;
-            this.buttonExecuteModel.Location = new System.Drawing.Point(473, 258);
+            this.buttonExecuteModel.Location = new System.Drawing.Point(490, 169);
             this.buttonExecuteModel.Name = "buttonExecuteModel";
             this.buttonExecuteModel.Size = new System.Drawing.Size(98, 23);
             this.buttonExecuteModel.TabIndex = 6;
@@ -248,10 +246,12 @@
             // 
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox2.Controls.Add(this.txtFactor);
             this.groupBox2.Controls.Add(this.comboBox5);
+            this.groupBox2.Controls.Add(this.checkFactor);
             this.groupBox2.Location = new System.Drawing.Point(9, 213);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(632, 44);
+            this.groupBox2.Size = new System.Drawing.Size(633, 44);
             this.groupBox2.TabIndex = 10;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "GSFLOW Pumping Scenario";
@@ -273,7 +273,7 @@
                 "umping"});
             this.comboBox5.Location = new System.Drawing.Point(19, 17);
             this.comboBox5.Name = "comboBox5";
-            this.comboBox5.Size = new System.Drawing.Size(607, 21);
+            this.comboBox5.Size = new System.Drawing.Size(268, 21);
             this.comboBox5.TabIndex = 0;
             // 
             // groupBox3
@@ -334,8 +334,6 @@
             this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox4.Controls.Add(this.groupBox8);
-            this.groupBox4.Controls.Add(this.checkFactor);
             this.groupBox4.Controls.Add(this.groupBox9);
             this.groupBox4.Controls.Add(this.checkBoxRiparianLogic);
             this.groupBox4.Controls.Add(this.groupBox6);
@@ -350,23 +348,13 @@
             this.groupBox4.Text = "Simulation Preferences";
             this.groupBox4.Enter += new System.EventHandler(this.groupBox4_Enter);
             // 
-            // groupBox8
-            // 
-            this.groupBox8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox8.Controls.Add(this.txtFactor);
-            this.groupBox8.Location = new System.Drawing.Point(442, 194);
-            this.groupBox8.Name = "groupBox8";
-            this.groupBox8.Size = new System.Drawing.Size(183, 55);
-            this.groupBox8.TabIndex = 8;
-            this.groupBox8.TabStop = false;
-            this.groupBox8.Text = "Factor";
-            // 
             // txtFactor
             // 
-            this.txtFactor.Location = new System.Drawing.Point(9, 20);
+            this.txtFactor.Location = new System.Drawing.Point(552, 15);
             this.txtFactor.Name = "txtFactor";
-            this.txtFactor.Size = new System.Drawing.Size(101, 20);
+            this.txtFactor.Size = new System.Drawing.Size(71, 20);
             this.txtFactor.TabIndex = 0;
+            this.txtFactor.Text = "1.0";
             this.txtFactor.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.txtFactor.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
             // 
@@ -376,7 +364,7 @@
             this.checkFactor.AutoSize = true;
             this.checkFactor.Checked = true;
             this.checkFactor.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkFactor.Location = new System.Drawing.Point(442, 173);
+            this.checkFactor.Location = new System.Drawing.Point(351, 17);
             this.checkFactor.Name = "checkFactor";
             this.checkFactor.Size = new System.Drawing.Size(191, 17);
             this.checkFactor.TabIndex = 7;
@@ -637,6 +625,7 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
@@ -646,8 +635,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewISF)).EndInit();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
-            this.groupBox8.ResumeLayout(false);
-            this.groupBox8.PerformLayout();
             this.groupBox9.ResumeLayout(false);
             this.groupBox9.PerformLayout();
             this.groupBoxRunInfo.ResumeLayout(false);
@@ -704,7 +691,6 @@
         private System.Windows.Forms.RadioButton radioButtonMMSRun;
         private System.Windows.Forms.RadioButton radioButtonRunActive;
         private System.Windows.Forms.CheckBox checkBoxUseInName;
-        private System.Windows.Forms.GroupBox groupBox8;
         private System.Windows.Forms.TextBox txtFactor;
         private System.Windows.Forms.CheckBox checkFactor;
     }

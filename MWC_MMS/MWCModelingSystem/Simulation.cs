@@ -152,10 +152,7 @@ namespace RRModelingSystem
                 {
                     messageOut("Sucessful completion of the MODSIM run!");
                 }
-                if (checkFactor.Checked)
-                {
-                    ProcessPumpingFactor(RRPreferences.rutaPumping, Convert.ToDouble(txtFactor.Text));
-                }
+                ProcessPumpingFactor(RRPreferences.rutaPumping, Convert.ToDouble(txtFactor.Text), checkFactor.Checked);
             }
             catch (Exception ex)
             {
@@ -170,21 +167,23 @@ namespace RRModelingSystem
             Cursor.Current = Cursors.Default;
         }
 
-        static void ProcessPumpingFactor(string FileName, double factor)
+        static void ProcessPumpingFactor(string FileName, double factor, Boolean aplicafactor)
         {
             int line = 0;
             string lineOut;
             string lineIn;
-            string nombre1 = DateTime.Now.ToString("yyyy-MM-dd-HH-MM-ss");
+            //string nombre1 = DateTime.Now.ToString("yyyy-MM-dd-HH-MM-ss");
 
             //StreamWriter sw = new StreamWriter(FileName + ".out");
 
             //StreamWriter sw = new StreamWriter(FileName.Replace(".wel", "_run" + nombre1 + ".wel"));
-            //StreamWriter sw = new StreamWriter(FileName.Replace(".wel", "_run" + ".wel"));
+            if (aplicafactor==true)
+            { 
+            StreamWriter sw = new StreamWriter(FileName.Replace(".wel", "_run" + ".wel"));
 
-            string FileName1 = FileName.Replace("input\\MODFLOW", "output");
+            //string FileName1 = FileName.Replace("input\\MODFLOW", "output");
 
-            StreamWriter sw = new StreamWriter(FileName1.Replace(".wel", "_run" + ".wel"));
+            //StreamWriter sw = new StreamWriter(FileName1.Replace(".wel", "_run" + ".wel"));
 
             using (StreamReader sr = File.OpenText(FileName))
             {
@@ -218,6 +217,11 @@ namespace RRModelingSystem
             }
 
             sw.Close();
+            }
+            else
+            {
+                File.Copy(FileName, FileName.Replace(".wel", "_run" + ".wel"));
+            }
 
             //File.Delete(FileName);
             //File.Move(FileName + ".out", textBoxWorkspace.Text +);
