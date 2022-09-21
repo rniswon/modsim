@@ -21,9 +21,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Data.SQLite;
 
-namespace RTI.CWR.MMS_Support
+namespace RTI.CWR.MWC_MODSIMUtils
 {
-    public delegate void ProcessMessage(string msg);  // delegate
+    //public delegate void ProcessMessage(string msg);  // delegate
 
     public class MyDBSqlite : IDisposable
     {

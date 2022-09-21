@@ -69,6 +69,9 @@
             this.label3 = new System.Windows.Forms.Label();
             this.pictureBoxStatus = new System.Windows.Forms.PictureBox();
             this.labelActFile = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -118,6 +121,9 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.label5);
+            this.groupBox1.Controls.Add(this.label6);
+            this.groupBox1.Controls.Add(this.label7);
             this.groupBox1.Controls.Add(this.labelISFlinks);
             this.groupBox1.Controls.Add(this.labelRiparian);
             this.groupBox1.Controls.Add(this.labelCostBlock);
@@ -141,34 +147,37 @@
             // labelISFlinks
             // 
             this.labelISFlinks.AutoSize = true;
-            this.labelISFlinks.Location = new System.Drawing.Point(30, 42);
+            this.labelISFlinks.ForeColor = System.Drawing.SystemColors.Highlight;
+            this.labelISFlinks.Location = new System.Drawing.Point(197, 43);
             this.labelISFlinks.Name = "labelISFlinks";
-            this.labelISFlinks.Size = new System.Drawing.Size(104, 13);
+            this.labelISFlinks.Size = new System.Drawing.Size(10, 13);
             this.labelISFlinks.TabIndex = 19;
-            this.labelISFlinks.Text = "Instream flow targets";
+            this.labelISFlinks.Text = ":";
             // 
             // labelRiparian
             // 
             this.labelRiparian.AutoSize = true;
-            this.labelRiparian.Location = new System.Drawing.Point(30, 12);
+            this.labelRiparian.ForeColor = System.Drawing.SystemColors.Highlight;
+            this.labelRiparian.Location = new System.Drawing.Point(197, 13);
             this.labelRiparian.Name = "labelRiparian";
-            this.labelRiparian.Size = new System.Drawing.Size(100, 13);
+            this.labelRiparian.Size = new System.Drawing.Size(10, 13);
             this.labelRiparian.TabIndex = 18;
-            this.labelRiparian.Text = "Riparian rights cost:";
+            this.labelRiparian.Text = ":";
             // 
             // labelCostBlock
             // 
             this.labelCostBlock.AutoSize = true;
-            this.labelCostBlock.Location = new System.Drawing.Point(30, 27);
+            this.labelCostBlock.ForeColor = System.Drawing.SystemColors.Highlight;
+            this.labelCostBlock.Location = new System.Drawing.Point(197, 28);
             this.labelCostBlock.Name = "labelCostBlock";
-            this.labelCostBlock.Size = new System.Drawing.Size(147, 13);
+            this.labelCostBlock.Size = new System.Drawing.Size(10, 13);
             this.labelCostBlock.TabIndex = 17;
-            this.labelCostBlock.Text = "Normal water right cost block:";
+            this.labelCostBlock.Text = ":";
             // 
             // buttonNodeDW
             // 
             this.buttonNodeDW.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonNodeDW.Location = new System.Drawing.Point(295, 84);
+            this.buttonNodeDW.Location = new System.Drawing.Point(295, 91);
             this.buttonNodeDW.Name = "buttonNodeDW";
             this.buttonNodeDW.Size = new System.Drawing.Size(75, 23);
             this.buttonNodeDW.TabIndex = 16;
@@ -179,7 +188,7 @@
             // buttonNodeUP
             // 
             this.buttonNodeUP.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonNodeUP.Location = new System.Drawing.Point(295, 57);
+            this.buttonNodeUP.Location = new System.Drawing.Point(295, 64);
             this.buttonNodeUP.Name = "buttonNodeUP";
             this.buttonNodeUP.Size = new System.Drawing.Size(75, 23);
             this.buttonNodeUP.TabIndex = 15;
@@ -192,9 +201,9 @@
             this.treeViewPsdoCost.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.treeViewPsdoCost.Location = new System.Drawing.Point(87, 57);
+            this.treeViewPsdoCost.Location = new System.Drawing.Point(87, 60);
             this.treeViewPsdoCost.Name = "treeViewPsdoCost";
-            this.treeViewPsdoCost.Size = new System.Drawing.Size(202, 124);
+            this.treeViewPsdoCost.Size = new System.Drawing.Size(202, 121);
             this.treeViewPsdoCost.TabIndex = 14;
             this.treeViewPsdoCost.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewPsdoCost_AfterSelect);
             // 
@@ -582,6 +591,36 @@
             this.labelActFile.TabIndex = 20;
             this.labelActFile.Text = "No active file";
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.ForeColor = System.Drawing.SystemColors.Highlight;
+            this.label5.Location = new System.Drawing.Point(31, 44);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(104, 13);
+            this.label5.TabIndex = 22;
+            this.label5.Text = "Instream flow targets";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.ForeColor = System.Drawing.SystemColors.Highlight;
+            this.label6.Location = new System.Drawing.Point(31, 14);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(100, 13);
+            this.label6.TabIndex = 21;
+            this.label6.Text = "Riparian rights cost:";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.ForeColor = System.Drawing.SystemColors.Highlight;
+            this.label7.Location = new System.Drawing.Point(31, 29);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(147, 13);
+            this.label7.TabIndex = 20;
+            this.label7.Text = "Normal water right cost block:";
+            // 
             // Simulation
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -663,5 +702,8 @@
         private System.Windows.Forms.RadioButton radioButtonMMSRun;
         private System.Windows.Forms.RadioButton radioButtonRunActive;
         private System.Windows.Forms.CheckBox checkBoxUseInName;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label7;
     }
 }
