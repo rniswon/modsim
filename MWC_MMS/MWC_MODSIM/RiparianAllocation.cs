@@ -7,7 +7,6 @@ using Csu.Modsim.ModsimModel;
 
 using System.IO;
 using System.Data;
-using RTI.CWR.MMS_Support;
 
 namespace RTI.CWR.MWC_MODSIMUtils
 {

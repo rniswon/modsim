@@ -14,7 +14,6 @@ using System.Diagnostics;
 using System.IO;
 using RTI.CWR.MWC_MODSIMUtils;
 using RRModelingSystem.Properties;
-using RTI.CWR.MMS_Support;
 using MODSIM_GSFLOW_C;
 
 namespace RRModelingSystem
@@ -65,7 +64,7 @@ namespace RRModelingSystem
             treeViewPsdoCost.Nodes.Add("Instream Flow Target", "Instream Flow Target");
 
             //comboBoxMODSIMFile.SelectedIndex = 0;
-            labelRiparian.Text = "Riparian rights cost: " + _riparianCost;
+            labelRiparian.Text =  _riparianCost.ToString(); //"Riparian rights cost: "
 
             //Keywords
             string sql= "SELECT keyword FROM MMS_RunsInfo GROUP BY Keyword";
@@ -533,15 +532,15 @@ namespace RRModelingSystem
                 
                 labelCostBlock.BeginInvoke((Action)(() =>
                 {
-                    labelCostBlock.Text = $"Normal Water Right Cost Block: {costRange["Min"]} to {costRange["Max"]} -> {count} links.";
+                    labelCostBlock.Text = $"{costRange["Min"]} to {costRange["Max"]} -> {count} links."; //Normal Water Right Cost Block:
                 }));
                 labelISFlinks.BeginInvoke((Action)(() =>
                 {
-                    labelISFlinks.Text = $"Instream flow targets ('WR_ISF_*') -> {countISF} links.";
+                    labelISFlinks.Text = $"{countISF} links.";//Instream flow targets ('WR_ISF_*') ->
                 }));
                 labelRiparian.BeginInvoke((Action)(() =>
                 {
-                    labelRiparian.Text = $"Riparian rights cost: {_riparianCost} -> {countRip} links.";
+                    labelRiparian.Text = $"{_riparianCost} -> {countRip} links."; //Riparian rights cost:
                 }));
                 dataGridViewISF.BeginInvoke((Action)(() =>
                 {
@@ -627,6 +626,8 @@ namespace RRModelingSystem
         private void ProcessNodesText()
         {
             nodeSetCost = new Dictionary<string, long>();
+            if (costRange == null)
+                return;
             int currentCost = _riparianCost - 2* (int)costRange["Increment"];
             for(int i = 0; i < treeViewPsdoCost.Nodes.Count; i++)
             {
@@ -743,7 +744,7 @@ namespace RRModelingSystem
             if (treeViewPsdoCost.SelectedNode == treeViewPsdoCost.Nodes["Other Demands"] ||
                 treeViewPsdoCost.SelectedNode == treeViewPsdoCost.Nodes["Agriculture"] ||
                 treeViewPsdoCost.SelectedNode == treeViewPsdoCost.Nodes["Outdoor Domestic"] ||
-                treeViewPsdoCost.SelectedNode == treeViewPsdoCost.Nodes["Indoor Domestic"] ||
+                //treeViewPsdoCost.SelectedNode == treeViewPsdoCost.Nodes["Indoor Domestic"] ||
                 treeViewPsdoCost.SelectedNode == treeViewPsdoCost.Nodes["Agriculture"])
             {
                 buttonNodeDW.Enabled = true;

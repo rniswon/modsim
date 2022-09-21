@@ -21,9 +21,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Data.SQLite;
 
-namespace RTI.CWR.MMS_Support
+namespace RTI.CWR.MWC_MODSIMUtils
 {
-    public delegate void ProcessMessage(string msg);  // delegate
+    //public delegate void ProcessMessage(string msg);  // delegate
 
     public class MyDBSqlite : IDisposable
     {
@@ -61,7 +61,7 @@ namespace RTI.CWR.MMS_Support
             return conn.ConnectionString;
         }
 
-       private bool IsTableExist(string tablename)
+       public bool IsTableExist(string tablename)
         {
             bool isexist = false;
             using (SQLiteConnection c = new SQLiteConnection(ConnectionString))
@@ -439,11 +439,12 @@ namespace RTI.CWR.MMS_Support
                 if (!IsTableExist("DatasetsTSSet"))
                 {
                     string sql = @"CREATE TABLE DatasetsTSSet (
-	                                Dataset	INTEGER,
-	                                TSType	INTEGER,
-	                                Notes	TEXT,
-	                                PRIMARY KEY(Dataset,TSType)
-                                )";
+                                        Dataset   INTEGER,
+	                                    [Order] INTEGER,
+	                                    TSType    INTEGER,
+	                                    Notes TEXT,
+	                                    PRIMARY KEY(Dataset,TSType,[Order])
+                                    );";
                     ExecuteNonQuery(sql);
                 }
 
