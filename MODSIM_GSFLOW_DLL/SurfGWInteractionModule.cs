@@ -1042,7 +1042,7 @@ namespace MODSIM_GSFLOW_C
                 // Convergence checked in MODFLOW units.
                 converge = converge && ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) <= EXCHNGVol_Tolerance);  // (double)(Math.Abs(MS_FlowsPREV[i]) * percent_diff));
                 converge = converge && ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) <= EXCHNGVol_Tolerance); // (double)(Math.Abs(EXCHANGEPREV[i]) * percent_diff));
-                if ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) > EXCHNGVol_Tolerance) 
+                if ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) > EXCHNGVol_Tolerance && swgwUtils.iterCount > 2) 
                     messageOut("For iseg (diversion): " + (i + 1).ToString() + " difference between MODSIM & MF is: " + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
                 if(maxExchDiff<(double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]))
                 {
@@ -1057,7 +1057,7 @@ namespace MODSIM_GSFLOW_C
                 //sw.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + Convert.ToInt32(i + 1) + " " + Convert.ToSingle(EXCHANGEPREV[i]) + " " + Convert.ToSingle(EXCHANGE[i]));
                 //sw.Flush();
             }
-            if(maxExchDiff>0)
+            if(maxExchDiff>0 &&  swgwUtils.iterCount > 2)
             {
                 messageOut($"\tAcc/Dep Exchange max: {maxExchDiff} segment {maxSeg}.");
             }
