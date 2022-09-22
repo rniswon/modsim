@@ -57,6 +57,7 @@ namespace MODSIM_GSFLOW_C
         public bool afr, MS_GSF_converge;
         public int Model_mode, Nsegshold, Nlakeshold;
         public int[] startTime = new int[6];
+        public int[] endTime = new int[6];
         public int Process_mode;
         public int txtiter = 1;
         public long[] LinkHi = new long[1];
@@ -85,7 +86,7 @@ namespace MODSIM_GSFLOW_C
         public static extern void put_prms_control_file([In] ref char[] command_line_args);
 
         [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void gsflow_prmsSettings([In, Out] ref int Numts, ref int Model_mode, ref int startTime, ref int File1_length, [In, Out] char[] FileName1, ref int File2_length, [In, Out] char[] FileName2);
+        public static extern void gsflow_prmsSettings([In, Out] ref int Numts, [In, Out] ref int Model_mode, [In, Out] int[] startTime, [In, Out] int[] endTime, ref int File1_length, [In, Out] char[] FileName1, ref int File2_length, [In, Out] char[] FileName2);
 
         [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void LAK2MODSIM_InitLakes([In, Out] double[] DELTAVOL, [In, Out] double[] LAKEVOL, [In, Out] double[] MXLKVOL);
@@ -103,9 +104,9 @@ namespace MODSIM_GSFLOW_C
                 Numts = 1;
                 int len_xyname, len_mapname;
 
-                xyFileName = new String(' ', 80);
-                mappingFileName = new String(' ', 80);
-                char[] command_line_args = String.Join(" ", CmdArgs).PadRight(256).ToCharArray();
+                xyFileName = new String(' ', 256);
+                mappingFileName = new String(' ', 256);
+                char[] command_line_args = String.Join(" ", CmdArgs).PadRight(512).ToCharArray();
                 len_xyname = xyFileName.Length;
                 len_mapname = mappingFileName.Length;
 
@@ -122,7 +123,7 @@ namespace MODSIM_GSFLOW_C
                     put_prms_control_file(ref command_line_args);
                     gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
                 }
-                catch (Exception ex)
+                catch 
                 {
 
                 }
@@ -133,7 +134,7 @@ namespace MODSIM_GSFLOW_C
                 char[] xyPathChars = ToCharacterArrayFortran(xyFileName, len_xyname);
                 char[] mapPathChars = ToCharacterArrayFortran(mappingFileName, len_mapname);
 
-                gsflow_prmsSettings(ref Numts, ref Model_mode, ref startTime[0], ref len_xyname, xyPathChars, ref len_mapname, mapPathChars);
+                gsflow_prmsSettings(ref Numts, ref Model_mode, startTime, endTime, ref len_xyname, xyPathChars, ref len_mapname,  mapPathChars);
                 //Start time is [0]=year [1]=month [2]=day
                 //End simulation using Numts
                 xyFileName = new string(xyPathChars);
@@ -150,14 +151,6 @@ namespace MODSIM_GSFLOW_C
                     Process_mode = 1; // declare
                     gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
                 }
-
-                if (Model_mode < 12 | Model_mode > 20) // > 20 means a special PRMS-only mode
-                {
-                    Process_mode = 2; // initialize
-                    gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
-                }
-
-                Process_mode = 0; // run
 
                 // Redimension arrays to equal number of segments and lakes
                 Diversions = (double[])ResizeArray(Diversions, new int[] { Nsegshold });
@@ -176,6 +169,16 @@ namespace MODSIM_GSFLOW_C
                 LinkHi = (long[])ResizeArray(LinkHi, new int[] { Nsegshold });
                 LinkHi_Sv = (long[])ResizeArray(LinkHi, new int[] { Nsegshold });
 
+                if (Model_mode < 12 | Model_mode > 20) // > 20 means a special PRMS-only mode
+                {
+                    Process_mode = 2; // initialize
+                    gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
+                }
+
+                Process_mode = 0; // run
+
+
+
             }
             catch (Exception ex)
             {
@@ -187,8 +190,6 @@ namespace MODSIM_GSFLOW_C
 
         public void InitializeRUN(ref Model m_Model)
         {
-            messageOut($"\tUsing DB:{map_FileName}");
-            messageOut($"\tUsing xy File:{xyFileName}");
             if (Model_mode < 10) // GSFLOW and PRMS-only
             {
                 for (int i = 0; i < Numts; i++)
@@ -203,6 +204,8 @@ namespace MODSIM_GSFLOW_C
             else
             // do something different if MODSIM-MODFLOW **** CAUTION ****
             {
+                messageOut($"\tUsing DB:{map_FileName}");
+                messageOut($"\tUsing xy File:{xyFileName}");
                 //myModel = new Model();
                 m_Model.Init += OnInitialize;
                 m_Model.IterBottom += OnIterationBottom;
@@ -213,6 +216,24 @@ namespace MODSIM_GSFLOW_C
                 //myModel.OnModsimError += OnError;
                 myModel = m_Model;
 
+                //Set simulation/data periods to match GSFLOW
+                myModel.timeStep = ModsimTimeStep.FromLabel("daily");
+                myModel.TimeStepManager.startingDate = new DateTime(startTime[0], startTime[1], startTime[2]);
+                if (myModel.TimeStepManager.startingDate < myModel.TimeStepManager.dataStartDate)
+                {
+                    myModel.TimeStepManager.dataStartDate = myModel.TimeStepManager.startingDate;
+                    messageOut("\tWARNING: Simulation start date is sonner than the MODSIM data start date.\n" +
+                        "Data start date adjusted, but time series might not be correctly extrapolated.");
+                }
+
+                myModel.TimeStepManager.endingDate = new DateTime(endTime[0], endTime[1], endTime[2]);
+
+                if (myModel.TimeStepManager.endingDate > myModel.TimeStepManager.dataEndDate)
+                {
+                    myModel.TimeStepManager.dataEndDate = myModel.TimeStepManager.endingDate;
+                    messageOut("\tWARNING: Simulation end date is greater than the MODSIM data end date.");
+                }
+                myModel.TimeStepManager.UpdateTimeStepsInfo(myModel.timeStep); // redo the time steps info in case time step or dataend date changed.
 
                 //if (Model_mode == 11) // MODSIM-PRMS
                 //{
@@ -232,15 +253,18 @@ namespace MODSIM_GSFLOW_C
                 string outputFile = xyFileName.Replace(".xy", "MSGSFOUTPUT.sqlite");
                 if (File.Exists(outputFile))
                     File.Delete(outputFile);
-                //Modsim.RunSolver(myModel);
-
             }
         }
 
-        public void FinalizeMODSIM()
+        public void FinalizeRUN()
         {
             try
             {
+                //Finalize GSFLOW run
+                Process_mode = 3; // clean
+                gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
+
+
                 //Copy output to the original file name - Custom Output carries the MF Dep/Acc
                 File.Copy(xyFileName.Replace(".xy", "MSGSFOUTPUT.sqlite"), xyFileName.Replace(".xy", "OUTPUT.sqlite"), true);
                 messageOut(" MF_MS Simulation Finished Succesfully");
@@ -375,7 +399,7 @@ namespace MODSIM_GSFLOW_C
                     //temporary fix for RR PRMS
                     //                uConvToMODFLOW = 1233.48;
                     //  PRMS will always send evap in inches.  We need to apply the conversion feet in english.
-                    uConvRateToMODSIM = 1 / 12;
+                    uConvRateToMODSIM = (double) 1 / 12;
                 }
 
                 // Write a header row to the streamwriter for evaluating convergence with R
@@ -428,7 +452,7 @@ namespace MODSIM_GSFLOW_C
                         }
 
                     }
-                    catch (NullReferenceException ex)
+                    catch 
                     {
                         continue;
                     }
@@ -444,7 +468,7 @@ namespace MODSIM_GSFLOW_C
                     {
                         assignDepAcc(MS_Reservoirs[i].name, m_value);
                     }
-                    catch (NullReferenceException ex)
+                    catch 
                     {
                         continue;
                     }
@@ -707,7 +731,7 @@ namespace MODSIM_GSFLOW_C
 
                     //
                     // Lake 1 (inline lake)
-                    double LK5_in_val;
+                    //double LK5_in_val;
                     //double LK6_in_val;
                     //double up1_val;
                     //double up2_val;
@@ -775,7 +799,7 @@ namespace MODSIM_GSFLOW_C
                     {
                         if (MS_Links[i] != null)
                         {
-                            Link expLink = myModel.FindLink(MS_Links[i].name);
+                            //Link expLink = myModel.FindLink(MS_Links[i].name);
                             //all_links.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + MS_Links[i].name + " " + "iter_" + txtiter.ToString() + " " + (double)expLink.mlInfo.flow / accuracy * uConvToMODFLOW);
                             //all_links.Flush();
                         }
@@ -794,6 +818,7 @@ namespace MODSIM_GSFLOW_C
                     if (Model_mode != 12)   //Different flow of console output in MODSIM-MODFLOW mode, don't want the '.' in this case 
                     {
                         messageOut(".");
+                        //messageOut("." + swgwUtils.iterCount + "Dem:" + agDemand[24]);
                     }
 
                     swgwUtils.iterCount += 1;
@@ -834,16 +859,25 @@ namespace MODSIM_GSFLOW_C
                             {
                                 //Setting the MODSIM demand to the value set from GSFLOW
                                 //   Using the diversions array 
-                                if (Convert.ToInt16(swgwUtils.m_SyncTblSEG.Rows[i]["Diversion"]) > 0 && agDemand[i] >= 0)
+                                //if (Convert.ToInt16(swgwUtils.m_SyncTblSEG.Rows[i]["Diversion"]) > 0 && agDemand[i] >= 0)
+                                //if (agDemand[i] > 0)
+                                //{
+                                //Assumes that the demand is connected to the link mapped to the segment.
+                                //Node demNode = MS_Links[i].from.InflowLinks.link.from;
+                                if (int.Parse(swgwUtils.m_SyncTblSEG.Rows[i]["AgDem"].ToString()) == 1)
                                 {
-                                    //Assumes that the demand is connected to the link mapped to the segment.
-                                    Node demNode = MS_Links[i].from.InflowLinks.link.from;
+                                    Node demNode = MS_Links[i].to;
+                                    if (swgwUtils.m_SyncTblSEG.Rows[i]["AssocDem"].ToString() != "")
+                                        demNode = myModel.FindNode(swgwUtils.m_SyncTblSEG.Rows[i]["AgDem"].ToString());
                                     if (demNode.nodeType == NodeType.Demand)
                                     {
                                         int hydState = demNode.mnInfo.hydStateIndex;
                                         demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * accuracy / uConvToMODFLOW, 0);
                                         messageOut($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
                                     }
+                                    else
+                                        messageOut($"Demand node {demNode.name} not found in the model. Skipping MODSIM demand processing.");
+                                    //}
                                 }
 
                             }
@@ -903,7 +937,7 @@ namespace MODSIM_GSFLOW_C
                     }
                 }
                 // Easiest way forward might be to expose LAK2MODSIM in the DLL so it is callable both by GSFLOW and by MODSIM (this may have implications for MODSIM-PRMS mode)
-                if (Model_mode != 11)  //Model_mode 11: PRMS-MODSIM mode
+                if (Model_mode == 10 || Model_mode == 11)  //Don't want to do it in Model_mode 3: PRMS-MODSIM mode or MODSIM only or the ones don't include MODSIM
                 {
                     LAK2MODSIM_InitLakes(DELTAVOL, LAKEVOL, MXLKVOL);
                     for (int i = 0; i < LAKEVOL.Length; i++)
@@ -1000,15 +1034,21 @@ namespace MODSIM_GSFLOW_C
 
             bool converge = true;
             // double percent_diff = 0.005;
-
+            double maxExchDiff = 0;
+            int maxSeg = -1;
             for (int i = 0; i < MS_Flows.Length; i++)
             {
                 // Check for changes in the MODSIM flows in the diversion links.
                 // Convergence checked in MODFLOW units.
                 converge = converge && ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) <= EXCHNGVol_Tolerance);  // (double)(Math.Abs(MS_FlowsPREV[i]) * percent_diff));
                 converge = converge && ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) <= EXCHNGVol_Tolerance); // (double)(Math.Abs(EXCHANGEPREV[i]) * percent_diff));
-                if ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) > EXCHNGVol_Tolerance) 
-                    messageOut("For iseg: " + (i + 1).ToString() + " difference between MODSIM & MF is: " + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
+                if ((double)Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]) > EXCHNGVol_Tolerance && swgwUtils.iterCount > 2) 
+                    messageOut("For iseg (diversion): " + (i + 1).ToString() + " difference between MODSIM & MF is: " + Math.Abs(MS_Flows[i] - MS_FlowsPREV[i]));
+                if(maxExchDiff<(double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]))
+                {
+                    maxExchDiff = (double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]);
+                    maxSeg = i;
+                }
                 //if ((i == 18 || i == 19) && myModel.mInfo.CurrentModelTimeStepIndex >= 364) messageOut("Diver:" + i + ":" + MS_Flows[i] + "Exch: " + EXCHANGE[i]);
                 // if ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > EXCHNGVol_Tolerance) messageOut("GW-SW Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
                 // myModel.mInfo.CurrentModelTimeStepIndex
@@ -1016,6 +1056,10 @@ namespace MODSIM_GSFLOW_C
                 //Here is what the header looks like: sw.WriteLine("TS iseg Exchange_Prev Exchange");
                 //sw.WriteLine(Convert.ToInt32(myModel.mInfo.CurrentModelTimeStepIndex + 1) + " " + Convert.ToInt32(i + 1) + " " + Convert.ToSingle(EXCHANGEPREV[i]) + " " + Convert.ToSingle(EXCHANGE[i]));
                 //sw.Flush();
+            }
+            if(maxExchDiff>0 &&  swgwUtils.iterCount > 2)
+            {
+                messageOut($"\tAcc/Dep Exchange max: {maxExchDiff} segment {maxSeg}.");
             }
 
             if (Model_mode != 11)

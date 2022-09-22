@@ -24,15 +24,15 @@ namespace MODSIM_GSFLOW_C
             LAKEVol_Tolerance = 0;
             SqliteHelper sqliteHelper = new SqliteHelper(m_TblPath);
             //MWH.MWHUtils.GeneralUtils.MyDBUtils m_DBUtils = new MWH.MWHUtils.GeneralUtils.MyDBUtils(m_TblPath);
-            string m_Sql = "SELECT [MS-GSF_mapping_info].[Link Name], [MS-GSF_mapping_info].[iseg], [MS-GSF_mapping_info].[Diversion], [MS-GSF_mapping_info].ResRelease, [MS-GSF_mapping_info].AssocRes FROM [MS-GSF_mapping_info] ORDER BY [MS-GSF_mapping_info].iseg;";
+            string m_Sql = "SELECT *, 0 AS adjted FROM [MS-GSF_mapping_info] ORDER BY [MS-GSF_mapping_info].iseg;";
             m_SyncTblSEG = sqliteHelper.GetTableFromDB(m_Sql, "SegmentSync"); //"SELECT Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name FROM Modsim_Streams WHERE (((Modsim_Streams.MF_iseg) Is Not Null)) GROUP BY Modsim_Streams.MF_iseg, Modsim_Streams.MOD_Name;", "Streams");
-            m_SyncTblSEG.Columns.Add("adjted", typeof(System.Int32));
+            //m_SyncTblSEG.Columns.Add("adjted", typeof(System.Int32));
 
-            // Initialize column values
-            foreach (DataRow m_row in m_SyncTblSEG.Rows)
-            {
-                m_row["adjted"] = 0;
-            }
+            //// Initialize column values
+            //foreach (DataRow m_row in m_SyncTblSEG.Rows)
+            //{
+            //    m_row["adjted"] = 0;
+            //}
 
             // Get Reservoir mapping table 
             m_Sql = "SELECT * FROM [MS-GSF_Lake_Mapping_Info] ORDER BY [MS-GSF_Lake_Mapping_Info].GSF_LAK_ID;";
@@ -54,7 +54,7 @@ namespace MODSIM_GSFLOW_C
 
             Dictionary<string, float> coord = GetCoordFrame(myModel);
             // Create GW-SW Sink Node
-            Node m_Sink = myModel.FindNode("MF_SINK");
+            Node m_Sink = myModel.FindNode("MF_SINK",silent:true);
             if (m_Sink==null)
                 m_Sink = myModel.AddNewNode(true);
             m_Sink.nodeType = NodeType.Sink;
@@ -63,7 +63,7 @@ namespace MODSIM_GSFLOW_C
             m_Sink.name = "MF_SINK";
 
             // Create GW-SW Source Node
-            Node m_Source = myModel.FindNode("MF_SOURCE");
+            Node m_Source = myModel.FindNode("MF_SOURCE",silent:true);
             if (m_Source == null)
                 m_Source = myModel.AddNewNode(true);
             m_Source.nodeType = NodeType.NonStorage;
@@ -71,7 +71,7 @@ namespace MODSIM_GSFLOW_C
             m_Source.graphics.nodeLoc.Y = coord["maxY"] + (coord["maxY"] - coord["minY"]) * 0.010f; ;
             m_Source.name = "MF_SOURCE";
             DataTable m_TSTbl = m_Source.m.adaInflowsM.dataTable;
-            SetDefaultTableValue(ref m_TSTbl, 9900000000);
+            SetDefaultTableValue(ref m_TSTbl, 99000000);
 
             // Connect both of just instantiated nodes so that unused source water 
             // is shunted out of the model through the sink Node

@@ -1,0 +1,65 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MWC_MODSIMUtils", "MWC_MODSIM\MWC_MODSIMUtils.csproj", "{934DB78E-6254-4053-9FA4-29E39C00E6D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MWCModelingSystem", "MWCModelingSystem\MWCModelingSystem.csproj", "{82526C10-6378-47C1-B922-643E6C3F36F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MODSIM_GSFLOW_DLL", "..\MODSIM_GSFLOW_DLL\MODSIM_GSFLOW_DLL.csproj", "{B23549E7-3C1B-43B5-867C-BA30112BEAD6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{934DB78E-6254-4053-9FA4-29E39C00E6D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{934DB78E-6254-4053-9FA4-29E39C00E6D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{934DB78E-6254-4053-9FA4-29E39C00E6D1}.Debug|x64.ActiveCfg = Debug|x64
+		{934DB78E-6254-4053-9FA4-29E39C00E6D1}.Debug|x64.Build.0 = Debug|x64
+		{934DB78E-6254-4053-9FA4-29E39C00E6D1}.Debug|x86.ActiveCfg = Debug|x86
+		{934DB78E-6254-4053-9FA4-29E39C00E6D1}.Debug|x86.Build.0 = Debug|x86
+		{934DB78E-6254-4053-9FA4-29E39C00E6D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{934DB78E-6254-4053-9FA4-29E39C00E6D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{934DB78E-6254-4053-9FA4-29E39C00E6D1}.Release|x64.ActiveCfg = Release|x64
+		{934DB78E-6254-4053-9FA4-29E39C00E6D1}.Release|x64.Build.0 = Release|x64
+		{934DB78E-6254-4053-9FA4-29E39C00E6D1}.Release|x86.ActiveCfg = Release|x86
+		{934DB78E-6254-4053-9FA4-29E39C00E6D1}.Release|x86.Build.0 = Release|x86
+		{82526C10-6378-47C1-B922-643E6C3F36F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82526C10-6378-47C1-B922-643E6C3F36F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82526C10-6378-47C1-B922-643E6C3F36F0}.Debug|x64.ActiveCfg = Debug|x64
+		{82526C10-6378-47C1-B922-643E6C3F36F0}.Debug|x64.Build.0 = Debug|x64
+		{82526C10-6378-47C1-B922-643E6C3F36F0}.Debug|x86.ActiveCfg = Debug|x86
+		{82526C10-6378-47C1-B922-643E6C3F36F0}.Debug|x86.Build.0 = Debug|x86
+		{82526C10-6378-47C1-B922-643E6C3F36F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82526C10-6378-47C1-B922-643E6C3F36F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82526C10-6378-47C1-B922-643E6C3F36F0}.Release|x64.ActiveCfg = Release|x64
+		{82526C10-6378-47C1-B922-643E6C3F36F0}.Release|x64.Build.0 = Release|x64
+		{82526C10-6378-47C1-B922-643E6C3F36F0}.Release|x86.ActiveCfg = Release|x86
+		{82526C10-6378-47C1-B922-643E6C3F36F0}.Release|x86.Build.0 = Release|x86
+		{B23549E7-3C1B-43B5-867C-BA30112BEAD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B23549E7-3C1B-43B5-867C-BA30112BEAD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B23549E7-3C1B-43B5-867C-BA30112BEAD6}.Debug|x64.ActiveCfg = Debug|x64
+		{B23549E7-3C1B-43B5-867C-BA30112BEAD6}.Debug|x64.Build.0 = Debug|x64
+		{B23549E7-3C1B-43B5-867C-BA30112BEAD6}.Debug|x86.ActiveCfg = Debug|x86
+		{B23549E7-3C1B-43B5-867C-BA30112BEAD6}.Debug|x86.Build.0 = Debug|x86
+		{B23549E7-3C1B-43B5-867C-BA30112BEAD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B23549E7-3C1B-43B5-867C-BA30112BEAD6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B23549E7-3C1B-43B5-867C-BA30112BEAD6}.Release|x64.ActiveCfg = Release|x64
+		{B23549E7-3C1B-43B5-867C-BA30112BEAD6}.Release|x64.Build.0 = Release|x64
+		{B23549E7-3C1B-43B5-867C-BA30112BEAD6}.Release|x86.ActiveCfg = Release|x86
+		{B23549E7-3C1B-43B5-867C-BA30112BEAD6}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {92821645-B337-48E2-B054-CBFB592B113F}
+	EndGlobalSection
+EndGlobal
