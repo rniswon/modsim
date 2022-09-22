@@ -95,19 +95,11 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>SurfGWModule</StartupObject>
+    <StartupObject>MODSIM_GSFLOW_C.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="A2CM">
       <HintPath>MODSIMLibraries\x64\A2CM.dll</HintPath>
-    </Reference>
-    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\..\gsflow_v2\gsflow_develop\packages\EntityFramework.6.4.4\lib\net40\EntityFramework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\..\gsflow_v2\gsflow_develop\packages\EntityFramework.6.4.4\lib\net40\EntityFramework.SqlServer.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="libsim">
       <HintPath>MODSIMLibraries\x64\libsim.dll</HintPath>
@@ -122,9 +114,9 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.SQLite, Version=1.0.116.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
-      <HintPath>packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\lib\net40\System.Data.SQLite.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>$(SolutionDir)\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\lib\net40\System.Data.SQLite.dll</HintPath>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -135,8 +127,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqliteHelper.cs" />
     <Compile Include="SurfGWInteractionModule.cs" />
+    <Compile Include="SWGW_MODSIMUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -160,19 +155,34 @@
 echo user: %25USERNAME%25
 
 if %25USERNAME%25  ==  rniswon (
-COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\GSFLOW_MODSIM.dll" "$(TargetDir)GSFLOW_MODSIM.dll"
+COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\gsflow_modsim.dll" "$(TargetDir)GSFLOW_MODSIM.dll"
+COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\gsflow_modsim.dll" "$(ProjectDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll"
 )
 if %25USERNAME%25 ==  emorway (
 COPY /Y  "$(SolutionDir)\..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
 COPY /Y  "$(SolutionDir)\..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.exp" "$(TargetDir)\GSFLOW_MODSIM.exp"
 COPY /Y  "$(SolutionDir)\..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.pdb" "$(TargetDir)\GSFLOW_MODSIM.pdb"
 COPY /Y  "$(SolutionDir)\..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.lib" "$(TargetDir)\GSFLOW_MODSIM.lib"
+COPY /Y  "$(SolutionDir)..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.dll" "$(ProjectDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll"
 )
 if %25USERNAME%25 ==  etriana (
-COPY /Y  "$(SolutionDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
+COPY /Y  "$(ProjectDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
+)
+if %25USERNAME%25 ==  rsregan (
+COPY /Y  "$(SolutionDir)..\modsim_fortran\$(PlatformName)\$(ConfigurationName)\modsim_fortran.dll" "$(TargetDir)\GSFLOW_MODSIM.dll"
+COPY /Y  "$(SolutionDir)..\modsim_fortran\$(PlatformName)\$(ConfigurationName)\modsim_fortran.exp" "$(TargetDir)\GSFLOW_MODSIM.exp"
+COPY /Y  "$(SolutionDir)..\modsim_fortran\$(PlatformName)\$(ConfigurationName)\modsim_fortran.pdb" "$(TargetDir)\GSFLOW_MODSIM.pdb"
+COPY /Y  "$(SolutionDir)..\modsim_fortran\$(PlatformName)\$(ConfigurationName)\modsim_fortran.lib" "$(TargetDir)\GSFLOW_MODSIM.lib"
+COPY /Y  "$(SolutionDir)..\modsim_fortran\$(PlatformName)\$(ConfigurationName)\modsim_fortran.dll" "$(ProjectDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll"
 )</PreBuildEvent>
   </PropertyGroup>
-  <Import Project="packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
+  <Import Project="$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
