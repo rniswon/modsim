@@ -20,8 +20,8 @@
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <StartArguments>gsflow.control</StartArguments>
-    <StartWorkingDirectory>C:\Users\etriana\source\repos\rniswon\gsflow_examples\sagehen_3lay_modsim\windows\</StartWorkingDirectory>
+    <StartArguments>SRPHM_strm_dpl_Restart.control</StartArguments>
+    <StartWorkingDirectory>C:\Users\etriana\source\repos\rniswon\SRP_MODSIM\model\</StartWorkingDirectory>
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
   </PropertyGroup>
 </Project>
