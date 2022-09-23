@@ -162,6 +162,7 @@ namespace RRModelingSystem
                 {
                     messageOut("Sucessful completion of the MODSIM run!");
                 }
+                ProcessPumpingFactor(RRPreferences.rutaPumping, Convert.ToDouble(txtFactor.Text), checkFactor.Checked);
             }
             catch (Exception ex)
             {
@@ -176,6 +177,67 @@ namespace RRModelingSystem
             Cursor.Current = Cursors.Default;
         }
 
+        static void ProcessPumpingFactor(string FileName, double factor, Boolean aplicafactor)
+        {
+            int line = 0;
+            string lineOut;
+            string lineIn;
+            //string nombre1 = DateTime.Now.ToString("yyyy-MM-dd-HH-MM-ss");
+
+            //StreamWriter sw = new StreamWriter(FileName + ".out");
+
+            //StreamWriter sw = new StreamWriter(FileName.Replace(".wel", "_run" + nombre1 + ".wel"));
+            if (aplicafactor==true)
+            { 
+            StreamWriter sw = new StreamWriter(FileName.Replace(".wel", "_run" + ".wel"));
+
+            //string FileName1 = FileName.Replace("input\\MODFLOW", "output");
+
+            //StreamWriter sw = new StreamWriter(FileName1.Replace(".wel", "_run" + ".wel"));
+
+            using (StreamReader sr = File.OpenText(FileName))
+            {
+                while ((lineIn = sr.ReadLine()) != null)
+                {
+                    Console.Write("Procesando linea {0}\r", ++line);
+
+                    if (line > 3)
+                    {
+                        if (!lineIn.Contains("#"))
+                        {
+                            string[] stringValues = lineIn.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                            int column1 = Int32.Parse(stringValues[0]);
+                            int column2 = Int32.Parse(stringValues[1]);
+                            int column3 = Int32.Parse(stringValues[2].Replace("-", ""));
+                            double column4 = Convert.ToDouble(stringValues[3]);
+
+                            column4 *= factor;
+
+                            lineOut = string.Format("{0,10}{1,10}{2,10}{3,16:N2}", column1, column2, column3, column4);
+                        }
+                        else
+                            lineOut = lineIn + "\r";
+                    }
+                    else
+                        lineOut = lineIn + "\r";
+
+                    sw.Write("{0}\n", lineOut);
+                }
+            }
+
+            sw.Close();
+            }
+            else
+            {
+                File.Copy(FileName, FileName.Replace(".wel", "_run" + ".wel"));
+            }
+
+            //File.Delete(FileName);
+            //File.Move(FileName + ".out", textBoxWorkspace.Text +);
+
+            MessageBox.Show("Terminó!!!!!");
+        }
         /// <summary>
         /// update run status in project database
         /// </summary>
@@ -702,6 +764,21 @@ namespace RRModelingSystem
         private void radioButtonRunActive_CheckedChanged(object sender, EventArgs e)
         {
             groupBoxRunInfo.Visible = radioButtonMODSIMOnly.Checked;
+        }
+
+        private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) &&
+        (e.KeyChar != '.'))
+            {
+                e.Handled = true;
+            }
+
+            // only allow one decimal point
+            if ((e.KeyChar == '.') && ((sender as TextBox).Text.IndexOf('.') > -1))
+            {
+                e.Handled = true;
+            }
         }
     }
 }

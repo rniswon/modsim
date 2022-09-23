@@ -69,7 +69,7 @@ namespace MODSIM_GSFLOW_C
         private SWGW_MODSIMUtils swgwUtils;
         private int Numts;
         private string map_FileName;
-
+        private int maxIterCount=0;
 
         //Flags for custom project codes
         private bool WES_ON = false;
@@ -197,6 +197,7 @@ namespace MODSIM_GSFLOW_C
                     gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
                 }
 
+                messageOut("\tClosing GSFLOW simulation ...");
                 Process_mode = 3; // clean
                 gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
             }
@@ -261,13 +262,18 @@ namespace MODSIM_GSFLOW_C
             try
             {
                 //Finalize GSFLOW run
+                messageOut("\tClosing GSFLOW simulation ...");
                 Process_mode = 3; // clean
+                afr = true;
                 gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
 
+                if (maxIterCount > 0)
+                    messageOut($"\tSimualtion had {maxIterCount} time steps that ran into maximum number of MODSIM-GSFLOW iterations.");
 
                 //Copy output to the original file name - Custom Output carries the MF Dep/Acc
                 File.Copy(xyFileName.Replace(".xy", "MSGSFOUTPUT.sqlite"), xyFileName.Replace(".xy", "OUTPUT.sqlite"), true);
                 messageOut(" MF_MS Simulation Finished Succesfully");
+                
 
             }
             catch (Exception ex)
@@ -826,17 +832,20 @@ namespace MODSIM_GSFLOW_C
                     if (swgwUtils.iterCount >= swgwUtils.maxNoIterations)//(myModel.mInfo.Iteration > myModel.maxit)
                     {
                         messageOut("\r\n MODSIM & GSFLOW Ran into maximum number of iterations - Warning !!! models have not converged.");
+                        maxIterCount++;
                         MS_GSF_converge = true;
                     }
                     //ETS - This check make sense if the iteration is reset every time that MODSIM restart. 
-                    if (myModel.mInfo.Iteration > myModel.maxit)
+                    if (myModel.mInfo.Iteration > myModel.maxit && !MS_GSF_converge)
                     {
                         messageOut("\r\n MODSIM ran into maximum number of iterations - Warning !!! models have not converged.");
+                        maxIterCount++;
                         MS_GSF_converge = true;
 
                         update_lake_synchronization();
                     }
 
+                    //ETS - these modes will not loop through the MODSIM loop
                     if (Model_mode == 0 || Model_mode == 1 || Model_mode == 2 || Model_mode == 3)
                     {
                         afr = true;
@@ -1014,7 +1023,7 @@ namespace MODSIM_GSFLOW_C
 
         private double EXCHNGVol_Tolerance; //in m3
         private double LAKEVol_Tolerance;//in m3
-
+        
         private Boolean Get_Div_Chng()//SortedList myDiversions)
         {
             //for (int i = 0; i < MS_Links.Length; i++)

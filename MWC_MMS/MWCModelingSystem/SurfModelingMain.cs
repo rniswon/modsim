@@ -244,6 +244,16 @@ namespace RRModelingSystem
             value = textBox.Text;
             return dialogResult;
         }
+
+        private void logWindowToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            splitContainer2.Panel2Collapsed = !logWindowToolStripMenuItem.Checked;
+        }
+
+        private void navigationPaneToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            splitContainer1.Panel1Collapsed = !navigationPaneToolStripMenuItem.Checked;
+        }
     }
 
 }

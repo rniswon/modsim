@@ -49,6 +49,8 @@
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.dataGridViewISF = new System.Windows.Forms.DataGridView();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.txtFactor = new System.Windows.Forms.TextBox();
+            this.checkFactor = new System.Windows.Forms.CheckBox();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
             this.groupBoxRunInfo = new System.Windows.Forms.GroupBox();
             this.checkBoxUseInName = new System.Windows.Forms.CheckBox();
@@ -93,7 +95,7 @@
             // 
             this.buttonExecuteModel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonExecuteModel.Enabled = false;
-            this.buttonExecuteModel.Location = new System.Drawing.Point(476, 167);
+            this.buttonExecuteModel.Location = new System.Drawing.Point(490, 169);
             this.buttonExecuteModel.Name = "buttonExecuteModel";
             this.buttonExecuteModel.Size = new System.Drawing.Size(98, 23);
             this.buttonExecuteModel.TabIndex = 6;
@@ -253,10 +255,12 @@
             // 
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox2.Controls.Add(this.txtFactor);
             this.groupBox2.Controls.Add(this.comboBox5);
+            this.groupBox2.Controls.Add(this.checkFactor);
             this.groupBox2.Location = new System.Drawing.Point(9, 213);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(632, 44);
+            this.groupBox2.Size = new System.Drawing.Size(633, 44);
             this.groupBox2.TabIndex = 10;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "GSFLOW Pumping Scenario";
@@ -278,7 +282,7 @@
                 "umping"});
             this.comboBox5.Location = new System.Drawing.Point(19, 17);
             this.comboBox5.Name = "comboBox5";
-            this.comboBox5.Size = new System.Drawing.Size(607, 21);
+            this.comboBox5.Size = new System.Drawing.Size(268, 21);
             this.comboBox5.TabIndex = 0;
             // 
             // groupBox3
@@ -352,6 +356,29 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Simulation Preferences";
             this.groupBox4.Enter += new System.EventHandler(this.groupBox4_Enter);
+            // 
+            // txtFactor
+            // 
+            this.txtFactor.Location = new System.Drawing.Point(552, 15);
+            this.txtFactor.Name = "txtFactor";
+            this.txtFactor.Size = new System.Drawing.Size(71, 20);
+            this.txtFactor.TabIndex = 0;
+            this.txtFactor.Text = "1.0";
+            this.txtFactor.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.txtFactor.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
+            // 
+            // checkFactor
+            // 
+            this.checkFactor.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkFactor.AutoSize = true;
+            this.checkFactor.Checked = true;
+            this.checkFactor.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkFactor.Location = new System.Drawing.Point(351, 17);
+            this.checkFactor.Name = "checkFactor";
+            this.checkFactor.Size = new System.Drawing.Size(191, 17);
+            this.checkFactor.TabIndex = 7;
+            this.checkFactor.Text = "Enable Pumping Adjustment Factor";
+            this.checkFactor.UseVisualStyleBackColor = true;
             // 
             // groupBox9
             // 
@@ -469,7 +496,7 @@
             this.checkBoxRiparianLogic.AutoSize = true;
             this.checkBoxRiparianLogic.Checked = true;
             this.checkBoxRiparianLogic.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxRiparianLogic.Location = new System.Drawing.Point(445, 19);
+            this.checkBoxRiparianLogic.Location = new System.Drawing.Point(442, 19);
             this.checkBoxRiparianLogic.Name = "checkBoxRiparianLogic";
             this.checkBoxRiparianLogic.Size = new System.Drawing.Size(179, 17);
             this.checkBoxRiparianLogic.TabIndex = 3;
@@ -481,7 +508,7 @@
             this.groupBox6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox6.Controls.Add(this.radioButtonAgPckge);
             this.groupBox6.Controls.Add(this.radioButtonWRIMS);
-            this.groupBox6.Location = new System.Drawing.Point(446, 103);
+            this.groupBox6.Location = new System.Drawing.Point(443, 103);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Size = new System.Drawing.Size(183, 55);
             this.groupBox6.TabIndex = 2;
@@ -516,7 +543,7 @@
             this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox5.Controls.Add(this.radioButtonMS_GS);
             this.groupBox5.Controls.Add(this.radioButtonMODSIMOnly);
-            this.groupBox5.Location = new System.Drawing.Point(445, 42);
+            this.groupBox5.Location = new System.Drawing.Point(442, 42);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Size = new System.Drawing.Size(184, 55);
             this.groupBox5.TabIndex = 1;
@@ -637,6 +664,7 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
@@ -702,8 +730,7 @@
         private System.Windows.Forms.RadioButton radioButtonMMSRun;
         private System.Windows.Forms.RadioButton radioButtonRunActive;
         private System.Windows.Forms.CheckBox checkBoxUseInName;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TextBox txtFactor;
+        private System.Windows.Forms.CheckBox checkFactor;
     }
 }
