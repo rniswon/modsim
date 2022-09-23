@@ -1,0 +1,700 @@
+xyVersion 8.6
+numhydtables 0
+n_links 20
+n_nodes 21
+n_lags 5
+ExtManualStorageRightActive False
+ExtStorageRightActive False
+ExtWaterRightsActive False
+ExtLastFillRentActive False
+NonstorageNodeSize 100
+DemandNodeSize 100
+ReservoirNodeSize 100
+LinkSize 100
+BackgroundImageLocation 
+BackgroundImageSize 0
+DefaultFlowUnits acre-ft/month
+DefaultStorageUnits acre-ft
+hydroCtrl
+ExtHydropowerActive False
+node
+name A
+nuid 62abc37f-d72f-4c15-bab7-510be995cff9
+desc 
+num 1
+ntype 2
+out 1
+out 8
+out 9
+tsinflow
+units acre-ft/month
+01/01/1980 00:00:00	560
+06/01/1980 00:00:00	3200
+pos
+0 544.0000
+1 284.0000
+labelpos
+0 544.0000
+1 292.5000
+select 0
+node
+name C
+nuid 155e5094-4dca-4bf8-b7c3-a1b867dc4d27
+desc 
+num 2
+ntype 2
+in 1
+in 2
+out 3
+out 12
+tsinflow
+units acre-ft/month
+01/01/1980 00:00:00	560
+pos
+0 590.0000
+1 377.0000
+labelpos
+0 590.0000
+1 385.5000
+select 0
+node
+name B
+nuid 2a30bb76-1df0-452c-803b-8f0d0c77a8c3
+desc 
+num 3
+ntype 2
+out 2
+out 13
+tsinflow
+units acre-ft/month
+01/01/1980 00:00:00	560
+11/01/1980 00:00:00	3200
+pos
+0 479.0000
+1 362.0000
+labelpos
+0 479.0000
+1 370.5000
+select 0
+node
+name D
+nuid ab4aa4a3-d1b2-44f1-afc4-a555cffc28c6
+desc 
+num 4
+ntype 2
+out 4
+out 11
+tsinflow
+units acre-ft/month
+01/01/1980 00:00:00	560
+pos
+0 751.5000
+1 391.5000
+labelpos
+0 751.5000
+1 400.0000
+select 0
+node
+name E
+nuid 34ef9586-9ab3-452a-b895-1e61b2328436
+desc 
+num 5
+ntype 2
+in 3
+in 4
+out 5
+out 15
+out 16
+out 20
+tsinflow
+units acre-ft/month
+01/01/1980 00:00:00	560
+pos
+0 638.5000
+1 475.5000
+labelpos
+0 638.5000
+1 484.0000
+select 0
+node
+name F
+nuid df021010-540c-43c0-9c21-4bb50391be58
+desc 
+num 6
+ntype 2
+in 5
+out 7
+out 17
+out 18
+tsinflow
+units acre-ft/month
+01/01/1980 00:00:00	560
+pos
+0 668.5000
+1 572.5000
+labelpos
+0 668.5000
+1 581.0000
+select 0
+node
+name G
+nuid 466faddb-e9ea-4f63-bbcc-6760d1140812
+desc 
+num 7
+ntype 2
+out 6
+out 14
+tsinflow
+units acre-ft/month
+01/01/1980 00:00:00	560
+pos
+0 562.5000
+1 597.5000
+labelpos
+0 562.5000
+1 606.0000
+select 0
+node
+name H
+nuid 9cc7d772-6156-41a9-8b08-9e9cf5e047e8
+desc 
+num 8
+ntype 2
+in 6
+in 7
+out 10
+out 19
+tsinflow
+units acre-ft/month
+01/01/1980 00:00:00	560
+pos
+0 676.5000
+1 653.5000
+labelpos
+0 676.5000
+1 662.0000
+select 0
+node
+name User_1
+nuid 12d5da4f-c58b-4ada-8335-3db02a910b29
+desc 
+num 9
+ntype 3
+in 8
+pos
+0 618.5000
+1 216.5000
+labelpos
+0 618.5000
+1 225.0000
+select 0
+pcapUnits acre-ft/month
+tsdemand
+units acre-ft/month
+01/01/1980 00:00:00	800
+node
+name User_2
+nuid 15a9e5ff-792e-4445-b407-a61842fdf422
+desc 
+num 10
+ntype 3
+in 9
+pos
+0 633.5000
+1 276.5000
+labelpos
+0 633.5000
+1 285.0000
+select 0
+pcapUnits acre-ft/month
+tsdemand
+units acre-ft/month
+01/01/1980 00:00:00	1000
+node
+name Sink
+nuid 7cef2067-44fc-4b8a-a0e5-83ce4270c88c
+desc 
+num 11
+ntype 4
+in 10
+pos
+0 677.5000
+1 733.5000
+labelpos
+0 677.5000
+1 742.0000
+select 0
+node
+name User_5
+nuid 12cc13dd-133a-4578-bf32-494163f4c749
+desc 
+num 12
+ntype 3
+in 11
+pos
+0 815.0000
+1 389.0000
+labelpos
+0 815.0000
+1 397.5000
+select 0
+pcapUnits acre-ft/month
+tsdemand
+units acre-ft/month
+01/01/1980 00:00:00	2200
+node
+name User_4
+nuid 63d89eb5-aadd-4590-815e-f0ec8246d3aa
+desc 
+num 13
+ntype 3
+in 12
+pos
+0 657.0000
+1 357.0000
+labelpos
+0 657.0000
+1 365.5000
+select 0
+pcapUnits acre-ft/month
+tsdemand
+units acre-ft/month
+01/01/1980 00:00:00	400
+node
+name User_3
+nuid d7367109-0938-437e-865c-f7f049b33bcc
+desc 
+num 14
+ntype 3
+in 13
+pos
+0 516.0000
+1 421.0000
+labelpos
+0 516.0000
+1 429.5000
+select 0
+pcapUnits acre-ft/month
+tsdemand
+units acre-ft/month
+01/01/1980 00:00:00	800
+node
+name User_6
+nuid 2df5afd9-1389-42d1-a3c2-87ac2ff69614
+desc 
+num 15
+ntype 3
+in 15
+pos
+0 708.0000
+1 482.0000
+labelpos
+0 708.0000
+1 490.5000
+select 0
+pcapUnits acre-ft/month
+tsdemand
+units acre-ft/month
+01/01/1980 00:00:00	900
+node
+name User_7
+nuid 19172f2e-f920-411e-b699-bce316ec8739
+desc 
+num 16
+ntype 3
+in 16
+pos
+0 709.0000
+1 520.0000
+labelpos
+0 709.0000
+1 528.5000
+select 0
+pcapUnits acre-ft/month
+tsdemand
+units acre-ft/month
+01/01/1980 00:00:00	1200
+node
+name User_8
+nuid 7c7d8dd3-6d4f-416b-90c4-e721bc1d21ee
+desc 
+num 17
+ntype 3
+in 17
+pos
+0 734.0000
+1 572.0000
+labelpos
+0 734.0000
+1 580.5000
+select 0
+pcapUnits acre-ft/month
+tsdemand
+units acre-ft/month
+01/01/1980 00:00:00	700
+node
+name User_9
+nuid e0c5cd24-363d-460a-8a27-8cf71f524410
+desc 
+num 18
+ntype 3
+in 18
+pos
+0 734.0000
+1 618.0000
+labelpos
+0 734.0000
+1 626.5000
+select 0
+pcapUnits acre-ft/month
+tsdemand
+units acre-ft/month
+01/01/1980 00:00:00	1300
+node
+name User_11
+nuid eb3f9c30-5e56-4114-95e9-908485fcd9ab
+desc 
+num 19
+ntype 3
+in 19
+pos
+0 759.0000
+1 674.0000
+labelpos
+0 759.0000
+1 682.5000
+select 0
+pcapUnits acre-ft/month
+tsdemand
+units acre-ft/month
+01/01/1980 00:00:00	800
+node
+name User_10
+nuid 5b7e1475-920d-4ee5-b211-b69a5675cc12
+desc 
+num 20
+ntype 3
+in 14
+pos
+0 584.0000
+1 654.0000
+labelpos
+0 584.0000
+1 662.5000
+select 0
+pcapUnits acre-ft/month
+tsdemand
+units acre-ft/month
+01/01/1980 00:00:00	900
+node
+name Junior Demand
+nuid 86eea6b4-0070-4b43-86d7-9e2f4c3ee839
+desc 
+num 21
+ntype 3
+in 20
+pos
+0 586.9000
+1 533.1000
+labelpos
+0 586.9000
+1 541.6000
+select 0
+pcapUnits acre-ft/month
+tsdemand
+units acre-ft/month
+01/01/1980 00:00:00	1000
+link
+lname A_C
+luid 492fe05e-d329-450a-aa51-e781d68e14dd
+ldescription 
+lnum 1
+fromnum 1
+tonum 2
+select 0
+link
+lname B_C
+luid 9aba076c-ab8f-45c1-af83-4c363d5ccd6a
+ldescription 
+lnum 2
+fromnum 3
+tonum 2
+select 0
+link
+lname C_E
+luid 481effd4-5a7f-48a9-b584-7448abbdf366
+ldescription 
+lnum 3
+fromnum 2
+tonum 5
+select 0
+link
+lname D_E
+luid 27ee629a-ef75-4041-9529-5a0b6363b143
+ldescription 
+lnum 4
+fromnum 4
+tonum 5
+select 0
+link
+lname E_F
+luid accac7d4-9859-4204-a1c8-50287659e777
+ldescription 
+lnum 5
+fromnum 5
+tonum 6
+select 0
+link
+lname G_H
+luid 9c72a519-785b-4315-897b-4f71afb57a5f
+ldescription 
+lnum 6
+fromnum 7
+tonum 8
+select 0
+link
+lname F_H
+luid 7eb3b4c7-05ca-4d26-9219-e2cc1e47abf3
+ldescription 
+lnum 7
+fromnum 6
+tonum 8
+select 0
+link
+lname A_User_1
+luid 9e8dfcc5-186c-4d52-b01a-b2a0d8f2694e
+ldescription 
+lnum 8
+fromnum 1
+tonum 9
+lcost -999
+maxCap
+units acre-ft/month
+01/01/1980 00:00:00	800
+select 0
+link
+lname A_User_2
+luid 2300e830-8a8b-4d39-a257-02bce7346493
+ldescription 
+lnum 9
+fromnum 1
+tonum 10
+lcost -999
+maxCap
+units acre-ft/month
+01/01/1980 00:00:00	1000
+select 0
+link
+lname H_Sink
+luid 4a9a41dd-93ca-4fdd-ae82-9422a996c36f
+ldescription 
+lnum 10
+fromnum 8
+tonum 11
+select 0
+link
+lname D_User_5
+luid 55d1b698-8a5f-45a0-b91f-be5d41109cef
+ldescription 
+lnum 11
+fromnum 4
+tonum 12
+lcost -999
+maxCap
+units acre-ft/month
+01/01/1980 00:00:00	2200
+select 0
+link
+lname C_User_4
+luid ad97d8c5-d143-4734-a000-b747bfb1a696
+ldescription 
+lnum 12
+fromnum 2
+tonum 13
+lcost -999
+maxCap
+units acre-ft/month
+01/01/1980 00:00:00	400
+select 0
+link
+lname B_User_3
+luid ab590181-d8d0-42ea-9e66-47a1d3c544be
+ldescription 
+lnum 13
+fromnum 3
+tonum 14
+lcost -999
+maxCap
+units acre-ft/month
+01/01/1980 00:00:00	800
+select 0
+link
+lname G_User_10
+luid 95b3110a-fbdf-4016-a7d5-2cf4e2bf4390
+ldescription 
+lnum 14
+fromnum 7
+tonum 20
+lcost -999
+maxCap
+units acre-ft/month
+01/01/1980 00:00:00	900
+select 0
+link
+lname E_User_6
+luid afa9af4a-6743-4045-a521-f2415d2fbe39
+ldescription 
+lnum 15
+fromnum 5
+tonum 15
+lcost -999
+maxCap
+units acre-ft/month
+01/01/1980 00:00:00	900
+lcoords
+0 675.3154
+1 478.0000
+select 0
+link
+lname E_User_7
+luid 8fbca9c9-dd04-4d3f-b6b5-4f8c411beb94
+ldescription 
+lnum 16
+fromnum 5
+tonum 16
+lcost -999
+maxCap
+units acre-ft/month
+01/01/1980 00:00:00	1200
+select 0
+link
+lname F_User_8
+luid 95e01da9-0280-40fc-a7a2-aa5947c4613f
+ldescription 
+lnum 17
+fromnum 6
+tonum 17
+lcost -999
+maxCap
+units acre-ft/month
+01/01/1980 00:00:00	700
+select 0
+link
+lname F_User_9
+luid d7407f0b-a676-45d3-9dd3-8e2b3d21d4b8
+ldescription 
+lnum 18
+fromnum 6
+tonum 18
+lcost -999
+maxCap
+units acre-ft/month
+01/01/1980 00:00:00	1300
+select 0
+link
+lname H_User_11
+luid 81c471a1-a03a-4d76-8ba4-f1a08ab02306
+ldescription 
+lnum 19
+fromnum 8
+tonum 19
+lcost -999
+maxCap
+units acre-ft/month
+01/01/1980 00:00:00	800
+select 0
+link
+lname E_Junior Demand
+luid 42936f5a-f365-4b4b-b282-a06bf2c85df6
+ldescription 
+lnum 20
+fromnum 5
+tonum 21
+lcost -100
+maxCap
+units acre-ft/month
+01/01/1980 00:00:00	1000
+measured
+units acre-ft/month
+01/01/1980 00:00:00	2999999999
+select 0
+ially 1 # Explicit_Targets
+iplot 0
+iprd Monthly
+iut 0
+n_years 1
+rdim
+0 0
+1 0
+2 20480
+3 2700
+title test_model_riparian_MidUser_2
+uselags 1
+maxit 800
+gw_cp 0.05
+flowth_cp 0.00005
+evap_cp 0.01
+infeasrestart 0
+relxacrul 0
+dataStartDate 01/01/1980 00:00:00
+dataEndDate 01/01/1981 00:00:00
+startingDate 01/01/1980 00:00:00
+endingDate 01/01/1981 00:00:00
+accrualDate 01/01/1980 00:00:00
+seasCapDate 01/01/1980 00:00:00
+accuracy 2
+defaultMaxCap 2999999999
+res_output 1
+dws_rel 1
+elev_end 1
+evp_loss 1
+evp_rate 1
+gwater 1
+head_avg 1
+hydra_Cap 1
+powr_avg 1
+powr_pk 1
+pump_in 1
+pump_out 1
+pwr_2nd 1
+seepage 1
+spills 1
+stor_beg 1
+stor_end 1
+stor_trg 1
+unreg_in 1
+ups_rel 1
+dem_output 1
+dem_sht 1
+demand 1
+gw_in 1
+surf_in 1
+acc_flow 1
+acc_output 1
+acrl 1
+stgl 1
+flo_flow 1
+flo_output 1
+loss 1
+natflow 1
+fromgwtono 1
+gw_output 1
+noTimeStepsInMemorygwinfiltra 1
+spcl_rpts 0
+part_flows 0
+ver7OutputFiles 0
+ver8MSDBOutputFiles 0
+SQLiteOutputFiles 1
+DeleteTempVer8OutputFiles 1
+noTimeStepsInMemory 12
+hydroStateOUT 1
+nonStorage_output 1
+l_MaxOUT 1
+l_MinOUT 1
+Flow_ThruOUT 1
+Rout_RetOUT 1
+InflowOUT 1
+nomaxmesg 0
+constsysst 0
+IsBackRoutingActive 0
+IsStorageAccountWithRouting 0
