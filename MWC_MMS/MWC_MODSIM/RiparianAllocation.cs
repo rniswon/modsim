@@ -7,7 +7,7 @@ using Csu.Modsim.ModsimModel;
 
 using System.IO;
 using System.Data;
-using RTI.CWR.MMS_Support;
+using RTI.CWR.MWC_MODSIMUtils;
 
 namespace RTI.CWR.MWC_MODSIMUtils
 {
@@ -77,13 +77,15 @@ namespace RTI.CWR.MWC_MODSIMUtils
         {
             if (m_Model.mInfo.Iteration == 0)
             {
-            
+
                 if (RipAllocLoopCount == 0)
                 {
                     UBPerc = 0;
                     UBRed = 0.1;
                     UBPerc += UBRed;
-                
+
+
+
 
                     //Initialize all riparian rights as unlocked
                     foreach (string name in riparianLinks.Keys)
@@ -94,6 +96,10 @@ namespace RTI.CWR.MWC_MODSIMUtils
                 }
                 else
                 {
+                    while (UBPerc + UBRed < 0)
+                        UBRed *= -0.5;
+                    while (UBPerc + UBRed > 1)
+                        UBRed *= 0.5;
                     UBPerc += UBRed;
                 }
                 //UBPerc = Math.Min(1, UBPerc);
@@ -139,17 +145,17 @@ namespace RTI.CWR.MWC_MODSIMUtils
             m_Model.mInfo.convg = false;
             RipAllocLoopCount = RipAllocLoopCount + 1;
 
-            if ((minSP == 1 && UBRed >= 0) || (minSP < 1 && UBRed < 0)) //If True -- we want to KEEP moving in the direction of UBRed
+            if ((minSP == 1 && UBRed >= 0) || (minSP < 1 && UBRed < 0) || (minSP == 1 && UBPerc == 1)) //If True -- we want to KEEP moving in the direction of UBRed
             {
                 
                 //If we have met precision for P, implement LOCK for users where SP = MinSP AND 
-                if (Math.Abs(UBRed) < 1 / (m_Model.ScaleFactor * 100) && (minSP < 0.9999 && UBRed < 0))
+                if ((Math.Abs(UBRed) < 1 / (m_Model.ScaleFactor ) && (minSP < 0.99999 && UBRed < 0)) || (minSP == 1 && UBPerc == 1))
                 {
 
                     messageOut($"   ---");
                     foreach (string name in riparianLinks.Keys)
                     {
-                        if (riparianLinks[name].shortPercent < 1 && riparianLinks[name].clusterLocked == false)
+                        if ((riparianLinks[name].shortPercent < 1 && riparianLinks[name].clusterLocked == false) || (riparianLinks[name].shortPercent == 1 && UBPerc == 1))
                         {
 
                             //if(riparianLinks[name].GetRiverDWSFlow()==0) 
