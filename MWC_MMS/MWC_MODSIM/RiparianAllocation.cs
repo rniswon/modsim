@@ -7,6 +7,7 @@ using Csu.Modsim.ModsimModel;
 
 using System.IO;
 using System.Data;
+using RTI.CWR.MWC_MODSIMUtils;
 
 namespace RTI.CWR.MWC_MODSIMUtils
 {
@@ -76,13 +77,15 @@ namespace RTI.CWR.MWC_MODSIMUtils
         {
             if (m_Model.mInfo.Iteration == 0)
             {
-            
+
                 if (RipAllocLoopCount == 0)
                 {
                     UBPerc = 0;
                     UBRed = 0.1;
                     UBPerc += UBRed;
-                
+
+
+
 
                     //Initialize all riparian rights as unlocked
                     foreach (string name in riparianLinks.Keys)
@@ -105,10 +108,7 @@ namespace RTI.CWR.MWC_MODSIMUtils
             {
                 //max flow (hi) updated based on UBPerc and stepsize. hi is integer, so we need to round and convert. hiVariable = orginal upper limit
                 if (!riparianLinks[name].clusterLocked)
-                {
-                    long newval = (long)Math.Round(riparianLinks[name].riparianLink.mlInfo.hiVariable[m_Model.mInfo.CurrentModelTimeStepIndex, 0] * (UBPerc), 0);
-                    riparianLinks[name].riparianLink.mlInfo.hi = Math.Min(newval, riparianLinks[name].riparianLink.mlInfo.hiVariable[m_Model.mInfo.CurrentModelTimeStepIndex, 0]);
-                }
+                    riparianLinks[name].riparianLink.mlInfo.hi = (long) Math.Round(riparianLinks[name].riparianLink.mlInfo.hiVariable[m_Model.mInfo.CurrentModelTimeStepIndex,0] * (UBPerc),0); 
             }
         }
 
@@ -145,19 +145,17 @@ namespace RTI.CWR.MWC_MODSIMUtils
             m_Model.mInfo.convg = false;
             RipAllocLoopCount = RipAllocLoopCount + 1;
 
-            if ((minSP == 1 && UBRed >= 0) || (minSP < 1 && UBRed < 0)) 
-                //If True -- we want to KEEP moving in the direction of UBRed
+            if ((minSP == 1 && UBRed >= 0) || (minSP < 1 && UBRed < 0) || (minSP == 1 && UBPerc == 1)) //If True -- we want to KEEP moving in the direction of UBRed
             {
                 
                 //If we have met precision for P, implement LOCK for users where SP = MinSP AND 
-                if (Math.Abs(UBRed) < 1 / (m_Model.ScaleFactor * 100) )
-                    if((minSP < 0.9999 && UBRed < 0)||(minSP==1 && UBRed>0))
+                if ((Math.Abs(UBRed) < 1 / (m_Model.ScaleFactor ) && (minSP < 0.99999 && UBRed < 0)) || (minSP == 1 && UBPerc == 1))
                 {
 
                     messageOut($"   ---");
                     foreach (string name in riparianLinks.Keys)
                     {
-                        if (riparianLinks[name].shortPercent <= 1 && riparianLinks[name].clusterLocked == false)
+                        if ((riparianLinks[name].shortPercent < 1 && riparianLinks[name].clusterLocked == false) || (riparianLinks[name].shortPercent == 1 && UBPerc == 1))
                         {
 
                             //if(riparianLinks[name].GetRiverDWSFlow()==0) 
@@ -198,6 +196,7 @@ namespace RTI.CWR.MWC_MODSIMUtils
             }
             
          m_Model.mInfo.Iteration = 0;
+
 
         }
 
