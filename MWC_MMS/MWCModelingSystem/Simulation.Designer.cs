@@ -724,6 +724,9 @@
         private System.Windows.Forms.RichTextBox richTextBoxRunNotes;
         private System.Windows.Forms.ComboBox comboBoxKeyword;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label labelActFile;
         private System.Windows.Forms.GroupBox groupBox9;
         private System.Windows.Forms.GroupBox groupBoxRunInfo;

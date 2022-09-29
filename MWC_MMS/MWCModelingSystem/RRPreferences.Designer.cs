@@ -104,7 +104,7 @@
             this.groupBox2.ForeColor = System.Drawing.SystemColors.ControlText;
             this.groupBox2.Location = new System.Drawing.Point(9, 16);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(353, 48);
+            this.groupBox2.Size = new System.Drawing.Size(436, 48);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "XY File";
@@ -112,7 +112,7 @@
             // button2
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(289, 20);
+            this.button2.Location = new System.Drawing.Point(372, 20);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(58, 20);
             this.button2.TabIndex = 1;
@@ -128,7 +128,7 @@
             this.textBoxMODSIMFile.Location = new System.Drawing.Point(6, 20);
             this.textBoxMODSIMFile.Multiline = true;
             this.textBoxMODSIMFile.Name = "textBoxMODSIMFile";
-            this.textBoxMODSIMFile.Size = new System.Drawing.Size(277, 20);
+            this.textBoxMODSIMFile.Size = new System.Drawing.Size(360, 20);
             this.textBoxMODSIMFile.TabIndex = 0;
             this.textBoxMODSIMFile.Text = "MODSIM\\SRP Demo v3.xy";
             this.textBoxMODSIMFile.TextChanged += new System.EventHandler(this.textBoxMODSIMFile_TextChanged);
@@ -258,7 +258,7 @@
             this.groupBox4.ForeColor = System.Drawing.SystemColors.ControlText;
             this.groupBox4.Location = new System.Drawing.Point(36, 77);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(368, 48);
+            this.groupBox4.Size = new System.Drawing.Size(451, 48);
             this.groupBox4.TabIndex = 3;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "MMS Database";
@@ -272,7 +272,7 @@
             this.textBoxMMSDatabase.Multiline = true;
             this.textBoxMMSDatabase.Name = "textBoxMMSDatabase";
             this.textBoxMMSDatabase.ReadOnly = true;
-            this.textBoxMMSDatabase.Size = new System.Drawing.Size(350, 20);
+            this.textBoxMMSDatabase.Size = new System.Drawing.Size(433, 20);
             this.textBoxMMSDatabase.TabIndex = 0;
             this.textBoxMMSDatabase.Text = "MMS-Data\\MWC_MMSDatabase.sqlite";
             // 
@@ -298,12 +298,14 @@
             // 
             // groupBox5
             // 
+            this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox5.Controls.Add(this.label3);
             this.groupBox5.Controls.Add(this.textBoxPREFSRiparianCost);
             this.groupBox5.Controls.Add(this.groupBox2);
             this.groupBox5.Location = new System.Drawing.Point(36, 131);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(368, 100);
+            this.groupBox5.Size = new System.Drawing.Size(451, 100);
             this.groupBox5.TabIndex = 16;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "MODSIM";
