@@ -877,10 +877,11 @@ namespace MODSIM_GSFLOW_C
                                 {
                                     Node demNode = MS_Links[i].to;
                                     if (swgwUtils.m_SyncTblSEG.Rows[i]["AssocDem"].ToString() != "")
-                                        demNode = myModel.FindNode(swgwUtils.m_SyncTblSEG.Rows[i]["AgDem"].ToString());
+                                        demNode = myModel.FindNode(swgwUtils.m_SyncTblSEG.Rows[i]["AssocDem"].ToString());
                                     if (demNode.nodeType == NodeType.Demand)
                                     {
                                         int hydState = demNode.mnInfo.hydStateIndex;
+                                        if (demNode.mnInfo.nodedemand.Length>0)
                                         demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * accuracy / uConvToMODFLOW, 0);
                                         messageOut($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
                                     }
