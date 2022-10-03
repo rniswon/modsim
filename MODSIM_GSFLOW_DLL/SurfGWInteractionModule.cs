@@ -218,23 +218,27 @@ namespace MODSIM_GSFLOW_C
                 myModel = m_Model;
 
                 //Set simulation/data periods to match GSFLOW
-                myModel.timeStep = ModsimTimeStep.FromLabel("daily");
-                myModel.TimeStepManager.startingDate = new DateTime(startTime[0], startTime[1], startTime[2]);
-                if (myModel.TimeStepManager.startingDate < myModel.TimeStepManager.dataStartDate)
+                if (Model_mode != 11)   //MODSIM-MODFLOW mode does not set the time step to daily - User needs to set simulation period in MODSIM 
                 {
-                    myModel.TimeStepManager.dataStartDate = myModel.TimeStepManager.startingDate;
-                    messageOut("\tWARNING: Simulation start date is sonner than the MODSIM data start date.\n" +
-                        "Data start date adjusted, but time series might not be correctly extrapolated.");
-                }
+                    myModel.timeStep = ModsimTimeStep.FromLabel("daily");
 
-                myModel.TimeStepManager.endingDate = new DateTime(endTime[0], endTime[1], endTime[2]);
+                    myModel.TimeStepManager.startingDate = new DateTime(startTime[0], startTime[1], startTime[2]);
+                    if (myModel.TimeStepManager.startingDate < myModel.TimeStepManager.dataStartDate)
+                    {
+                        myModel.TimeStepManager.dataStartDate = myModel.TimeStepManager.startingDate;
+                        messageOut("\tWARNING: Simulation start date is sonner than the MODSIM data start date.\n" +
+                            "Data start date adjusted, but time series might not be correctly extrapolated.");
+                    }
 
-                if (myModel.TimeStepManager.endingDate > myModel.TimeStepManager.dataEndDate)
-                {
-                    myModel.TimeStepManager.dataEndDate = myModel.TimeStepManager.endingDate;
-                    messageOut("\tWARNING: Simulation end date is greater than the MODSIM data end date.");
+                    myModel.TimeStepManager.endingDate = new DateTime(endTime[0], endTime[1], endTime[2]);
+
+                    if (myModel.TimeStepManager.endingDate > myModel.TimeStepManager.dataEndDate)
+                    {
+                        myModel.TimeStepManager.dataEndDate = myModel.TimeStepManager.endingDate;
+                        messageOut("\tWARNING: Simulation end date is greater than the MODSIM data end date.");
+                    }
+                    myModel.TimeStepManager.UpdateTimeStepsInfo(myModel.timeStep); // redo the time steps info in case time step or dataend date changed.
                 }
-                myModel.TimeStepManager.UpdateTimeStepsInfo(myModel.timeStep); // redo the time steps info in case time step or dataend date changed.
 
                 //if (Model_mode == 11) // MODSIM-PRMS
                 //{
