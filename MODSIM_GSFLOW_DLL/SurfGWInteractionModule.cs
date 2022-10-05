@@ -358,6 +358,32 @@ namespace MODSIM_GSFLOW_C
                     }
 
                     MS_Links[i] = m_Link;
+
+
+                    //Initializing arrays for setting the MODSIM demand to the value set from GSFLOW
+
+                    if (int.Parse(m_Row["AgDem"].ToString()) == 1)
+                    {
+                        Node demNode = MS_Links[i].to;
+                        if (m_Row["AssocDem"].ToString() != "")
+                            demNode = myModel.FindNode(m_Row["AssocDem"].ToString());
+                        if (demNode.nodeType == NodeType.Demand)
+                        {
+                            if (demNode.mnInfo.nodedemand.Length == 0)
+                            {
+                                int hs = 0;
+                                if (myModel.HydStateTables.Length > 0 && demNode.m.hydTable > 0)
+                                {
+                                    hs = myModel.HydStateTables[demNode.m.hydTable - 1].NumHydBounds + 1;
+                                }
+                                demNode.mnInfo.nodedemand = new long[myModel.TimeStepManager.noModelTimeSteps, hs];
+                            }
+                        }
+                        else
+                            messageOut($"Demand node {demNode.name} not found in the model. Skipping MODSIM demand processing.");
+                    }
+
+
                     i += 1;
                 }
 
@@ -871,12 +897,7 @@ namespace MODSIM_GSFLOW_C
                             for (int i = 0; i < swgwUtils.m_SyncTblSEG.Rows.Count; i++)
                             {
                                 //Setting the MODSIM demand to the value set from GSFLOW
-                                //   Using the diversions array 
-                                //if (Convert.ToInt16(swgwUtils.m_SyncTblSEG.Rows[i]["Diversion"]) > 0 && agDemand[i] >= 0)
-                                //if (agDemand[i] > 0)
-                                //{
                                 //Assumes that the demand is connected to the link mapped to the segment.
-                                //Node demNode = MS_Links[i].from.InflowLinks.link.from;
                                 if (int.Parse(swgwUtils.m_SyncTblSEG.Rows[i]["AgDem"].ToString()) == 1)
                                 {
                                     Node demNode = MS_Links[i].to;
@@ -885,13 +906,12 @@ namespace MODSIM_GSFLOW_C
                                     if (demNode.nodeType == NodeType.Demand)
                                     {
                                         int hydState = demNode.mnInfo.hydStateIndex;
-                                        if (demNode.mnInfo.nodedemand.Length>0)
                                         demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * accuracy / uConvToMODFLOW, 0);
                                         messageOut($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
                                     }
-                                    else
-                                        messageOut($"Demand node {demNode.name} not found in the model. Skipping MODSIM demand processing.");
-                                    //}
+                                    //else
+                                    //    messageOut($"Demand node {demNode.name} not found in the model. Skipping MODSIM demand processing.");
+                                    
                                 }
 
                             }
