@@ -32,6 +32,9 @@
             this.label1 = new System.Windows.Forms.Label();
             this.textBoxScnName = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
             this.labelISFlinks = new System.Windows.Forms.Label();
             this.labelRiparian = new System.Windows.Forms.Label();
             this.labelCostBlock = new System.Windows.Forms.Label();
@@ -43,14 +46,14 @@
             this.checkBoxIndoorDomON = new System.Windows.Forms.CheckBox();
             this.checkBoxOutdoorDomON = new System.Windows.Forms.CheckBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.txtFactor = new System.Windows.Forms.TextBox();
             this.comboBox5 = new System.Windows.Forms.ComboBox();
+            this.checkFactor = new System.Windows.Forms.CheckBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.dataGridViewISF = new System.Windows.Forms.DataGridView();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.txtFactor = new System.Windows.Forms.TextBox();
-            this.checkFactor = new System.Windows.Forms.CheckBox();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
             this.groupBoxRunInfo = new System.Windows.Forms.GroupBox();
             this.checkBoxUseInName = new System.Windows.Forms.CheckBox();
@@ -71,9 +74,6 @@
             this.label3 = new System.Windows.Forms.Label();
             this.pictureBoxStatus = new System.Windows.Forms.PictureBox();
             this.labelActFile = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -145,6 +145,36 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Allocation Pseudo-Priorities";
             this.groupBox1.Enter += new System.EventHandler(this.groupBox1_Enter);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.ForeColor = System.Drawing.SystemColors.Highlight;
+            this.label5.Location = new System.Drawing.Point(31, 44);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(104, 13);
+            this.label5.TabIndex = 22;
+            this.label5.Text = "Instream flow targets";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.ForeColor = System.Drawing.SystemColors.Highlight;
+            this.label6.Location = new System.Drawing.Point(31, 14);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(100, 13);
+            this.label6.TabIndex = 21;
+            this.label6.Text = "Riparian rights cost:";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.ForeColor = System.Drawing.SystemColors.Highlight;
+            this.label7.Location = new System.Drawing.Point(31, 29);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(147, 13);
+            this.label7.TabIndex = 20;
+            this.label7.Text = "Normal water right cost block:";
             // 
             // labelISFlinks
             // 
@@ -265,25 +295,48 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "GSFLOW Pumping Scenario";
             // 
+            // txtFactor
+            // 
+            this.txtFactor.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtFactor.Location = new System.Drawing.Point(552, 15);
+            this.txtFactor.Name = "txtFactor";
+            this.txtFactor.Size = new System.Drawing.Size(71, 20);
+            this.txtFactor.TabIndex = 0;
+            this.txtFactor.Text = "1.0";
+            this.txtFactor.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.txtFactor.Visible = false;
+            this.txtFactor.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
+            // 
             // comboBox5
             // 
             this.comboBox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox5.Enabled = false;
             this.comboBox5.FormattingEnabled = true;
             this.comboBox5.Items.AddRange(new object[] {
-            "1.  20% reduction in agricultural groundwater pumping.",
-            "2.  20% reduction in municipal and industrial groundwater pumping.",
-            "3.  20% reduction in all groundwater pumping.",
-            "4.  20% reduction in residential groundwater pumping.",
-            "5.  20% reduction in outdoor residential groundwater pumping.",
-            "6.  20% reduction in indoor residential groundwater pumping.",
-            "7.  20% transfer of agricultural groundwater pumping to residential groundwater p" +
-                "umping"});
-            this.comboBox5.Location = new System.Drawing.Point(19, 17);
+            "1.  Multiplier factor in agricultural groundwater pumping.",
+            "2.  Multiplier factor in municipal and industrial groundwater pumping.",
+            "3.  Multiplier factor in all groundwater pumping.",
+            "4.  Multiplier factor in residential groundwater pumping.",
+            "5.  Multiplier factor in outdoor residential groundwater pumping.",
+            "6.  Multiplier factor in indoor residential groundwater pumping.",
+            "7.  Multiplier factor transfer of agricultural groundwater pumping to residential" +
+                " groundwater pumping"});
+            this.comboBox5.Location = new System.Drawing.Point(220, 15);
             this.comboBox5.Name = "comboBox5";
-            this.comboBox5.Size = new System.Drawing.Size(268, 21);
+            this.comboBox5.Size = new System.Drawing.Size(307, 21);
             this.comboBox5.TabIndex = 0;
+            this.comboBox5.Visible = false;
+            // 
+            // checkFactor
+            // 
+            this.checkFactor.AutoSize = true;
+            this.checkFactor.Location = new System.Drawing.Point(6, 18);
+            this.checkFactor.Name = "checkFactor";
+            this.checkFactor.Size = new System.Drawing.Size(191, 17);
+            this.checkFactor.TabIndex = 7;
+            this.checkFactor.Text = "Enable Pumping Adjustment Factor";
+            this.checkFactor.UseVisualStyleBackColor = true;
+            this.checkFactor.CheckStateChanged += new System.EventHandler(this.checkFactor_CheckStateChanged);
             // 
             // groupBox3
             // 
@@ -320,8 +373,9 @@
             // 
             // groupBox7
             // 
+            this.groupBox7.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox7.Controls.Add(this.dataGridViewISF);
-            this.groupBox7.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox7.Location = new System.Drawing.Point(0, 0);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Size = new System.Drawing.Size(253, 188);
@@ -356,29 +410,6 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Simulation Preferences";
             this.groupBox4.Enter += new System.EventHandler(this.groupBox4_Enter);
-            // 
-            // txtFactor
-            // 
-            this.txtFactor.Location = new System.Drawing.Point(552, 15);
-            this.txtFactor.Name = "txtFactor";
-            this.txtFactor.Size = new System.Drawing.Size(71, 20);
-            this.txtFactor.TabIndex = 0;
-            this.txtFactor.Text = "1.0";
-            this.txtFactor.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.txtFactor.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
-            // 
-            // checkFactor
-            // 
-            this.checkFactor.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.checkFactor.AutoSize = true;
-            this.checkFactor.Checked = true;
-            this.checkFactor.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkFactor.Location = new System.Drawing.Point(351, 17);
-            this.checkFactor.Name = "checkFactor";
-            this.checkFactor.Size = new System.Drawing.Size(191, 17);
-            this.checkFactor.TabIndex = 7;
-            this.checkFactor.Text = "Enable Pumping Adjustment Factor";
-            this.checkFactor.UseVisualStyleBackColor = true;
             // 
             // groupBox9
             // 
@@ -617,36 +648,6 @@
             this.labelActFile.Size = new System.Drawing.Size(551, 29);
             this.labelActFile.TabIndex = 20;
             this.labelActFile.Text = "No active file";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.ForeColor = System.Drawing.SystemColors.Highlight;
-            this.label5.Location = new System.Drawing.Point(31, 44);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(104, 13);
-            this.label5.TabIndex = 22;
-            this.label5.Text = "Instream flow targets";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.ForeColor = System.Drawing.SystemColors.Highlight;
-            this.label6.Location = new System.Drawing.Point(31, 14);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(100, 13);
-            this.label6.TabIndex = 21;
-            this.label6.Text = "Riparian rights cost:";
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.ForeColor = System.Drawing.SystemColors.Highlight;
-            this.label7.Location = new System.Drawing.Point(31, 29);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(147, 13);
-            this.label7.TabIndex = 20;
-            this.label7.Text = "Normal water right cost block:";
             // 
             // Simulation
             // 

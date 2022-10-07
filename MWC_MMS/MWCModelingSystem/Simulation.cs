@@ -162,7 +162,7 @@ namespace RRModelingSystem
                 {
                     messageOut("Sucessful completion of the MODSIM run!");
                 }
-                ProcessPumpingFactor(RRPreferences.rutaPumping, Convert.ToDouble(txtFactor.Text), checkFactor.Checked);
+                ProcessPumpingFactor(RRPreferences.rutaPumping, Convert.ToDouble(txtFactor.Text), checkFactor.Checked, comboBox5.Text);
             }
             catch (Exception ex)
             {
@@ -177,30 +177,44 @@ namespace RRModelingSystem
             Cursor.Current = Cursors.Default;
         }
 
-        static void ProcessPumpingFactor(string FileName, double factor, Boolean aplicafactor)
+        static void ProcessPumpingFactor(string FileName, double factor, Boolean aplicafactor, string tipo)
         {
             int line = 0;
             string lineOut;
             string lineIn;
-            //string nombre1 = DateTime.Now.ToString("yyyy-MM-dd-HH-MM-ss");
-
-            //StreamWriter sw = new StreamWriter(FileName + ".out");
-
-            //StreamWriter sw = new StreamWriter(FileName.Replace(".wel", "_run" + nombre1 + ".wel"));
+            string tipofactor;
+            switch (tipo)
+            {
+                case "1.Multiplier factor in agricultural groundwater pumping.":
+                    tipofactor = "irr_ag";
+                    break;
+                case "2.Multiplier factor in municipal and industrial groundwater pumping.":
+                    tipofactor = "mni";
+                    break;
+                case "3.Multiplier factor in all groundwater pumping.":
+                    tipofactor = "todos";
+                    break;
+                case "4.Multiplier factor in residential groundwater pumping.":
+                    tipofactor = "rur_dom";
+                    break;
+                case "5.Multiplier factor in outdoor residential groundwater pumping.":
+                    tipofactor = "rur_dom";
+                    break;
+                case "6.Multiplier factor in indoor residential groundwater pumping.":
+                    tipofactor = "rur_dom";
+                    break;
+                default:
+                    tipofactor = tipo;
+                    break;
+            }
             if (aplicafactor==true)
             { 
             StreamWriter sw = new StreamWriter(FileName.Replace(".wel", "_run" + ".wel"));
-
-            //string FileName1 = FileName.Replace("input\\MODFLOW", "output");
-
-            //StreamWriter sw = new StreamWriter(FileName1.Replace(".wel", "_run" + ".wel"));
-
             using (StreamReader sr = File.OpenText(FileName))
             {
                 while ((lineIn = sr.ReadLine()) != null)
                 {
                     Console.Write("Procesando linea {0}\r", ++line);
-
                     if (line > 3)
                     {
                         if (!lineIn.Contains("#"))
@@ -211,10 +225,24 @@ namespace RRModelingSystem
                             int column2 = Int32.Parse(stringValues[1]);
                             int column3 = Int32.Parse(stringValues[2].Replace("-", ""));
                             double column4 = Convert.ToDouble(stringValues[3]);
-
-                            column4 *= factor;
-
-                            lineOut = string.Format("{0,10}{1,10}{2,10}{3,16:N2}", column1, column2, column3, column4);
+                            string column5 = stringValues[4];
+                            string column6 = stringValues[5];
+                                if (tipofactor == "todos")
+                                {
+                                    column4 *= factor;
+                                }
+                                else
+                                {
+                                    if (column5 == tipofactor)
+                                    {
+                                        column4 *= factor;
+                                    }
+                                    else
+                                    {
+                                        column4 = column4 * 1;
+                                    }
+                                }
+                                lineOut = string.Format("{0,10}{1,10}{2,10}{3,16:N2}{4,10}{5,10}", column1, column2, column3, column4, column5, column6);
                         }
                         else
                             lineOut = lineIn + "\r";
@@ -232,10 +260,6 @@ namespace RRModelingSystem
             {
                 File.Copy(FileName, FileName.Replace(".wel", "_run" + ".wel"));
             }
-
-            //File.Delete(FileName);
-            //File.Move(FileName + ".out", textBoxWorkspace.Text +);
-
             MessageBox.Show("Terminó!!!!!");
         }
         /// <summary>
@@ -779,6 +803,12 @@ namespace RRModelingSystem
             {
                 e.Handled = true;
             }
+        }
+
+        private void checkFactor_CheckStateChanged(object sender, EventArgs e)
+        {
+            comboBox5.Visible = checkFactor.Checked;
+            txtFactor.Visible = checkFactor.Checked;
         }
     }
 }
