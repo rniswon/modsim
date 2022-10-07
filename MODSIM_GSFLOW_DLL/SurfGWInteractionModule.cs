@@ -175,10 +175,6 @@ namespace MODSIM_GSFLOW_C
                     gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
                 }
 
-                Process_mode = 0; // run
-
-
-
             }
             catch (Exception ex)
             {
@@ -190,8 +186,11 @@ namespace MODSIM_GSFLOW_C
 
         public void InitializeRUN(ref Model m_Model)
         {
+            Process_mode = 0; // run
+
             if (Model_mode < 10) // GSFLOW and PRMS-only
             {
+                afr = true;
                 for (int i = 0; i < Numts; i++)
                 {
                     gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
@@ -371,7 +370,7 @@ namespace MODSIM_GSFLOW_C
                         {
                             if (demNode.mnInfo.nodedemand.Length == 0)
                             {
-                                int hs = 0;
+                                int hs = 1;
                                 if (myModel.HydStateTables.Length > 0 && demNode.m.hydTable > 0)
                                 {
                                     hs = myModel.HydStateTables[demNode.m.hydTable - 1].NumHydBounds + 1;
@@ -903,8 +902,8 @@ namespace MODSIM_GSFLOW_C
                                     Node demNode = MS_Links[i].to;
                                     if (swgwUtils.m_SyncTblSEG.Rows[i]["AssocDem"].ToString() != "")
                                         demNode = myModel.FindNode(swgwUtils.m_SyncTblSEG.Rows[i]["AssocDem"].ToString());
-                                    if (demNode.nodeType == NodeType.Demand)
-                                    {
+                                    if (demNode != null && demNode.nodeType == NodeType.Demand)
+                                    { 
                                         int hydState = demNode.mnInfo.hydStateIndex;
                                         demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * accuracy / uConvToMODFLOW, 0);
                                         messageOut($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
@@ -1081,7 +1080,7 @@ namespace MODSIM_GSFLOW_C
                 if(maxExchDiff<(double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]))
                 {
                     maxExchDiff = (double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]);
-                    maxSeg = i;
+                    maxSeg = i+1;
                 }
                 //if ((i == 18 || i == 19) && myModel.mInfo.CurrentModelTimeStepIndex >= 364) messageOut("Diver:" + i + ":" + MS_Flows[i] + "Exch: " + EXCHANGE[i]);
                 // if ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > EXCHNGVol_Tolerance) messageOut("GW-SW Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
