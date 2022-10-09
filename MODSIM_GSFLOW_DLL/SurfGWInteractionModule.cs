@@ -863,6 +863,8 @@ namespace MODSIM_GSFLOW_C
                         messageOut("\r\n MODSIM & GSFLOW Ran into maximum number of iterations - Warning !!! models have not converged.");
                         maxIterCount++;
                         MS_GSF_converge = true;
+
+                        update_lake_synchronization(maxIter:true);
                     }
                     //ETS - This check make sense if the iteration is reset every time that MODSIM restart. 
                     if (myModel.mInfo.Iteration > myModel.maxit && !MS_GSF_converge)
@@ -871,7 +873,7 @@ namespace MODSIM_GSFLOW_C
                         maxIterCount++;
                         MS_GSF_converge = true;
 
-                        update_lake_synchronization();
+                        update_lake_synchronization(maxIter: true);
                     }
 
                     //ETS - these modes will not loop through the MODSIM loop
@@ -1004,7 +1006,7 @@ namespace MODSIM_GSFLOW_C
             }
         }
 
-        private void update_lake_synchronization()
+        private void update_lake_synchronization(bool maxIter = false)
         {
             messageOut("");
             //Trying to correct the end Volume convergence
@@ -1016,6 +1018,8 @@ namespace MODSIM_GSFLOW_C
                 if (MS_Reservoirs[i] != null)
                 {
                     messageOut("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i] + " DPOOL: " + string.Format("{0:N1}", DPOOL[i]));
+                    if(maxIter)
+                        messageOut($"\t\t Volume Error: { 100 * (MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i])/ (MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW)} %");
                     STARTLAKEVOL[i] = LAKEVOL[i];
                 }
             }
