@@ -175,10 +175,6 @@ namespace MODSIM_GSFLOW_C
                     gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
                 }
 
-                Process_mode = 0; // run
-
-
-
             }
             catch (Exception ex)
             {
@@ -190,8 +186,11 @@ namespace MODSIM_GSFLOW_C
 
         public void InitializeRUN(ref Model m_Model)
         {
+            Process_mode = 0; // run
+
             if (Model_mode < 10) // GSFLOW and PRMS-only
             {
+                afr = true;
                 for (int i = 0; i < Numts; i++)
                 {
                     gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
@@ -218,23 +217,27 @@ namespace MODSIM_GSFLOW_C
                 myModel = m_Model;
 
                 //Set simulation/data periods to match GSFLOW
-                myModel.timeStep = ModsimTimeStep.FromLabel("daily");
-                myModel.TimeStepManager.startingDate = new DateTime(startTime[0], startTime[1], startTime[2]);
-                if (myModel.TimeStepManager.startingDate < myModel.TimeStepManager.dataStartDate)
+                if (Model_mode != 11)   //MODSIM-MODFLOW mode does not set the time step to daily - User needs to set simulation period in MODSIM 
                 {
-                    myModel.TimeStepManager.dataStartDate = myModel.TimeStepManager.startingDate;
-                    messageOut("\tWARNING: Simulation start date is sonner than the MODSIM data start date.\n" +
-                        "Data start date adjusted, but time series might not be correctly extrapolated.");
-                }
+                    myModel.timeStep = ModsimTimeStep.FromLabel("daily");
 
-                myModel.TimeStepManager.endingDate = new DateTime(endTime[0], endTime[1], endTime[2]);
+                    myModel.TimeStepManager.startingDate = new DateTime(startTime[0], startTime[1], startTime[2]);
+                    if (myModel.TimeStepManager.startingDate < myModel.TimeStepManager.dataStartDate)
+                    {
+                        myModel.TimeStepManager.dataStartDate = myModel.TimeStepManager.startingDate;
+                        messageOut("\tWARNING: Simulation start date is sonner than the MODSIM data start date.\n" +
+                            "Data start date adjusted, but time series might not be correctly extrapolated.");
+                    }
 
-                if (myModel.TimeStepManager.endingDate > myModel.TimeStepManager.dataEndDate)
-                {
-                    myModel.TimeStepManager.dataEndDate = myModel.TimeStepManager.endingDate;
-                    messageOut("\tWARNING: Simulation end date is greater than the MODSIM data end date.");
+                    myModel.TimeStepManager.endingDate = new DateTime(endTime[0], endTime[1], endTime[2]);
+
+                    if (myModel.TimeStepManager.endingDate > myModel.TimeStepManager.dataEndDate)
+                    {
+                        myModel.TimeStepManager.dataEndDate = myModel.TimeStepManager.endingDate;
+                        messageOut("\tWARNING: Simulation end date is greater than the MODSIM data end date.");
+                    }
+                    myModel.TimeStepManager.UpdateTimeStepsInfo(myModel.timeStep); // redo the time steps info in case time step or dataend date changed.
                 }
-                myModel.TimeStepManager.UpdateTimeStepsInfo(myModel.timeStep); // redo the time steps info in case time step or dataend date changed.
 
                 //if (Model_mode == 11) // MODSIM-PRMS
                 //{
@@ -354,6 +357,32 @@ namespace MODSIM_GSFLOW_C
                     }
 
                     MS_Links[i] = m_Link;
+
+
+                    //Initializing arrays for setting the MODSIM demand to the value set from GSFLOW
+
+                    if (int.Parse(m_Row["AgDem"].ToString()) == 1)
+                    {
+                        Node demNode = MS_Links[i].to;
+                        if (m_Row["AssocDem"].ToString() != "")
+                            demNode = myModel.FindNode(m_Row["AssocDem"].ToString());
+                        if (demNode.nodeType == NodeType.Demand)
+                        {
+                            if (demNode.mnInfo.nodedemand.Length == 0)
+                            {
+                                int hs = 1;
+                                if (myModel.HydStateTables.Length > 0 && demNode.m.hydTable > 0)
+                                {
+                                    hs = myModel.HydStateTables[demNode.m.hydTable - 1].NumHydBounds + 1;
+                                }
+                                demNode.mnInfo.nodedemand = new long[myModel.TimeStepManager.noModelTimeSteps, hs];
+                            }
+                        }
+                        else
+                            messageOut($"Demand node {demNode.name} not found in the model. Skipping MODSIM demand processing.");
+                    }
+
+
                     i += 1;
                 }
 
@@ -834,6 +863,8 @@ namespace MODSIM_GSFLOW_C
                         messageOut("\r\n MODSIM & GSFLOW Ran into maximum number of iterations - Warning !!! models have not converged.");
                         maxIterCount++;
                         MS_GSF_converge = true;
+
+                        update_lake_synchronization(maxIter:true);
                     }
                     //ETS - This check make sense if the iteration is reset every time that MODSIM restart. 
                     if (myModel.mInfo.Iteration > myModel.maxit && !MS_GSF_converge)
@@ -842,7 +873,7 @@ namespace MODSIM_GSFLOW_C
                         maxIterCount++;
                         MS_GSF_converge = true;
 
-                        update_lake_synchronization();
+                        update_lake_synchronization(maxIter: true);
                     }
 
                     //ETS - these modes will not loop through the MODSIM loop
@@ -867,26 +898,21 @@ namespace MODSIM_GSFLOW_C
                             for (int i = 0; i < swgwUtils.m_SyncTblSEG.Rows.Count; i++)
                             {
                                 //Setting the MODSIM demand to the value set from GSFLOW
-                                //   Using the diversions array 
-                                //if (Convert.ToInt16(swgwUtils.m_SyncTblSEG.Rows[i]["Diversion"]) > 0 && agDemand[i] >= 0)
-                                //if (agDemand[i] > 0)
-                                //{
                                 //Assumes that the demand is connected to the link mapped to the segment.
-                                //Node demNode = MS_Links[i].from.InflowLinks.link.from;
                                 if (int.Parse(swgwUtils.m_SyncTblSEG.Rows[i]["AgDem"].ToString()) == 1)
                                 {
                                     Node demNode = MS_Links[i].to;
                                     if (swgwUtils.m_SyncTblSEG.Rows[i]["AssocDem"].ToString() != "")
-                                        demNode = myModel.FindNode(swgwUtils.m_SyncTblSEG.Rows[i]["AgDem"].ToString());
-                                    if (demNode.nodeType == NodeType.Demand)
-                                    {
+                                        demNode = myModel.FindNode(swgwUtils.m_SyncTblSEG.Rows[i]["AssocDem"].ToString());
+                                    if (demNode != null && demNode.nodeType == NodeType.Demand)
+                                    { 
                                         int hydState = demNode.mnInfo.hydStateIndex;
                                         demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * accuracy / uConvToMODFLOW, 0);
                                         messageOut($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
                                     }
-                                    else
-                                        messageOut($"Demand node {demNode.name} not found in the model. Skipping MODSIM demand processing.");
-                                    //}
+                                    //else
+                                    //    messageOut($"Demand node {demNode.name} not found in the model. Skipping MODSIM demand processing.");
+                                    
                                 }
 
                             }
@@ -980,7 +1006,7 @@ namespace MODSIM_GSFLOW_C
             }
         }
 
-        private void update_lake_synchronization()
+        private void update_lake_synchronization(bool maxIter = false)
         {
             messageOut("");
             //Trying to correct the end Volume convergence
@@ -992,6 +1018,8 @@ namespace MODSIM_GSFLOW_C
                 if (MS_Reservoirs[i] != null)
                 {
                     messageOut("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i] + " DPOOL: " + string.Format("{0:N1}", DPOOL[i]));
+                    if(maxIter)
+                        messageOut($"\t\t Volume Error: { 100 * (MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i])/ (MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW)} %");
                     STARTLAKEVOL[i] = LAKEVOL[i];
                 }
             }
@@ -1056,7 +1084,7 @@ namespace MODSIM_GSFLOW_C
                 if(maxExchDiff<(double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]))
                 {
                     maxExchDiff = (double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]);
-                    maxSeg = i;
+                    maxSeg = i+1;
                 }
                 //if ((i == 18 || i == 19) && myModel.mInfo.CurrentModelTimeStepIndex >= 364) messageOut("Diver:" + i + ":" + MS_Flows[i] + "Exch: " + EXCHANGE[i]);
                 // if ((double)Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]) > EXCHNGVol_Tolerance) messageOut("GW-SW Exch:" + i + ":" + Math.Abs(EXCHANGE[i] - EXCHANGEPREV[i]));
