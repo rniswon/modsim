@@ -90,7 +90,7 @@ namespace RRModelingSystem
         {
             textBoxControlFile.Text = "";
             textBoxSyncingDB.Text = "";
-            textBoxPREFSRiparianCost.Text = "";
+            textBoxPREFSRiparianCost.Text = "-48888";
             textBoxWorkspace.Text = "";
             textBoxMMSDatabase.Text = "";
             textBoxMODSIMFile.Text = "";

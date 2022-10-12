@@ -58,6 +58,13 @@ namespace RRModelingSystem
                     case "Coupled Simulation":
                         if (m_SimUserControl == null || m_RRPreferences.hasChanges)
                         {
+                            if (m_RRPreferences.textBoxPREFSRiparianCost.Text == "")
+                            {
+                                MessageBox.Show("Cost for riparian links cannot be empty. Please define a value.");
+                                treeView1.SelectedNode = treeView1.Nodes["Node0"];
+                                treeView1_AfterSelect(null, null);
+                                break;
+                            }
                             m_SimUserControl = new Simulation(Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMODSIMFile.Text),
                                                                 Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxSyncingDB.Text),
                                                                 int.Parse(m_RRPreferences.textBoxPREFSRiparianCost.Text),
