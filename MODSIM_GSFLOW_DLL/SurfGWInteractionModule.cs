@@ -123,9 +123,9 @@ namespace MODSIM_GSFLOW_C
                     put_prms_control_file(ref command_line_args);
                     gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
                 }
-                catch 
+                catch (Exception ex)
                 {
-
+                    messageOut(ex.Message);
                 }
                 /* need file name of mapping file, read from GSFLOW Control File
                    file has link Name, iseg, diversion, ResRelease */
@@ -140,8 +140,10 @@ namespace MODSIM_GSFLOW_C
                 xyFileName = new string(xyPathChars);
                 map_FileName = new string(mapPathChars);
 
-                map_FileName = GetFullPath(map_FileName);
-                xyFileName = GetFullPath(xyFileName);
+                if (!File.Exists(map_FileName) && !Path.IsPathRooted(map_FileName))
+                    map_FileName = GetFullPath(map_FileName);
+                if(!File.Exists(xyFileName) && !Path.IsPathRooted(xyFileName))
+                    xyFileName = GetFullPath(xyFileName);
                 
                 //These are the options to add in the .control file to run different versions
                 // 0=GSFLOW; 1=PRMS; 2=MODFLOW; 10=MODSIM-GSFLOW; 11=MODSIM-PRMS; 12=MODSIM-MODFLOW; 13=MODSIM
