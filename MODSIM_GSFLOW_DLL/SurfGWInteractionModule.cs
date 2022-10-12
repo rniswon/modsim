@@ -126,6 +126,7 @@ namespace MODSIM_GSFLOW_C
                 catch (Exception ex)
                 {
                     messageOut(ex.Message);
+                    throw;
                 }
                 /* need file name of mapping file, read from GSFLOW Control File
                    file has link Name, iseg, diversion, ResRelease */
