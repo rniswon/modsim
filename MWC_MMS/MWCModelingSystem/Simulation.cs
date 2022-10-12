@@ -84,10 +84,26 @@ namespace RRModelingSystem
 
         private void buttonImportTS_Click(object sender, EventArgs e)
         {
+            using (BackgroundWorker bgworker = new BackgroundWorker())
+            {
+                bgworker.DoWork += RunSimulation;
+                bgworker.RunWorkerAsync(new object[]
+                                        { comboBoxMODSIMFile.Text,
+                                          radioButtonMMSRun.Checked});
+            }
+            
+        }
+
+        private void RunSimulation(object sender, DoWorkEventArgs e)
+        {
+            object[] args = e.Argument as object[];
+            string _comboMODSIMFile = args[0].ToString();
+            bool _radioButtonMMSRun = bool.Parse(args[1].ToString());
+
             Cursor.Current = Cursors.WaitCursor;
 
             int runid = -1;
-            if (radioButtonMMSRun.Checked)
+            if (_radioButtonMMSRun)
             {
                 string m_DateTime = DateTime.Now.ToString("yyyy-MM-dd HH:MM:ss");
                 string sql = "INSERT INTO MMS_RunsInfo (ScnName, SimulationStatus, Keyword, LastAccess, Notes, Options) VALUES ('{0}',{1},'{2}','{3}','{4}','{5}')";
@@ -98,7 +114,7 @@ namespace RRModelingSystem
             }
 
             int run = -1;
-            string runFile="";
+            string runFile = "";
             try
             {
                 if (!modelReady || m_ActiveModel == null)
@@ -114,7 +130,7 @@ namespace RRModelingSystem
 
                 messageOut("\tSaving changes to active network...");
                 //find output location and file name
-                runFile = GetActiveMODSIMFile(comboBoxMODSIMFile.Text, _ModsimFile);
+                runFile = GetActiveMODSIMFile(_comboMODSIMFile, _ModsimFile);
                 if (runid != -1)
                 {
                     if (checkBoxUseInName.Checked)
@@ -122,9 +138,9 @@ namespace RRModelingSystem
                     runFile = runFile.Replace(".xy", $"_r{runid}.xy");
                 }
 
-                if (runid!=-1 && comboBoxKeyword.Text != "")
+                if (runid != -1 && comboBoxKeyword.Text != "")
                 {
-                    string folder =Path.Combine(Path.GetDirectoryName(runFile),comboBoxKeyword.Text);
+                    string folder = Path.Combine(Path.GetDirectoryName(runFile), comboBoxKeyword.Text);
                     if (!Directory.Exists(folder))
                         Directory.CreateDirectory(folder);
                     runFile = Path.Combine(folder, Path.GetFileName(runFile));
@@ -143,7 +159,10 @@ namespace RRModelingSystem
                 if (radioButtonMS_GS.Checked)
                 {
                     messageOut("\tActivating MODSIM-GSFLOW simulation mode...");
-                    string[] CmdArgs = new string[] { "\"" + _controlFile + "\"" };
+                    // Need to update the xyfile in the control file.
+                    messageOut(Directory.GetCurrentDirectory());
+                    Directory.SetCurrentDirectory( Path.GetDirectoryName(_controlFile));
+                    string[] CmdArgs = new string[] { "\"" + Path.GetFullPath(_controlFile) + "\"" };
                     SurfGWModule sSurfGWModule = new SurfGWModule(CmdArgs);
                     sSurfGWModule.messageOut += OnMessageOut;
 
@@ -169,7 +188,7 @@ namespace RRModelingSystem
                 messageOut(String.Concat("ERROR: ", ex.Message));
             }
 
-            if(runid!=-1)
+            if (runid != -1)
                 UpdateRunInfo(runid, run == 0 ? false : true, runFile);
 
             //Reload active network
