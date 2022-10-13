@@ -296,7 +296,7 @@ namespace RRModelingSystem
                                                 column4 = column4 * 1;
                                             }
                                         }
-                                        lineOut = string.Format("{0,10}{1,10}{2,10}{3,16:N2}{4,10}{5,10}", column1, column2, column3, column4, column5, column6);
+                                        lineOut = string.Format("{0,10}{1,10}{2,10}{3,16:F2}     {4,-16} {5,-16}", column1, column2, column3, column4, column5, column6);
                                     }
                                     else {
                                         column4 *= factor;
