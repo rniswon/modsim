@@ -28,10 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.TreeNode treeNode5 = new System.Windows.Forms.TreeNode("Preferences");
-            System.Windows.Forms.TreeNode treeNode6 = new System.Windows.Forms.TreeNode("Pre-Processing");
-            System.Windows.Forms.TreeNode treeNode7 = new System.Windows.Forms.TreeNode("Coupled Simulation");
-            System.Windows.Forms.TreeNode treeNode8 = new System.Windows.Forms.TreeNode("Post-Processing");
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Preferences");
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Pre-Processing");
+            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("Coupled Simulation");
+            System.Windows.Forms.TreeNode treeNode4 = new System.Windows.Forms.TreeNode("Post-Processing");
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -76,20 +76,20 @@
             this.treeView1.HideSelection = false;
             this.treeView1.Location = new System.Drawing.Point(0, 0);
             this.treeView1.Name = "treeView1";
-            treeNode5.Name = "Node0";
-            treeNode5.Text = "Preferences";
-            treeNode6.Name = "NodePreProcess";
-            treeNode6.Text = "Pre-Processing";
-            treeNode7.Name = "Node2";
-            treeNode7.Text = "Coupled Simulation";
-            treeNode8.Name = "Node3";
-            treeNode8.Text = "Post-Processing";
+            treeNode1.Name = "Node0";
+            treeNode1.Text = "Preferences";
+            treeNode2.Name = "NodePreProcess";
+            treeNode2.Text = "Pre-Processing";
+            treeNode3.Name = "Node2";
+            treeNode3.Text = "Coupled Simulation";
+            treeNode4.Name = "Node3";
+            treeNode4.Text = "Post-Processing";
             this.treeView1.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode5,
-            treeNode6,
-            treeNode7,
-            treeNode8});
-            this.treeView1.Size = new System.Drawing.Size(144, 602);
+            treeNode1,
+            treeNode2,
+            treeNode3,
+            treeNode4});
+            this.treeView1.Size = new System.Drawing.Size(144, 571);
             this.treeView1.TabIndex = 0;
             this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
             // 
@@ -160,7 +160,7 @@
             this.navigationPaneToolStripMenuItem.CheckOnClick = true;
             this.navigationPaneToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.navigationPaneToolStripMenuItem.Name = "navigationPaneToolStripMenuItem";
-            this.navigationPaneToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.navigationPaneToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
             this.navigationPaneToolStripMenuItem.Text = "Navigation Pane";
             this.navigationPaneToolStripMenuItem.Click += new System.EventHandler(this.navigationPaneToolStripMenuItem_Click);
             // 
@@ -170,7 +170,7 @@
             this.logWindowToolStripMenuItem.CheckOnClick = true;
             this.logWindowToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.logWindowToolStripMenuItem.Name = "logWindowToolStripMenuItem";
-            this.logWindowToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.logWindowToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
             this.logWindowToolStripMenuItem.Text = "Log Window";
             this.logWindowToolStripMenuItem.Click += new System.EventHandler(this.logWindowToolStripMenuItem_Click);
             // 

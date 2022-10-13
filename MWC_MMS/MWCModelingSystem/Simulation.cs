@@ -30,6 +30,7 @@ namespace RRModelingSystem
         private Dictionary<string,long> costRange;
 
         public event ProcessMessage messageOut; // event
+        public event ProcessSimulationRum simulationStarted; // event
 
         private Model m_ActiveModel;
         public bool modelReady { get; set; }
@@ -97,7 +98,8 @@ namespace RRModelingSystem
                 bgworker.DoWork += RunSimulation;
                 bgworker.RunWorkerAsync(new object[]
                                         { comboBoxMODSIMFile.Text,
-                                          radioButtonMMSRun.Checked});
+                                          radioButtonMMSRun.Checked,
+                                          comboBox5.Text});
             }
             
         }
@@ -107,6 +109,7 @@ namespace RRModelingSystem
             object[] args = e.Argument as object[];
             string _comboMODSIMFile = args[0].ToString();
             bool _radioButtonMMSRun = bool.Parse(args[1].ToString());
+            string _comboPumpingText = args[2].ToString();
 
             Cursor.Current = Cursors.WaitCursor;
 
@@ -168,7 +171,8 @@ namespace RRModelingSystem
                 try
                 {
                     //Process pumping file with user factors - Only done if in MS-GSF mode
-                    ProcessPumpingFactor(checkFactor.Checked, Convert.ToDouble(txtFactor.Text), comboBox5.Text);
+                    if(_rutaPumping!="")
+                        ProcessPumpingFactor(checkFactor.Checked, Convert.ToDouble(txtFactor.Text), _comboPumpingText);
                     //radioButtonAgPckge
                     if (radioButtonWRIMS.Checked)
                     {
@@ -219,6 +223,7 @@ namespace RRModelingSystem
                     _standardOutput = process.StandardOutput;
                     standardOutputThread = startThread(new ThreadStart(writeStandardOutput), "StandardOutput");
                     //string output = process.StandardOutput.ReadToEnd();
+                    simulationStarted(1234, Path.Combine(Path.GetDirectoryName(_controlFile), "MMS_RunLog.txt"));
                     process.WaitForExit();
                 }
                 catch (Exception ex)

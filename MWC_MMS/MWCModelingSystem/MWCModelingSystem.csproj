@@ -168,6 +168,12 @@
     <Compile Include="RRPreferences.Designer.cs">
       <DependentUpon>RRPreferences.cs</DependentUpon>
     </Compile>
+    <Compile Include="SimulationRun.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SimulationRun.Designer.cs">
+      <DependentUpon>SimulationRun.cs</DependentUpon>
+    </Compile>
     <Compile Include="SurfModelingMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -191,6 +197,9 @@
     <Compile Include="TextUtils.cs" />
     <EmbeddedResource Include="RRPreferences.resx">
       <DependentUpon>RRPreferences.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SimulationRun.resx">
+      <DependentUpon>SimulationRun.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SurfModelingMain.resx">
       <DependentUpon>SurfModelingMain.cs</DependentUpon>

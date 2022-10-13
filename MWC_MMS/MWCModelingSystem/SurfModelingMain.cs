@@ -12,12 +12,14 @@ using System.Windows.Forms;
 
 namespace RRModelingSystem
 {
+    public delegate void ProcessSimulationRum(int runID, string fileName);  // delegate
     public partial class RRSurfModelingMain : Form
     {
         private Simulation m_SimUserControl;
         private DataProcessing m_DataProcessing;
         private RRPreferences m_RRPreferences;
         private string MMSDatabase { get; set; }
+        private Dictionary<string,SimulationRun> simRunWindows;
         public RRSurfModelingMain()
         {
             InitializeComponent();
@@ -25,6 +27,7 @@ namespace RRModelingSystem
             //m_SimUserControl = new Simulation();
             //m_DataProcessing = new DataProcessing();
             //m_RRPreferences = new RRPreferences();
+            simRunWindows = new Dictionary<string, SimulationRun>();
         }
 
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
@@ -69,13 +72,17 @@ namespace RRModelingSystem
                                 treeView1_AfterSelect(null, null);
                                 break;
                             }
+                            string pumpFile = "";
+                            if(m_RRPreferences.textBoxPumpingFile.Text!="")
+                                pumpFile = Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxPumpingFile.Text);
                             m_SimUserControl = new Simulation(Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMODSIMFile.Text),
                                                                 Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxSyncingDB.Text),
                                                                 int.Parse(m_RRPreferences.textBoxPREFSRiparianCost.Text),
                                                                 Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMMSDatabase.Text),
                                                                 Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxControlFile.Text),
-                                                                Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxPumpingFile.Text));
+                                                                pumpFile);
                             m_SimUserControl.messageOut += ProcessMessage;
+                            m_SimUserControl.simulationStarted += startSimulationRunWindow;
                             ProcessMessage($"Base MODSIM File: {m_RRPreferences.textBoxMODSIMFile.Text}");
                             ProcessMessage($"Active MODSIM-GSFLOW Sync Database: {m_RRPreferences.textBoxSyncingDB.Text}");
                         }
@@ -84,10 +91,26 @@ namespace RRModelingSystem
                         m_SimUserControl.Dock = DockStyle.Fill;
                         break;
                     default:
+                        if(simRunWindows.ContainsKey(treeView1.SelectedNode.Text))
+                        {
+                            splitContainer1.Panel2.Controls.Add(simRunWindows[treeView1.SelectedNode.Text]);
+                            m_SimUserControl.Dock = DockStyle.Fill;
+                        }
                         break;
                 }
                 m_RRPreferences.hasChanges = false;
             }
+        }
+
+        private void startSimulationRunWindow(int runID, string fileName)
+        {
+            SimulationRun sRWin = new SimulationRun(runID, fileName);
+            simRunWindows.Add(runID.ToString(),sRWin);
+            treeView1.BeginInvoke((Action)(() =>
+            {
+                treeView1.Nodes["Node2"].Nodes.Add(runID.ToString(), runID.ToString());
+            }));
+            
         }
 
         private void ProcessMessage(string msg)
