@@ -301,33 +301,46 @@
             // 
             // txtFactor
             // 
+            this.txtFactor.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.txtFactor.Location = new System.Drawing.Point(552, 15);
             this.txtFactor.Name = "txtFactor";
             this.txtFactor.Size = new System.Drawing.Size(71, 20);
             this.txtFactor.TabIndex = 0;
             this.txtFactor.Text = "1.0";
             this.txtFactor.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.txtFactor.Visible = false;
             this.txtFactor.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
             // 
             // comboBox5
             // 
             this.comboBox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox5.Enabled = false;
             this.comboBox5.FormattingEnabled = true;
             this.comboBox5.Items.AddRange(new object[] {
-            "1.  20% reduction in agricultural groundwater pumping.",
-            "2.  20% reduction in municipal and industrial groundwater pumping.",
-            "3.  20% reduction in all groundwater pumping.",
-            "4.  20% reduction in residential groundwater pumping.",
-            "5.  20% reduction in outdoor residential groundwater pumping.",
-            "6.  20% reduction in indoor residential groundwater pumping.",
-            "7.  20% transfer of agricultural groundwater pumping to residential groundwater p" +
-                "umping"});
-            this.comboBox5.Location = new System.Drawing.Point(19, 17);
+            "1.  Multiplier factor in agricultural groundwater pumping.",
+            "2.  Multiplier factor in municipal and industrial groundwater pumping.",
+            "3.  Multiplier factor in all groundwater pumping.",
+            "4.  Multiplier factor in residential groundwater pumping.",
+            "5.  Multiplier factor in outdoor residential groundwater pumping.",
+            "6.  Multiplier factor in indoor residential groundwater pumping.",
+            "7.  Multiplier factor transfer of agricultural groundwater pumping to residential" +
+                " groundwater pumping"});
+            this.comboBox5.Location = new System.Drawing.Point(220, 15);
             this.comboBox5.Name = "comboBox5";
-            this.comboBox5.Size = new System.Drawing.Size(268, 21);
+            this.comboBox5.Size = new System.Drawing.Size(307, 21);
             this.comboBox5.TabIndex = 0;
+            this.comboBox5.Visible = false;
+            // 
+            // checkFactor
+            // 
+            this.checkFactor.AutoSize = true;
+            this.checkFactor.Location = new System.Drawing.Point(6, 18);
+            this.checkFactor.Name = "checkFactor";
+            this.checkFactor.Size = new System.Drawing.Size(191, 17);
+            this.checkFactor.TabIndex = 7;
+            this.checkFactor.Text = "Enable Pumping Adjustment Factor";
+            this.checkFactor.UseVisualStyleBackColor = true;
+            this.checkFactor.CheckStateChanged += new System.EventHandler(this.checkFactor_CheckStateChanged);
             // 
             // checkFactor
             // 
@@ -377,8 +390,9 @@
             // 
             // groupBox7
             // 
+            this.groupBox7.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox7.Controls.Add(this.dataGridViewISF);
-            this.groupBox7.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox7.Location = new System.Drawing.Point(0, 0);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Size = new System.Drawing.Size(253, 188);

@@ -73,7 +73,8 @@ namespace RRModelingSystem
                                                                 Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxSyncingDB.Text),
                                                                 int.Parse(m_RRPreferences.textBoxPREFSRiparianCost.Text),
                                                                 Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMMSDatabase.Text),
-                                                                Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxControlFile.Text));
+                                                                Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxControlFile.Text),
+                                                                Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxPumpingFile.Text));
                             m_SimUserControl.messageOut += ProcessMessage;
                             ProcessMessage($"Base MODSIM File: {m_RRPreferences.textBoxMODSIMFile.Text}");
                             ProcessMessage($"Active MODSIM-GSFLOW Sync Database: {m_RRPreferences.textBoxSyncingDB.Text}");

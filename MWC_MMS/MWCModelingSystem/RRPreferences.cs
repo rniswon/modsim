@@ -78,6 +78,9 @@ namespace RRModelingSystem
                     case "Control File":
                         textBoxControlFile.Text = dr[1].ToString();
                         break;
+                    case "Pumping File":
+                        textBoxPumpingFile.Text = dr[1].ToString();
+                        break;
                     default:
                         break;
                 }
@@ -261,7 +264,6 @@ namespace RRModelingSystem
                         textBoxPumpingFile.Text = "";
                     }
                     textBoxPumpingFile.Text = textBoxPumpingFile.Text.StartsWith("\\") ? textBoxPumpingFile.Text.Substring(1) : textBoxPumpingFile.Text;
-                    rutaPumping = textBoxPumpingFile.Text;
                 }
             }
         }
