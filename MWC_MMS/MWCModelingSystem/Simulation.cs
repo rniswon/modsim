@@ -155,16 +155,6 @@ namespace RRModelingSystem
                 }
                 XYFileWriter.Write(m_ActiveModel, runFile);
 
-                ProcessPumpingFactor(checkFactor.Checked, Convert.ToDouble(txtFactor.Text), comboBox5.Text);
-                //radioButtonAgPckge
-                if (radioButtonWRIMS.Checked)
-                {
-                    ProcessDB("1");
-                }
-                if (radioButtonAgPckge.Checked)
-                {
-                    ProcessDB("2");
-                }
             }
             catch (Exception ex)
             {
@@ -177,6 +167,18 @@ namespace RRModelingSystem
             {
                 try
                 {
+                    //Process pumping file with user factors - Only done if in MS-GSF mode
+                    ProcessPumpingFactor(checkFactor.Checked, Convert.ToDouble(txtFactor.Text), comboBox5.Text);
+                    //radioButtonAgPckge
+                    if (radioButtonWRIMS.Checked)
+                    {
+                        ProcessDB("1");
+                    }
+                    if (radioButtonAgPckge.Checked)
+                    {
+                        ProcessDB("2");
+                    }
+
                     buttonExecuteModel.BeginInvoke((Action)(() =>
                     {
                         buttonExecuteModel.Visible = false;
