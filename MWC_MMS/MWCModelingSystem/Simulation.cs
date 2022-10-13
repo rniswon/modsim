@@ -39,7 +39,7 @@ namespace RRModelingSystem
 
         private StreamReader _standardOutput;
         private Process process;
-
+        private Thread standardOutputThread;
 
         public Simulation(string ModsimFile, string opsDB, int riparianCost, string MMS_db, string controlFile)
         {
@@ -155,7 +155,7 @@ namespace RRModelingSystem
                 messageOut(String.Concat("ERROR: ", ex.Message));
             }
 
-            Thread standardOutputThread = null;
+            standardOutputThread = null;
             //Adding 'plug-ins'
             if (radioButtonMS_GS.Checked)
             {
