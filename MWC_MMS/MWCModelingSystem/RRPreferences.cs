@@ -25,7 +25,7 @@ namespace RRModelingSystem
         public Dictionary<string, DataRow> MMSPrefs { get; private set; }
 
         private DataTable prefsTbl;
-        private bool loading = true;
+        public bool loading = true;
         public static string rutaPumping = "";
 
         public RRPreferences(string MMSDatabase)
@@ -227,7 +227,8 @@ namespace RRModelingSystem
 
         private void textBoxPREFSRiparianCost_TextChanged(object sender, EventArgs e)
         {
-            hasChanges = true;
+            if(!loading)
+                hasChanges = true;
             UpdatePreferences("Priority Cost", textBoxPREFSRiparianCost.Text);
         }
 

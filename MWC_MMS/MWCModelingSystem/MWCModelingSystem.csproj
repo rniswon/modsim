@@ -236,6 +236,10 @@
       <Project>{934db78e-6254-4053-9fa4-29e39c00e6d1}</Project>
       <Name>MWC_MODSIMUtils</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MWC_MS_GSF_Run\MWC_MS_GSF_Run.csproj">
+      <Project>{0666b2ff-0ae6-4505-82ea-2f4f95bd8b0a}</Project>
+      <Name>MWC_MS_GSF_Run</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
@@ -270,6 +274,11 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets'))" />
   </Target>
+  <PropertyGroup>
+    <PreBuildEvent>REM uses the windows user name to copy files from the user location
+echo user: %25USERNAME%25
+COPY /Y  "$(ProjectDir)..\..\MODSIM_GSFLOW_DLL\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll" "$(TargetDir)GSFLOW_MODSIM.dll"</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

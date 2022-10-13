@@ -32,6 +32,9 @@
             this.label1 = new System.Windows.Forms.Label();
             this.textBoxScnName = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
             this.labelISFlinks = new System.Windows.Forms.Label();
             this.labelRiparian = new System.Windows.Forms.Label();
             this.labelCostBlock = new System.Windows.Forms.Label();
@@ -43,14 +46,14 @@
             this.checkBoxIndoorDomON = new System.Windows.Forms.CheckBox();
             this.checkBoxOutdoorDomON = new System.Windows.Forms.CheckBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.txtFactor = new System.Windows.Forms.TextBox();
             this.comboBox5 = new System.Windows.Forms.ComboBox();
+            this.checkFactor = new System.Windows.Forms.CheckBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.dataGridViewISF = new System.Windows.Forms.DataGridView();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.txtFactor = new System.Windows.Forms.TextBox();
-            this.checkFactor = new System.Windows.Forms.CheckBox();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
             this.groupBoxRunInfo = new System.Windows.Forms.GroupBox();
             this.checkBoxUseInName = new System.Windows.Forms.CheckBox();
@@ -71,9 +74,9 @@
             this.label3 = new System.Windows.Forms.Label();
             this.pictureBoxStatus = new System.Windows.Forms.PictureBox();
             this.labelActFile = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -89,6 +92,7 @@
             this.groupBox6.SuspendLayout();
             this.groupBox5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxStatus)).BeginInit();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonExecuteModel
@@ -145,6 +149,36 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Allocation Pseudo-Priorities";
             this.groupBox1.Enter += new System.EventHandler(this.groupBox1_Enter);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.ForeColor = System.Drawing.SystemColors.Highlight;
+            this.label5.Location = new System.Drawing.Point(31, 44);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(104, 13);
+            this.label5.TabIndex = 22;
+            this.label5.Text = "Instream flow targets";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.ForeColor = System.Drawing.SystemColors.Highlight;
+            this.label6.Location = new System.Drawing.Point(31, 14);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(100, 13);
+            this.label6.TabIndex = 21;
+            this.label6.Text = "Riparian rights cost:";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.ForeColor = System.Drawing.SystemColors.Highlight;
+            this.label7.Location = new System.Drawing.Point(31, 29);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(147, 13);
+            this.label7.TabIndex = 20;
+            this.label7.Text = "Normal water right cost block:";
             // 
             // labelISFlinks
             // 
@@ -265,6 +299,16 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "GSFLOW Pumping Scenario";
             // 
+            // txtFactor
+            // 
+            this.txtFactor.Location = new System.Drawing.Point(552, 15);
+            this.txtFactor.Name = "txtFactor";
+            this.txtFactor.Size = new System.Drawing.Size(71, 20);
+            this.txtFactor.TabIndex = 0;
+            this.txtFactor.Text = "1.0";
+            this.txtFactor.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.txtFactor.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
+            // 
             // comboBox5
             // 
             this.comboBox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -284,6 +328,19 @@
             this.comboBox5.Name = "comboBox5";
             this.comboBox5.Size = new System.Drawing.Size(268, 21);
             this.comboBox5.TabIndex = 0;
+            // 
+            // checkFactor
+            // 
+            this.checkFactor.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkFactor.AutoSize = true;
+            this.checkFactor.Checked = true;
+            this.checkFactor.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkFactor.Location = new System.Drawing.Point(351, 17);
+            this.checkFactor.Name = "checkFactor";
+            this.checkFactor.Size = new System.Drawing.Size(191, 17);
+            this.checkFactor.TabIndex = 7;
+            this.checkFactor.Text = "Enable Pumping Adjustment Factor";
+            this.checkFactor.UseVisualStyleBackColor = true;
             // 
             // groupBox3
             // 
@@ -351,34 +408,11 @@
             this.groupBox4.ForeColor = System.Drawing.SystemColors.ControlText;
             this.groupBox4.Location = new System.Drawing.Point(14, 332);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(631, 339);
+            this.groupBox4.Size = new System.Drawing.Size(631, 329);
             this.groupBox4.TabIndex = 12;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Simulation Preferences";
             this.groupBox4.Enter += new System.EventHandler(this.groupBox4_Enter);
-            // 
-            // txtFactor
-            // 
-            this.txtFactor.Location = new System.Drawing.Point(552, 15);
-            this.txtFactor.Name = "txtFactor";
-            this.txtFactor.Size = new System.Drawing.Size(71, 20);
-            this.txtFactor.TabIndex = 0;
-            this.txtFactor.Text = "1.0";
-            this.txtFactor.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.txtFactor.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
-            // 
-            // checkFactor
-            // 
-            this.checkFactor.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.checkFactor.AutoSize = true;
-            this.checkFactor.Checked = true;
-            this.checkFactor.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkFactor.Location = new System.Drawing.Point(351, 17);
-            this.checkFactor.Name = "checkFactor";
-            this.checkFactor.Size = new System.Drawing.Size(191, 17);
-            this.checkFactor.TabIndex = 7;
-            this.checkFactor.Text = "Enable Pumping Adjustment Factor";
-            this.checkFactor.UseVisualStyleBackColor = true;
             // 
             // groupBox9
             // 
@@ -390,7 +424,7 @@
             this.groupBox9.Controls.Add(this.radioButtonRunActive);
             this.groupBox9.Location = new System.Drawing.Point(6, 15);
             this.groupBox9.Name = "groupBox9";
-            this.groupBox9.Size = new System.Drawing.Size(414, 318);
+            this.groupBox9.Size = new System.Drawing.Size(414, 308);
             this.groupBox9.TabIndex = 4;
             this.groupBox9.TabStop = false;
             this.groupBox9.Text = "Run Type";
@@ -409,7 +443,7 @@
             this.groupBoxRunInfo.Controls.Add(this.comboBoxKeyword);
             this.groupBoxRunInfo.Location = new System.Drawing.Point(6, 38);
             this.groupBoxRunInfo.Name = "groupBoxRunInfo";
-            this.groupBoxRunInfo.Size = new System.Drawing.Size(402, 274);
+            this.groupBoxRunInfo.Size = new System.Drawing.Size(402, 264);
             this.groupBoxRunInfo.TabIndex = 21;
             this.groupBoxRunInfo.TabStop = false;
             this.groupBoxRunInfo.Text = "Run Info";
@@ -439,7 +473,7 @@
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(1, 246);
+            this.label4.Location = new System.Drawing.Point(1, 236);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(94, 13);
             this.label4.TabIndex = 19;
@@ -452,7 +486,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.richTextBoxRunNotes.Location = new System.Drawing.Point(101, 33);
             this.richTextBoxRunNotes.Name = "richTextBoxRunNotes";
-            this.richTextBoxRunNotes.Size = new System.Drawing.Size(295, 204);
+            this.richTextBoxRunNotes.Size = new System.Drawing.Size(295, 194);
             this.richTextBoxRunNotes.TabIndex = 17;
             this.richTextBoxRunNotes.Text = "";
             // 
@@ -461,7 +495,7 @@
             this.comboBoxKeyword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBoxKeyword.FormattingEnabled = true;
-            this.comboBoxKeyword.Location = new System.Drawing.Point(101, 243);
+            this.comboBoxKeyword.Location = new System.Drawing.Point(101, 233);
             this.comboBoxKeyword.Name = "comboBoxKeyword";
             this.comboBoxKeyword.Size = new System.Drawing.Size(297, 21);
             this.comboBoxKeyword.TabIndex = 18;
@@ -618,40 +652,33 @@
             this.labelActFile.TabIndex = 20;
             this.labelActFile.Text = "No active file";
             // 
-            // label5
+            // statusStrip1
             // 
-            this.label5.AutoSize = true;
-            this.label5.ForeColor = System.Drawing.SystemColors.Highlight;
-            this.label5.Location = new System.Drawing.Point(31, 44);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(104, 13);
-            this.label5.TabIndex = 22;
-            this.label5.Text = "Instream flow targets";
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripProgressBar1,
+            this.toolStripStatusLabel1});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 664);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(654, 22);
+            this.statusStrip1.TabIndex = 21;
+            this.statusStrip1.Text = "statusStrip1";
             // 
-            // label6
+            // toolStripProgressBar1
             // 
-            this.label6.AutoSize = true;
-            this.label6.ForeColor = System.Drawing.SystemColors.Highlight;
-            this.label6.Location = new System.Drawing.Point(31, 14);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(100, 13);
-            this.label6.TabIndex = 21;
-            this.label6.Text = "Riparian rights cost:";
+            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
+            this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
             // 
-            // label7
+            // toolStripStatusLabel1
             // 
-            this.label7.AutoSize = true;
-            this.label7.ForeColor = System.Drawing.SystemColors.Highlight;
-            this.label7.Location = new System.Drawing.Point(31, 29);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(147, 13);
-            this.label7.TabIndex = 20;
-            this.label7.Text = "Normal water right cost block:";
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(77, 17);
+            this.toolStripStatusLabel1.Text = "Status: Ready";
             // 
             // Simulation
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.labelActFile);
             this.Controls.Add(this.pictureBoxStatus);
@@ -683,6 +710,8 @@
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxStatus)).EndInit();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -735,5 +764,8 @@
         private System.Windows.Forms.CheckBox checkBoxUseInName;
         private System.Windows.Forms.TextBox txtFactor;
         private System.Windows.Forms.CheckBox checkFactor;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
     }
 }

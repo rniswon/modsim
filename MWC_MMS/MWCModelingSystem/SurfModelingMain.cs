@@ -38,8 +38,12 @@ namespace RRModelingSystem
                         splitContainer1.Panel2.Controls.Add(m_RRPreferences);
                         m_RRPreferences.Dock = DockStyle.Fill;
                         if (m_DataProcessing != null)
+                        {
+                            m_RRPreferences.loading = true;
                             m_RRPreferences.textBoxPREFSRiparianCost.Text = m_DataProcessing.textBoxRiparianCost.Text;
-                        break;
+                            m_RRPreferences.loading = false;
+                        }
+                            break;
                     case "Pre-Processing":
                         if (m_DataProcessing == null || m_RRPreferences.hasChanges)
                         {
@@ -81,6 +85,7 @@ namespace RRModelingSystem
                     default:
                         break;
                 }
+                m_RRPreferences.hasChanges = false;
             }
         }
 

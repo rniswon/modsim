@@ -14,7 +14,7 @@ using System.Diagnostics;
 using System.IO;
 using RTI.CWR.MWC_MODSIMUtils;
 using RRModelingSystem.Properties;
-using MODSIM_GSFLOW_C;
+using System.Threading;
 
 namespace RRModelingSystem
 {
@@ -36,6 +36,9 @@ namespace RRModelingSystem
         private DataTable ISFTargetsTbl { get; set; }
         private Dictionary<string,long> nodeSetCost { get; set; }
         private static MyDBSqlite sqliteDB { get; set; }
+
+        private StreamReader _standardOutput;
+        private Process process;
 
 
         public Simulation(string ModsimFile, string opsDB, int riparianCost, string MMS_db, string controlFile)
@@ -146,7 +149,83 @@ namespace RRModelingSystem
                     runFile = Path.Combine(folder, Path.GetFileName(runFile));
                 }
                 XYFileWriter.Write(m_ActiveModel, runFile);
+            }
+            catch (Exception ex)
+            {
+                messageOut(String.Concat("ERROR: ", ex.Message));
+            }
 
+            Thread standardOutputThread = null;
+            //Adding 'plug-ins'
+            if (radioButtonMS_GS.Checked)
+            {
+                try
+                {
+                    buttonExecuteModel.BeginInvoke((Action)(() =>
+                    {
+                        buttonExecuteModel.Visible = false;
+                    }));
+                    
+                    toolStripStatusLabel1.Text = "MODSIM-GSFLOW Simulation in progress ...";
+                    messageOut("\tActivating MODSIM-GSFLOW simulation mode...");
+
+                    //ProcessPumpingFactor(RRPreferences.rutaPumping, Convert.ToDouble(txtFactor.Text), checkFactor.Checked);
+
+                    //// TODO: Need to update the xyfile in the control file.
+
+                    //messageOut(Directory.GetCurrentDirectory());
+                    //Directory.SetCurrentDirectory( Path.GetDirectoryName(_controlFile));
+                    //string[] CmdArgs = new string[] { "\"" + Path.GetFullPath(_controlFile) + "\"" };
+                    //SurfGWModule sSurfGWModule = new SurfGWModule(CmdArgs);
+                    //sSurfGWModule.messageOut += OnMessageOut;
+
+                    ////XYFileReader.Read(myModel, sSurfGWModule.xyFileName);
+                    //m_ActiveModel.OnMessage += OnMessageOut;
+                    //m_ActiveModel.OnModsimError += OnMessageOut;
+
+                    //sSurfGWModule.InitializeRUN(ref m_ActiveModel);
+
+                    process = new Process();
+                    process.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "MWC_MS_GSF_Run.exe";
+                    string riparianArgs = checkBoxRiparianLogic.Checked ? $"-RiparianON {_riparianCost} " : "";
+                    process.StartInfo.Arguments = riparianArgs + "\"" + Path.GetFileName(_controlFile) + "\"";
+                    process.StartInfo.WorkingDirectory = Path.GetDirectoryName(_controlFile);
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+                    process.StartInfo.UseShellExecute = false;
+                    process.StartInfo.RedirectStandardOutput = true;
+                    toolStripProgressBar1.GetCurrentParent().BeginInvoke((Action)(() =>
+                    {
+                        toolStripProgressBar1.Value = 50;
+                    }));
+                    process.Start();
+                    _standardOutput = process.StandardOutput;
+                    standardOutputThread = startThread(new ThreadStart(writeStandardOutput), "StandardOutput");                                       
+                    //string output = process.StandardOutput.ReadToEnd();
+                    process.WaitForExit();
+                }
+                catch (Exception ex)
+                {
+                    messageOut(ex.Message);
+                    throw;
+                }
+                finally
+                {
+                    if (standardOutputThread != null)
+                        standardOutputThread.Join();
+                    process.Dispose();
+                    buttonExecuteModel.BeginInvoke((Action)(() =>
+                    {
+                        buttonExecuteModel.Visible = true;
+                    }));
+                    toolStripProgressBar1.GetCurrentParent().BeginInvoke((Action)(() =>
+                    {
+                        toolStripProgressBar1.Value = 0;
+                        toolStripStatusLabel1.Text = "Done.";
+                    }));                    
+                }
+            }
+            else
+            {
                 //Adding 'plug-ins'
                 if (checkBoxRiparianLogic.Checked)
                 {
@@ -154,26 +233,6 @@ namespace RRModelingSystem
                     allocationTool = new RiparianAllocation(ref m_ActiveModel, _riparianCost);
                     allocationTool.messageOut += OnMessageOut;
                 }
-
-                //Adding 'plug-ins'
-                if (radioButtonMS_GS.Checked)
-                {
-                    messageOut("\tActivating MODSIM-GSFLOW simulation mode...");
-                    // Need to update the xyfile in the control file.
-                    messageOut(Directory.GetCurrentDirectory());
-                    Directory.SetCurrentDirectory( Path.GetDirectoryName(_controlFile));
-                    string[] CmdArgs = new string[] { "\"" + Path.GetFullPath(_controlFile) + "\"" };
-                    SurfGWModule sSurfGWModule = new SurfGWModule(CmdArgs);
-                    sSurfGWModule.messageOut += OnMessageOut;
-
-                    //XYFileReader.Read(myModel, sSurfGWModule.xyFileName);
-                    m_ActiveModel.OnMessage += OnMessageOut;
-                    m_ActiveModel.OnModsimError += OnMessageOut;
-
-                    sSurfGWModule.InitializeRUN(ref m_ActiveModel);
-
-                }
-
                 messageOut("\tExecuting MODSIM model...");
                 run = Modsim.RunSolver(m_ActiveModel);
 
@@ -181,11 +240,6 @@ namespace RRModelingSystem
                 {
                     messageOut("Sucessful completion of the MODSIM run!");
                 }
-                ProcessPumpingFactor(RRPreferences.rutaPumping, Convert.ToDouble(txtFactor.Text), checkFactor.Checked);
-            }
-            catch (Exception ex)
-            {
-                messageOut(String.Concat("ERROR: ", ex.Message));
             }
 
             if (runid != -1)
@@ -194,6 +248,50 @@ namespace RRModelingSystem
             //Reload active network
             comboBoxMODSIMFile_SelectedIndexChanged(null, null);
             Cursor.Current = Cursors.Default;
+        }
+
+        /// <summary>Start a thread.</summary>
+        /// <param name="startInfo">start information for this thread</param>
+        /// <param name="name">name of the thread</param>
+        /// <returns>thread object</returns>
+        private static Thread startThread(ThreadStart startInfo, string name)
+        {
+            Thread t = new Thread(startInfo);
+            t.IsBackground = true;
+            t.Name = name;
+            t.Start();
+            return t;
+        }
+
+        /// <summary>Thread which outputs standard output from the running executable to the appropriate file.</summary>
+        private void writeStandardOutput()
+        {
+            string _standardOutputFileName = Path.Combine(Path.GetDirectoryName(_controlFile), "MMS_RunLog.txt");
+            using (StreamWriter writer = File.CreateText(_standardOutputFileName))
+            using (StreamReader reader = _standardOutput)
+            {
+                writer.AutoFlush = true;
+
+                for (; ; )
+                {
+                    string textLine = reader.ReadLine();
+
+                    if (textLine == null)
+                        break;
+
+                    writer.WriteLine(textLine);
+                }
+            }
+
+            if (File.Exists(_standardOutputFileName))
+            {
+                FileInfo info = new FileInfo(_standardOutputFileName);
+
+                // if the error info is empty or just contains eof etc.
+
+                if (info.Length < 4)
+                    info.Delete();
+            }
         }
 
         static void ProcessPumpingFactor(string FileName, double factor, Boolean aplicafactor)

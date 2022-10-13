@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MWCModelingSystem", "MWCMod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MODSIM_GSFLOW_DLL", "..\MODSIM_GSFLOW_DLL\MODSIM_GSFLOW_DLL.csproj", "{B23549E7-3C1B-43B5-867C-BA30112BEAD6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MWC_MS_GSF_Run", "MWC_MS_GSF_Run\MWC_MS_GSF_Run.csproj", "{0666B2FF-0AE6-4505-82EA-2F4F95BD8B0A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{B23549E7-3C1B-43B5-867C-BA30112BEAD6}.Release|x64.Build.0 = Release|x64
 		{B23549E7-3C1B-43B5-867C-BA30112BEAD6}.Release|x86.ActiveCfg = Release|x86
 		{B23549E7-3C1B-43B5-867C-BA30112BEAD6}.Release|x86.Build.0 = Release|x86
+		{0666B2FF-0AE6-4505-82EA-2F4F95BD8B0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0666B2FF-0AE6-4505-82EA-2F4F95BD8B0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0666B2FF-0AE6-4505-82EA-2F4F95BD8B0A}.Debug|x64.ActiveCfg = Debug|x64
+		{0666B2FF-0AE6-4505-82EA-2F4F95BD8B0A}.Debug|x64.Build.0 = Debug|x64
+		{0666B2FF-0AE6-4505-82EA-2F4F95BD8B0A}.Debug|x86.ActiveCfg = Debug|x86
+		{0666B2FF-0AE6-4505-82EA-2F4F95BD8B0A}.Debug|x86.Build.0 = Debug|x86
+		{0666B2FF-0AE6-4505-82EA-2F4F95BD8B0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0666B2FF-0AE6-4505-82EA-2F4F95BD8B0A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0666B2FF-0AE6-4505-82EA-2F4F95BD8B0A}.Release|x64.ActiveCfg = Release|x64
+		{0666B2FF-0AE6-4505-82EA-2F4F95BD8B0A}.Release|x64.Build.0 = Release|x64
+		{0666B2FF-0AE6-4505-82EA-2F4F95BD8B0A}.Release|x86.ActiveCfg = Release|x86
+		{0666B2FF-0AE6-4505-82EA-2F4F95BD8B0A}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
