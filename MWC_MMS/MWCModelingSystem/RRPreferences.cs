@@ -26,7 +26,6 @@ namespace RRModelingSystem
 
         private DataTable prefsTbl;
         private bool loading = true;
-        public static string rutaPumping = "";
 
         public RRPreferences(string MMSDatabase)
         {
@@ -77,6 +76,9 @@ namespace RRModelingSystem
                         break;
                     case "Control File":
                         textBoxControlFile.Text = dr[1].ToString();
+                        break;
+                    case "Pumping File":
+                        textBoxPumpingFile.Text = dr[1].ToString();
                         break;
                     default:
                         break;
@@ -260,7 +262,6 @@ namespace RRModelingSystem
                         textBoxPumpingFile.Text = "";
                     }
                     textBoxPumpingFile.Text = textBoxPumpingFile.Text.StartsWith("\\") ? textBoxPumpingFile.Text.Substring(1) : textBoxPumpingFile.Text;
-                    rutaPumping = textBoxPumpingFile.Text;
                 }
             }
         }

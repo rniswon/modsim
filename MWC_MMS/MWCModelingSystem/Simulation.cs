@@ -36,9 +36,11 @@ namespace RRModelingSystem
         private DataTable ISFTargetsTbl { get; set; }
         private Dictionary<string,long> nodeSetCost { get; set; }
         private static MyDBSqlite sqliteDB { get; set; }
+        private static MyDBSqlite sqliteDBsync_db { get; set; }
+        private string _rutaPumping;
 
 
-        public Simulation(string ModsimFile, string opsDB, int riparianCost, string MMS_db, string controlFile)
+        public Simulation(string ModsimFile, string opsDB, int riparianCost, string MMS_db, string controlFile, string rutaPumping)
         {
             InitializeComponent();
 
@@ -46,9 +48,12 @@ namespace RRModelingSystem
             _OpsDB = opsDB;
             _riparianCost = riparianCost;
             _controlFile = controlFile;
+            _rutaPumping = rutaPumping;
             modelReady = false;
             sqliteDB = new MyDBSqlite(MMS_db);
             sqliteDB.messageOut += ProcessMessageOut;
+            sqliteDBsync_db = new MyDBSqlite(opsDB);
+            sqliteDBsync_db.messageOut += ProcessMessageOut;
 
         }
 
@@ -147,6 +152,16 @@ namespace RRModelingSystem
                 }
                 XYFileWriter.Write(m_ActiveModel, runFile);
 
+                ProcessPumpingFactor(checkFactor.Checked, Convert.ToDouble(txtFactor.Text), comboBox5.Text);
+                //radioButtonAgPckge
+                if (radioButtonWRIMS.Checked)
+                {
+                    ProcessDB("1");
+                }
+                if (radioButtonAgPckge.Checked)
+                {
+                    ProcessDB("2");
+                }
                 //Adding 'plug-ins'
                 if (checkBoxRiparianLogic.Checked)
                 {
@@ -181,7 +196,6 @@ namespace RRModelingSystem
                 {
                     messageOut("Sucessful completion of the MODSIM run!");
                 }
-                ProcessPumpingFactor(RRPreferences.rutaPumping, Convert.ToDouble(txtFactor.Text), checkFactor.Checked);
             }
             catch (Exception ex)
             {
@@ -196,66 +210,139 @@ namespace RRModelingSystem
             Cursor.Current = Cursors.Default;
         }
 
-        static void ProcessPumpingFactor(string FileName, double factor, Boolean aplicafactor)
+        static void ProcessDB(string opcion)
+        {
+            string sql;
+            if (opcion == "1")
+            {
+                sql = "UPDATE [MS-GSF_mapping_Info] SET AgDem = 0 WHERE AssocDem Is not null";
+                sqliteDBsync_db.ExecuteQuery(sql);
+            }
+            if (opcion == "2")
+            {
+                sql = "UPDATE [MS-GSF_mapping_Info] SET AgDem = 1 WHERE AssocDem Is not null";
+                sqliteDBsync_db.ExecuteQuery(sql);
+            }
+        }
+        private void ProcessPumpingFactor(Boolean aplicafactor, double factor, string tipo)
         {
             int line = 0;
             string lineOut;
             string lineIn;
-            //string nombre1 = DateTime.Now.ToString("yyyy-MM-dd-HH-MM-ss");
-
-            //StreamWriter sw = new StreamWriter(FileName + ".out");
-
-            //StreamWriter sw = new StreamWriter(FileName.Replace(".wel", "_run" + nombre1 + ".wel"));
-            if (aplicafactor==true)
-            { 
-            StreamWriter sw = new StreamWriter(FileName.Replace(".wel", "_run" + ".wel"));
-
-            //string FileName1 = FileName.Replace("input\\MODFLOW", "output");
-
-            //StreamWriter sw = new StreamWriter(FileName1.Replace(".wel", "_run" + ".wel"));
-
-            using (StreamReader sr = File.OpenText(FileName))
+            string tipofactor;
+            switch (tipo)
             {
-                while ((lineIn = sr.ReadLine()) != null)
+                case "1.  Multiplier factor in agricultural groundwater pumping.":
+                    tipofactor = "irr_ag";
+                    break;
+                case "2.  Multiplier factor in municipal and industrial groundwater pumping.":
+                    tipofactor = "mni";
+                    break;
+                case "3.  Multiplier factor in all groundwater pumping.":
+                    tipofactor = "todos";
+                    break;
+                case "4.  Multiplier factor in residential groundwater pumping.":
+                    tipofactor = "rur_dom";
+                    break;
+                case "5.  Multiplier factor in outdoor residential groundwater pumping.":
+                    tipofactor = "rur_dom";
+                    break;
+                case "6.  Multiplier factor in indoor residential groundwater pumping.":
+                    tipofactor = "rur_dom";
+                    break;
+                default:
+                    tipofactor = tipo;
+                    break;
+            }
+            if (aplicafactor)
+            {
+                StreamWriter sw = new StreamWriter(_rutaPumping.Replace(".wel", "_run" + ".wel"));
+                using (StreamReader sr = File.OpenText(_rutaPumping))
                 {
-                    Console.Write("Procesando linea {0}\r", ++line);
-
-                    if (line > 3)
+                    while ((lineIn = sr.ReadLine()) != null)
                     {
-                        if (!lineIn.Contains("#"))
+                        if (!lineIn.StartsWith("#"))
                         {
-                            string[] stringValues = lineIn.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-                            int column1 = Int32.Parse(stringValues[0]);
-                            int column2 = Int32.Parse(stringValues[1]);
-                            int column3 = Int32.Parse(stringValues[2].Replace("-", ""));
-                            double column4 = Convert.ToDouble(stringValues[3]);
-
-                            column4 *= factor;
-
-                            lineOut = string.Format("{0,10}{1,10}{2,10}{3,16:N2}", column1, column2, column3, column4);
+                            //Found the first line
+                            lineOut = lineIn + "\r";
+                            sw.Write("{0}\n", lineOut);
+                            break;
                         }
                         else
                             lineOut = lineIn + "\r";
+                        sw.Write("{0}\n", lineOut);
                     }
-                    else
-                        lineOut = lineIn + "\r";
+                    int numcolumnas;
+                    while ((lineIn = sr.ReadLine()) != null)
+                    {
+                        numcolumnas = 0;
+                        if (!lineIn.StartsWith("#") && !lineIn.StartsWith("specify"))
+                        {
+                            string[] stringValues = lineIn.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                            Console.Write("Processing line {0}\r", ++line);
+                            int noRows = int.Parse(stringValues[0]);
 
-                    sw.Write("{0}\n", lineOut);
+                            lineOut = lineIn + "\r";
+                            sw.Write("{0}\n", lineOut);
+
+                            for (int r= 0; r < noRows; r++)
+                            {
+                                lineIn = sr.ReadLine();
+                                if (!lineIn.StartsWith("#"))
+                                {
+                                    stringValues = lineIn.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                                    numcolumnas = stringValues.Length;
+                                    int column1 = Int32.Parse(stringValues[0]);
+                                    int column2 = Int32.Parse(stringValues[1]);
+                                    int column3 = Int32.Parse(stringValues[2].Replace("-", ""));
+                                    double column4 = Convert.ToDouble(stringValues[3]);
+                                    if (numcolumnas == 6)
+                                    {
+                                        string column5 = stringValues[4];
+                                        string column6 = stringValues[5];
+                                        if (tipofactor == "todos")
+                                        {
+                                            column4 *= factor;
+                                        }
+                                        else
+                                        {
+                                            if (column6 == tipofactor)
+                                            {
+                                                column4 *= factor;
+                                            }
+                                            else
+                                            {
+                                                column4 = column4 * 1;
+                                            }
+                                        }
+                                        lineOut = string.Format("{0,10}{1,10}{2,10}{3,16:F2}     {4,-16} {5,-16}", column1, column2, column3, column4, column5, column6);
+                                    }
+                                    else {
+                                        column4 *= factor;
+                                        lineOut = string.Format("{0,10}{1,10}{2,10}{3,16:N2}", column1, column2, column3, column4);
+                                    }
+
+                                    
+                                   // lineOut = string.Format("{0,10}{1,10}{2,10}{3,16:N2}{4,10}{5,10}", column1, column2, column3, column4, column5, column6);
+                                }
+                                else
+                                lineOut = lineIn + "\r";
+                                sw.Write("{0}\n", lineOut);
+                            }
+                            //else
+                            //    lineOut = lineIn + "\r";
+                        }
+                    }
                 }
-            }
 
-            sw.Close();
+                sw.Close();
+                messageOut($"Pumping factor applied in file {_rutaPumping.Replace(".wel", "_run" + ".wel")}");
             }
             else
             {
-                File.Copy(FileName, FileName.Replace(".wel", "_run" + ".wel"));
+                File.Copy(_rutaPumping, _rutaPumping.Replace(".wel", "_run" + ".wel"),true);
+                messageOut($"Copying base file of pumping flows {_rutaPumping.Replace(".wel", "_run" + ".wel")}");
             }
-
-            //File.Delete(FileName);
-            //File.Move(FileName + ".out", textBoxWorkspace.Text +);
-
-            MessageBox.Show("Terminó!!!!!");
         }
         /// <summary>
         /// update run status in project database
@@ -798,6 +885,12 @@ namespace RRModelingSystem
             {
                 e.Handled = true;
             }
+        }
+
+        private void checkFactor_CheckStateChanged(object sender, EventArgs e)
+        {
+            comboBox5.Visible = checkFactor.Checked;
+            txtFactor.Visible = checkFactor.Checked;
         }
     }
 }
