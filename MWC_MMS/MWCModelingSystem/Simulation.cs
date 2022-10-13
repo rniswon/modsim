@@ -136,7 +136,7 @@ namespace RRModelingSystem
                 }
                 XYFileWriter.Write(m_ActiveModel, runFile);
 
-                                ProcessPumpingFactor(Convert.ToDouble(txtFactor.Text), checkFactor.Checked, comboBox5.Text);
+                ProcessPumpingFactor(checkFactor.Checked, Convert.ToDouble(txtFactor.Text), comboBox5.Text);
                 //radioButtonAgPckge
                 if (radioButtonWRIMS.Checked)
                 {
@@ -205,7 +205,7 @@ namespace RRModelingSystem
                 sqliteDBsync_db.ExecuteQuery(sql);
             }
         }
-        private void ProcessPumpingFactor(double factor, Boolean aplicafactor, string tipo)
+        private void ProcessPumpingFactor(Boolean aplicafactor, double factor, string tipo)
         {
             int line = 0;
             string lineOut;
@@ -213,22 +213,22 @@ namespace RRModelingSystem
             string tipofactor;
             switch (tipo)
             {
-                case "1.Multiplier factor in agricultural groundwater pumping.":
+                case "1.  Multiplier factor in agricultural groundwater pumping.":
                     tipofactor = "irr_ag";
                     break;
-                case "2.Multiplier factor in municipal and industrial groundwater pumping.":
+                case "2.  Multiplier factor in municipal and industrial groundwater pumping.":
                     tipofactor = "mni";
                     break;
-                case "3.Multiplier factor in all groundwater pumping.":
+                case "3.  Multiplier factor in all groundwater pumping.":
                     tipofactor = "todos";
                     break;
-                case "4.Multiplier factor in residential groundwater pumping.":
+                case "4.  Multiplier factor in residential groundwater pumping.":
                     tipofactor = "rur_dom";
                     break;
-                case "5.Multiplier factor in outdoor residential groundwater pumping.":
+                case "5.  Multiplier factor in outdoor residential groundwater pumping.":
                     tipofactor = "rur_dom";
                     break;
-                case "6.Multiplier factor in indoor residential groundwater pumping.":
+                case "6.  Multiplier factor in indoor residential groundwater pumping.":
                     tipofactor = "rur_dom";
                     break;
                 default:
@@ -242,44 +242,77 @@ namespace RRModelingSystem
                 {
                     while ((lineIn = sr.ReadLine()) != null)
                     {
-                        string[] stringValues = lineIn.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                        Console.Write("Procesando linea {0}\r", ++line);
-                        if (stringValues.Length >= 5)
+                        if (!lineIn.StartsWith("#"))
                         {
-                            if (!lineIn.Contains("#"))
-                            {
-                                // string[] stringValues = lineIn.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-                                int column1 = Int32.Parse(stringValues[0]);
-                                int column2 = Int32.Parse(stringValues[1]);
-                                int column3 = Int32.Parse(stringValues[2].Replace("-", ""));
-                                double column4 = Convert.ToDouble(stringValues[3]);
-                                string column5 = stringValues[4];
-                                string column6 = stringValues[5];
-                                if (tipofactor == "todos")
-                                {
-                                    column4 *= factor;
-                                }
-                                else
-                                {
-                                    if (column5 == tipofactor)
-                                    {
-                                        column4 *= factor;
-                                    }
-                                    else
-                                    {
-                                        column4 = column4 * 1;
-                                    }
-                                }
-                                lineOut = string.Format("{0,10}{1,10}{2,10}{3,16:N2}{4,10}{5,10}", column1, column2, column3, column4, column5, column6);
-                            }
-                            else
-                                lineOut = lineIn + "\r";
+                            //Found the first line
+                            lineOut = lineIn + "\r";
+                            sw.Write("{0}\n", lineOut);
+                            break;
                         }
                         else
                             lineOut = lineIn + "\r";
-
                         sw.Write("{0}\n", lineOut);
+                    }
+                    int numcolumnas;
+                    while ((lineIn = sr.ReadLine()) != null)
+                    {
+                        numcolumnas = 0;
+                        if (!lineIn.StartsWith("#") && !lineIn.StartsWith("specify"))
+                        {
+                            string[] stringValues = lineIn.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                            Console.Write("Processing line {0}\r", ++line);
+                            int noRows = int.Parse(stringValues[0]);
+
+                            lineOut = lineIn + "\r";
+                            sw.Write("{0}\n", lineOut);
+
+                            for (int r= 0; r < noRows; r++)
+                            {
+                                lineIn = sr.ReadLine();
+                                if (!lineIn.StartsWith("#"))
+                                {
+                                    stringValues = lineIn.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                                    numcolumnas = stringValues.Length;
+                                    int column1 = Int32.Parse(stringValues[0]);
+                                    int column2 = Int32.Parse(stringValues[1]);
+                                    int column3 = Int32.Parse(stringValues[2].Replace("-", ""));
+                                    double column4 = Convert.ToDouble(stringValues[3]);
+                                    if (numcolumnas == 6)
+                                    {
+                                        string column5 = stringValues[4];
+                                        string column6 = stringValues[5];
+                                        if (tipofactor == "todos")
+                                        {
+                                            column4 *= factor;
+                                        }
+                                        else
+                                        {
+                                            if (column6 == tipofactor)
+                                            {
+                                                column4 *= factor;
+                                            }
+                                            else
+                                            {
+                                                column4 = column4 * 1;
+                                            }
+                                        }
+                                        lineOut = string.Format("{0,10}{1,10}{2,10}{3,16:N2}{4,10}{5,10}", column1, column2, column3, column4, column5, column6);
+                                    }
+                                    else {
+                                        column4 *= factor;
+                                        lineOut = string.Format("{0,10}{1,10}{2,10}{3,16:N2}", column1, column2, column3, column4);
+                                    }
+
+                                    
+                                   // lineOut = string.Format("{0,10}{1,10}{2,10}{3,16:N2}{4,10}{5,10}", column1, column2, column3, column4, column5, column6);
+                                }
+                                else
+                                lineOut = lineIn + "\r";
+                                sw.Write("{0}\n", lineOut);
+                            }
+                            //else
+                            //    lineOut = lineIn + "\r";
+                        }
                     }
                 }
 

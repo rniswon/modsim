@@ -77,6 +77,9 @@ namespace RRModelingSystem
                     case "Control File":
                         textBoxControlFile.Text = dr[1].ToString();
                         break;
+                    case "Pumping File":
+                        textBoxPumpingFile.Text = dr[1].ToString();
+                        break;
                     default:
                         break;
                 }
