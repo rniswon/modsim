@@ -118,7 +118,7 @@ namespace RRModelingSystem
             {
                 string m_DateTime = DateTime.Now.ToString("yyyy-MM-dd HH:MM:ss");
                 string sql = "INSERT INTO MMS_RunsInfo (ScnName, SimulationStatus, Keyword, LastAccess, Notes, Options) VALUES ('{0}',{1},'{2}','{3}','{4}','{5}')";
-                string varTxt = BuildOptionsTxt();
+                string varTxt = BuildOptionsTxt(_comboPumpingText);
                 sql = string.Format(sql, textBoxScnName.Text, 0, comboBoxKeyword.Text, m_DateTime, richTextBoxRunNotes.Text, varTxt);
                 runid = sqliteDB.ExecuteQuery(sql);
                 messageOut($"Logged run {runid} to the MMS database under keyword {comboBoxKeyword.Text}.\n");
@@ -339,22 +339,22 @@ namespace RRModelingSystem
             string tipofactor;
             switch (tipo)
             {
-                case "1.  Multiplier factor in agricultural groundwater pumping.":
+                case "Multiplier factor in agricultural groundwater pumping":
                     tipofactor = "irr_ag";
                     break;
-                case "2.  Multiplier factor in municipal and industrial groundwater pumping.":
+                case "Multiplier factor in municipal and industrial groundwater pumping":
                     tipofactor = "mni";
                     break;
-                case "3.  Multiplier factor in all groundwater pumping.":
+                case "Multiplier factor in all groundwater pumping":
                     tipofactor = "todos";
                     break;
-                case "4.  Multiplier factor in residential groundwater pumping.":
+                case "Multiplier factor in residential groundwater pumping":
                     tipofactor = "rur_dom";
                     break;
-                case "5.  Multiplier factor in outdoor residential groundwater pumping.":
+                case "Multiplier factor in outdoor residential groundwater pumping":
                     tipofactor = "rur_dom";
                     break;
-                case "6.  Multiplier factor in indoor residential groundwater pumping.":
+                case "Multiplier factor in indoor residential groundwater pumping":
                     tipofactor = "rur_dom";
                     break;
                 default:
@@ -478,7 +478,7 @@ namespace RRModelingSystem
             } 
         }
 
-        private string BuildOptionsTxt()
+        private string BuildOptionsTxt(string comboPumpingText)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(labelActFile.Text);
@@ -490,6 +490,8 @@ namespace RRModelingSystem
             {
                 sb.AppendLine(String.Concat(dr["Location"], ":", dr["Target Flow [cfs]"], " cfs"));               
             }
+            sb.AppendLine(comboPumpingText + ":" + txtFactor.Text);
+
             return sb.ToString();
         }
 
@@ -998,6 +1000,11 @@ namespace RRModelingSystem
         {
             comboBox5.Visible = checkFactor.Checked;
             txtFactor.Visible = checkFactor.Checked;
+        }
+
+        private void radioButtonMS_GS_CheckedChanged(object sender, EventArgs e)
+        {
+            groupBox2.Visible = radioButtonMS_GS.Checked;
         }
     }
 }
