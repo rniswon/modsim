@@ -40,7 +40,7 @@ namespace RRModelingSystem
         private static MyDBSqlite sqliteDBsync_db { get; set; }
         private string _rutaPumping;
 
-        private StreamReader _standardOutput;
+        private static StreamReader _standardOutput;
         private Process process;
         private Thread standardOutputThread;
 
@@ -114,7 +114,7 @@ namespace RRModelingSystem
             Cursor.Current = Cursors.WaitCursor;
 
             int runid = -1;
-            if (_radioButtonMMSRun)
+            if (_radioButtonMMSRun || radioButtonMS_GS.Checked)
             {
                 string m_DateTime = DateTime.Now.ToString("yyyy-MM-dd HH:MM:ss");
                 string sql = "INSERT INTO MMS_RunsInfo (ScnName, SimulationStatus, Keyword, LastAccess, Notes, Options) VALUES ('{0}',{1},'{2}','{3}','{4}','{5}')";
@@ -194,6 +194,9 @@ namespace RRModelingSystem
                     //ProcessPumpingFactor(RRPreferences.rutaPumping, Convert.ToDouble(txtFactor.Text), checkFactor.Checked);
 
                     //// TODO: Need to update the xyfile in the control file.
+                    MODSIM_GSFLOW_C.ControlHelper ctrHlpr = new MODSIM_GSFLOW_C.ControlHelper(_controlFile);
+                    ctrHlpr.ReplaceKeyRelativePath("xyFileName", new string[] { runFile });
+                    ctrHlpr.ReplaceKeyRelativePath("mappingFileName", new string[] { _OpsDB });
 
                     //messageOut(Directory.GetCurrentDirectory());
                     //Directory.SetCurrentDirectory( Path.GetDirectoryName(_controlFile));
@@ -221,9 +224,8 @@ namespace RRModelingSystem
                     }));
                     process.Start();
                     _standardOutput = process.StandardOutput;
-                    standardOutputThread = startThread(new ThreadStart(writeStandardOutput), "StandardOutput");
-                    //string output = process.StandardOutput.ReadToEnd();
-                    simulationStarted(1234, Path.Combine(Path.GetDirectoryName(_controlFile), "MMS_RunLog.txt"));
+                    standardOutputThread = startThread("StandardOutput", Path.Combine(Path.GetDirectoryName(_controlFile), $"MMS_Run{runid}Log.txt"));
+                    simulationStarted(runid, Path.Combine(Path.GetDirectoryName(_controlFile), $"MMS_Run{runid}Log.txt"));
                     process.WaitForExit();
                 }
                 catch (Exception ex)
@@ -277,9 +279,10 @@ namespace RRModelingSystem
         /// <param name="startInfo">start information for this thread</param>
         /// <param name="name">name of the thread</param>
         /// <returns>thread object</returns>
-        private static Thread startThread(ThreadStart startInfo, string name)
+        private static Thread startThread(string name, string parameter)
         {
-            Thread t = new Thread(startInfo);
+            //Thread t = new Thread(startInfo);
+            var t = new Thread(() => writeStandardOutput(parameter));
             t.IsBackground = true;
             t.Name = name;
             t.Start();
@@ -287,9 +290,9 @@ namespace RRModelingSystem
         }
 
         /// <summary>Thread which outputs standard output from the running executable to the appropriate file.</summary>
-        private void writeStandardOutput()
+        private static void writeStandardOutput(string logFileName)
         {
-            string _standardOutputFileName = Path.Combine(Path.GetDirectoryName(_controlFile), "MMS_RunLog.txt");
+            string _standardOutputFileName = logFileName;
             using (StreamWriter writer = File.CreateText(_standardOutputFileName))
             using (StreamReader reader = _standardOutput)
             {
