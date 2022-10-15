@@ -64,12 +64,12 @@
             this.radioButtonMMSRun = new System.Windows.Forms.RadioButton();
             this.radioButtonRunActive = new System.Windows.Forms.RadioButton();
             this.checkBoxRiparianLogic = new System.Windows.Forms.CheckBox();
-            this.groupBox6 = new System.Windows.Forms.GroupBox();
-            this.radioButtonAgPckge = new System.Windows.Forms.RadioButton();
-            this.radioButtonWRIMS = new System.Windows.Forms.RadioButton();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.radioButtonMS_GS = new System.Windows.Forms.RadioButton();
             this.radioButtonMODSIMOnly = new System.Windows.Forms.RadioButton();
+            this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.radioButtonAgPckge = new System.Windows.Forms.RadioButton();
+            this.radioButtonWRIMS = new System.Windows.Forms.RadioButton();
             this.comboBoxMODSIMFile = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.pictureBoxStatus = new System.Windows.Forms.PictureBox();
@@ -89,8 +89,8 @@
             this.groupBox4.SuspendLayout();
             this.groupBox9.SuspendLayout();
             this.groupBoxRunInfo.SuspendLayout();
-            this.groupBox6.SuspendLayout();
             this.groupBox5.SuspendLayout();
+            this.groupBox6.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxStatus)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -99,7 +99,7 @@
             // 
             this.buttonExecuteModel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonExecuteModel.Enabled = false;
-            this.buttonExecuteModel.Location = new System.Drawing.Point(492, 257);
+            this.buttonExecuteModel.Location = new System.Drawing.Point(475, 245);
             this.buttonExecuteModel.Name = "buttonExecuteModel";
             this.buttonExecuteModel.Size = new System.Drawing.Size(98, 23);
             this.buttonExecuteModel.TabIndex = 6;
@@ -144,7 +144,7 @@
             this.groupBox1.ForeColor = System.Drawing.SystemColors.ControlText;
             this.groupBox1.Location = new System.Drawing.Point(0, 0);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(378, 184);
+            this.groupBox1.Size = new System.Drawing.Size(378, 186);
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Allocation Pseudo-Priorities";
@@ -239,7 +239,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.treeViewPsdoCost.Location = new System.Drawing.Point(87, 60);
             this.treeViewPsdoCost.Name = "treeViewPsdoCost";
-            this.treeViewPsdoCost.Size = new System.Drawing.Size(202, 121);
+            this.treeViewPsdoCost.Size = new System.Drawing.Size(202, 123);
             this.treeViewPsdoCost.TabIndex = 14;
             this.treeViewPsdoCost.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewPsdoCost_AfterSelect);
             // 
@@ -292,17 +292,18 @@
             this.groupBox2.Controls.Add(this.txtFactor);
             this.groupBox2.Controls.Add(this.comboBox5);
             this.groupBox2.Controls.Add(this.checkFactor);
-            this.groupBox2.Location = new System.Drawing.Point(9, 213);
+            this.groupBox2.Location = new System.Drawing.Point(6, 113);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(633, 44);
+            this.groupBox2.Size = new System.Drawing.Size(208, 91);
             this.groupBox2.TabIndex = 10;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "GSFLOW Pumping Scenario";
+            this.groupBox2.Visible = false;
             // 
             // txtFactor
             // 
             this.txtFactor.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtFactor.Location = new System.Drawing.Point(552, 15);
+            this.txtFactor.Location = new System.Drawing.Point(131, 66);
             this.txtFactor.Name = "txtFactor";
             this.txtFactor.Size = new System.Drawing.Size(71, 20);
             this.txtFactor.TabIndex = 0;
@@ -317,17 +318,17 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox5.FormattingEnabled = true;
             this.comboBox5.Items.AddRange(new object[] {
-            "1.  Multiplier factor in agricultural groundwater pumping.",
-            "2.  Multiplier factor in municipal and industrial groundwater pumping.",
-            "3.  Multiplier factor in all groundwater pumping.",
-            "4.  Multiplier factor in residential groundwater pumping.",
-            "5.  Multiplier factor in outdoor residential groundwater pumping.",
-            "6.  Multiplier factor in indoor residential groundwater pumping.",
-            "7.  Multiplier factor transfer of agricultural groundwater pumping to residential" +
-                " groundwater pumping"});
-            this.comboBox5.Location = new System.Drawing.Point(220, 15);
+            "Multiplier factor in agricultural groundwater pumping",
+            "Multiplier factor in municipal and industrial groundwater pumping",
+            "Multiplier factor in all groundwater pumping",
+            "Multiplier factor in residential groundwater pumping",
+            "Multiplier factor in outdoor residential groundwater pumping",
+            "Multiplier factor in indoor residential groundwater pumping",
+            "Multiplier factor transfer of agricultural groundwater pumping to residential gro" +
+                "undwater pumping"});
+            this.comboBox5.Location = new System.Drawing.Point(6, 40);
             this.comboBox5.Name = "comboBox5";
-            this.comboBox5.Size = new System.Drawing.Size(307, 21);
+            this.comboBox5.Size = new System.Drawing.Size(196, 21);
             this.comboBox5.TabIndex = 0;
             this.comboBox5.Visible = false;
             // 
@@ -335,9 +336,7 @@
             // 
             this.checkFactor.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.checkFactor.AutoSize = true;
-            this.checkFactor.Checked = true;
-            this.checkFactor.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkFactor.Location = new System.Drawing.Point(17, 17);
+            this.checkFactor.Location = new System.Drawing.Point(6, 19);
             this.checkFactor.Name = "checkFactor";
             this.checkFactor.Size = new System.Drawing.Size(191, 17);
             this.checkFactor.TabIndex = 7;
@@ -350,11 +349,10 @@
             this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox3.Controls.Add(this.splitContainer1);
-            this.groupBox3.Controls.Add(this.groupBox2);
             this.groupBox3.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.groupBox3.Location = new System.Drawing.Point(3, 61);
+            this.groupBox3.Location = new System.Drawing.Point(3, 52);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(648, 265);
+            this.groupBox3.Size = new System.Drawing.Size(648, 219);
             this.groupBox3.TabIndex = 11;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Management Preferences";
@@ -374,7 +372,7 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.groupBox7);
-            this.splitContainer1.Size = new System.Drawing.Size(635, 188);
+            this.splitContainer1.Size = new System.Drawing.Size(635, 192);
             this.splitContainer1.SplitterDistance = 378;
             this.splitContainer1.TabIndex = 15;
             // 
@@ -385,7 +383,7 @@
             this.groupBox7.Controls.Add(this.dataGridViewISF);
             this.groupBox7.Location = new System.Drawing.Point(0, 0);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(253, 188);
+            this.groupBox7.Size = new System.Drawing.Size(253, 186);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Instream Flow Targets";
@@ -396,7 +394,7 @@
             this.dataGridViewISF.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewISF.Location = new System.Drawing.Point(3, 16);
             this.dataGridViewISF.Name = "dataGridViewISF";
-            this.dataGridViewISF.Size = new System.Drawing.Size(247, 169);
+            this.dataGridViewISF.Size = new System.Drawing.Size(247, 167);
             this.dataGridViewISF.TabIndex = 0;
             // 
             // groupBox4
@@ -404,14 +402,14 @@
             this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox4.Controls.Add(this.buttonExecuteModel);
             this.groupBox4.Controls.Add(this.groupBox9);
             this.groupBox4.Controls.Add(this.checkBoxRiparianLogic);
-            this.groupBox4.Controls.Add(this.buttonExecuteModel);
             this.groupBox4.Controls.Add(this.groupBox5);
             this.groupBox4.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.groupBox4.Location = new System.Drawing.Point(14, 332);
+            this.groupBox4.Location = new System.Drawing.Point(10, 274);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(631, 329);
+            this.groupBox4.Size = new System.Drawing.Size(631, 387);
             this.groupBox4.TabIndex = 12;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Simulation Preferences";
@@ -427,7 +425,7 @@
             this.groupBox9.Controls.Add(this.radioButtonRunActive);
             this.groupBox9.Location = new System.Drawing.Point(6, 15);
             this.groupBox9.Name = "groupBox9";
-            this.groupBox9.Size = new System.Drawing.Size(394, 308);
+            this.groupBox9.Size = new System.Drawing.Size(394, 372);
             this.groupBox9.TabIndex = 4;
             this.groupBox9.TabStop = false;
             this.groupBox9.Text = "Run Type";
@@ -446,7 +444,7 @@
             this.groupBoxRunInfo.Controls.Add(this.comboBoxKeyword);
             this.groupBoxRunInfo.Location = new System.Drawing.Point(6, 38);
             this.groupBoxRunInfo.Name = "groupBoxRunInfo";
-            this.groupBoxRunInfo.Size = new System.Drawing.Size(382, 264);
+            this.groupBoxRunInfo.Size = new System.Drawing.Size(382, 328);
             this.groupBoxRunInfo.TabIndex = 21;
             this.groupBoxRunInfo.TabStop = false;
             this.groupBoxRunInfo.Text = "Run Info";
@@ -476,7 +474,7 @@
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(1, 236);
+            this.label4.Location = new System.Drawing.Point(1, 300);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(94, 13);
             this.label4.TabIndex = 19;
@@ -489,7 +487,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.richTextBoxRunNotes.Location = new System.Drawing.Point(101, 33);
             this.richTextBoxRunNotes.Name = "richTextBoxRunNotes";
-            this.richTextBoxRunNotes.Size = new System.Drawing.Size(275, 194);
+            this.richTextBoxRunNotes.Size = new System.Drawing.Size(275, 258);
             this.richTextBoxRunNotes.TabIndex = 17;
             this.richTextBoxRunNotes.Text = "";
             // 
@@ -498,7 +496,7 @@
             this.comboBoxKeyword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBoxKeyword.FormattingEnabled = true;
-            this.comboBoxKeyword.Location = new System.Drawing.Point(101, 233);
+            this.comboBoxKeyword.Location = new System.Drawing.Point(101, 297);
             this.comboBoxKeyword.Name = "comboBoxKeyword";
             this.comboBoxKeyword.Size = new System.Drawing.Size(277, 21);
             this.comboBoxKeyword.TabIndex = 18;
@@ -533,19 +531,57 @@
             this.checkBoxRiparianLogic.AutoSize = true;
             this.checkBoxRiparianLogic.Checked = true;
             this.checkBoxRiparianLogic.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxRiparianLogic.Location = new System.Drawing.Point(442, 19);
+            this.checkBoxRiparianLogic.Location = new System.Drawing.Point(406, 15);
             this.checkBoxRiparianLogic.Name = "checkBoxRiparianLogic";
             this.checkBoxRiparianLogic.Size = new System.Drawing.Size(179, 17);
             this.checkBoxRiparianLogic.TabIndex = 3;
             this.checkBoxRiparianLogic.Text = "Enable Riparian Allocation Logic";
             this.checkBoxRiparianLogic.UseVisualStyleBackColor = true;
             // 
+            // groupBox5
+            // 
+            this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox5.Controls.Add(this.groupBox2);
+            this.groupBox5.Controls.Add(this.radioButtonMS_GS);
+            this.groupBox5.Controls.Add(this.radioButtonMODSIMOnly);
+            this.groupBox5.Controls.Add(this.groupBox6);
+            this.groupBox5.Location = new System.Drawing.Point(406, 34);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(220, 209);
+            this.groupBox5.TabIndex = 1;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "Simulation Mode";
+            // 
+            // radioButtonMS_GS
+            // 
+            this.radioButtonMS_GS.AutoSize = true;
+            this.radioButtonMS_GS.Location = new System.Drawing.Point(19, 32);
+            this.radioButtonMS_GS.Name = "radioButtonMS_GS";
+            this.radioButtonMS_GS.Size = new System.Drawing.Size(160, 17);
+            this.radioButtonMS_GS.TabIndex = 1;
+            this.radioButtonMS_GS.Text = "Coupled MODSIM-GSFLOW";
+            this.radioButtonMS_GS.UseVisualStyleBackColor = true;
+            this.radioButtonMS_GS.CheckedChanged += new System.EventHandler(this.radioButtonMS_GS_CheckedChanged);
+            // 
+            // radioButtonMODSIMOnly
+            // 
+            this.radioButtonMODSIMOnly.AutoSize = true;
+            this.radioButtonMODSIMOnly.Checked = true;
+            this.radioButtonMODSIMOnly.Location = new System.Drawing.Point(19, 14);
+            this.radioButtonMODSIMOnly.Name = "radioButtonMODSIMOnly";
+            this.radioButtonMODSIMOnly.Size = new System.Drawing.Size(93, 17);
+            this.radioButtonMODSIMOnly.TabIndex = 0;
+            this.radioButtonMODSIMOnly.TabStop = true;
+            this.radioButtonMODSIMOnly.Text = "MODSIM Only";
+            this.radioButtonMODSIMOnly.UseVisualStyleBackColor = true;
+            this.radioButtonMODSIMOnly.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
+            // 
             // groupBox6
             // 
             this.groupBox6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox6.Controls.Add(this.radioButtonAgPckge);
             this.groupBox6.Controls.Add(this.radioButtonWRIMS);
-            this.groupBox6.Location = new System.Drawing.Point(36, 55);
+            this.groupBox6.Location = new System.Drawing.Point(6, 55);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Size = new System.Drawing.Size(166, 55);
             this.groupBox6.TabIndex = 2;
@@ -574,42 +610,6 @@
             this.radioButtonWRIMS.TabStop = true;
             this.radioButtonWRIMS.Text = "eWRIMS";
             this.radioButtonWRIMS.UseVisualStyleBackColor = true;
-            // 
-            // groupBox5
-            // 
-            this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox5.Controls.Add(this.radioButtonMS_GS);
-            this.groupBox5.Controls.Add(this.radioButtonMODSIMOnly);
-            this.groupBox5.Controls.Add(this.groupBox6);
-            this.groupBox5.Location = new System.Drawing.Point(406, 42);
-            this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(220, 209);
-            this.groupBox5.TabIndex = 1;
-            this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "Simulation Mode";
-            // 
-            // radioButtonMS_GS
-            // 
-            this.radioButtonMS_GS.AutoSize = true;
-            this.radioButtonMS_GS.Location = new System.Drawing.Point(13, 32);
-            this.radioButtonMS_GS.Name = "radioButtonMS_GS";
-            this.radioButtonMS_GS.Size = new System.Drawing.Size(160, 17);
-            this.radioButtonMS_GS.TabIndex = 1;
-            this.radioButtonMS_GS.Text = "Coupled MODSIM-GSFLOW";
-            this.radioButtonMS_GS.UseVisualStyleBackColor = true;
-            // 
-            // radioButtonMODSIMOnly
-            // 
-            this.radioButtonMODSIMOnly.AutoSize = true;
-            this.radioButtonMODSIMOnly.Checked = true;
-            this.radioButtonMODSIMOnly.Location = new System.Drawing.Point(13, 14);
-            this.radioButtonMODSIMOnly.Name = "radioButtonMODSIMOnly";
-            this.radioButtonMODSIMOnly.Size = new System.Drawing.Size(93, 17);
-            this.radioButtonMODSIMOnly.TabIndex = 0;
-            this.radioButtonMODSIMOnly.TabStop = true;
-            this.radioButtonMODSIMOnly.Text = "MODSIM Only";
-            this.radioButtonMODSIMOnly.UseVisualStyleBackColor = true;
-            this.radioButtonMODSIMOnly.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
             // 
             // comboBoxMODSIMFile
             // 
@@ -709,10 +709,10 @@
             this.groupBox9.PerformLayout();
             this.groupBoxRunInfo.ResumeLayout(false);
             this.groupBoxRunInfo.PerformLayout();
-            this.groupBox6.ResumeLayout(false);
-            this.groupBox6.PerformLayout();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
+            this.groupBox6.ResumeLayout(false);
+            this.groupBox6.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxStatus)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();

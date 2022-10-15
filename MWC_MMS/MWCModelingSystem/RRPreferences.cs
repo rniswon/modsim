@@ -26,12 +26,16 @@ namespace RRModelingSystem
 
         private DataTable prefsTbl;
         public bool loading = true;
-        public static string rutaPumping = "";
+        public static bool rutaPumping = false;
+        
 
         public RRPreferences(string MMSDatabase)
         {
             InitializeComponent();
             _MMSDatabase = MMSDatabase;
+
+            
+            
         }
 
         private void RRPreferences_Load(object sender, EventArgs e)
@@ -39,6 +43,8 @@ namespace RRModelingSystem
             m_DBUtils = new MyDBSqlite(_MMSDatabase);
             m_DBUtils.messageOut += PrintMessage;
             LoadPreferences();
+
+            
         }
 
         public void SavePreferencesToDatabase()
@@ -265,6 +271,14 @@ namespace RRModelingSystem
                     }
                     textBoxPumpingFile.Text = textBoxPumpingFile.Text.StartsWith("\\") ? textBoxPumpingFile.Text.Substring(1) : textBoxPumpingFile.Text;
                 }
+            }
+            if (textBoxPumpingFile.Text.Trim() == "")
+            {
+                rutaPumping = false;
+            }
+            else
+            {
+                rutaPumping = true;
             }
         }
 
