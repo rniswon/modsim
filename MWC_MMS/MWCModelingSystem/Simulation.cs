@@ -48,6 +48,14 @@ namespace RRModelingSystem
         {
             InitializeComponent();
 
+             if (RRPreferences.rutaPumping && radioButtonMS_GS.Checked)
+            {
+                groupBox2.Visible = true;
+            }
+            else {
+                groupBox2.Visible = false;
+            }
+
             _ModsimFile = ModsimFile;
             _OpsDB = opsDB;
             _riparianCost = riparianCost;
@@ -1007,7 +1015,16 @@ namespace RRModelingSystem
 
         private void radioButtonMS_GS_CheckedChanged(object sender, EventArgs e)
         {
-            groupBox2.Visible = radioButtonMS_GS.Checked;
+            if (RRPreferences.rutaPumping && radioButtonMS_GS.Checked)
+            {
+                groupBox2.Visible = true;
+            }
+            else
+            {
+                groupBox2.Visible = false;
+            }
+
+
         }
     }
 }
