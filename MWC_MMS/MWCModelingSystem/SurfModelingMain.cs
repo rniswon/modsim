@@ -94,7 +94,7 @@ namespace RRModelingSystem
                         if(simRunWindows.ContainsKey(treeView1.SelectedNode.Text))
                         {
                             splitContainer1.Panel2.Controls.Add(simRunWindows[treeView1.SelectedNode.Text]);
-                            m_SimUserControl.Dock = DockStyle.Fill;
+                            simRunWindows[treeView1.SelectedNode.Text].Dock = DockStyle.Fill;
                         }
                         break;
                 }
