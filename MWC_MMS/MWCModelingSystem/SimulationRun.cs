@@ -23,13 +23,24 @@ namespace RRModelingSystem
             _fileName = fileName;
             textBoxHeading.Text = $"Simulation Run Monitoring | Run: {runID}";
             sw = Stopwatch.StartNew();
-            if(runMgs!=null)
+            
+            if (runMgs!=null)
             {
                 richTextBox1.Lines = runMgs.ToArray();
                 buttonUpdate.Enabled = false;
                 toolStripStatusLabel1.Text = "Simulation completed.";
                 sw.Stop();
-                AnalyzeMsgs();
+                
+            }
+        }
+
+        private void SimulationRun_Load(object sender, EventArgs e)
+        {
+            AnalyzeMsgs();
+            if (_fileName != "")
+            {
+                var item = listView1.Items.Add("Log File:");
+                item.SubItems.Add(_fileName);
             }
         }
 
@@ -44,6 +55,17 @@ namespace RRModelingSystem
 
                 if (line.ToLower().Contains("max"))
                     maxLines.Add(line);
+                if(line.ToLower().Contains("elapsed"))
+                {
+                    var item = listView1.FindItemWithText("Elapsed:");
+                    if (item == null)
+                    {
+                        item = listView1.Items.Add("Elapsed:");
+                        item.SubItems.Add(line);
+                    }
+                    else
+                        item.SubItems[0].Text = line;
+                }
             }
             treeViewMsgGroup.Nodes["NodeErrors"].Text = "Errors: " + errorLines.Count;
             treeViewMsgGroup.Nodes["NodeConvergence"].Text = "Convergence Issues: " + maxLines.Count;
@@ -56,11 +78,26 @@ namespace RRModelingSystem
 
         private void treeViewMsgGroup_AfterSelect(object sender, TreeViewEventArgs e)
         {
+            richTextBox2.Clear();
             if (treeViewMsgGroup.SelectedNode == treeViewMsgGroup.Nodes["NodeError"])
                 richTextBox2.Lines = errorLines.ToArray();
             if (treeViewMsgGroup.SelectedNode == treeViewMsgGroup.Nodes["NodeConvergence"])
                 richTextBox2.Lines = maxLines.ToArray();
         }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            richTextBox2.Clear();
+            List<string> searchLines = new List<string>();
+            foreach (string line in richTextBox1.Lines)
+            {
+                if (line.ToLower().Contains(comboBoxSearch.Text))
+                    searchLines.Add(line);
+            }
+            richTextBox2.Lines = searchLines.ToArray();
+        }
+
+        
 
         private void UpdateTxtFile()
         {
@@ -72,7 +109,7 @@ namespace RRModelingSystem
             }
 
             //sw.Stop();
-            listView1.Items[1].SubItems[2].Text = "Time elapsed : " + sw.Elapsed.TotalSeconds.ToString() + " sec.";
+            listView1.Items.Add(new ListViewItem(new string[] { "Time elapsed : ", sw.Elapsed.TotalSeconds.ToString() + " sec." }));
 
             AnalyzeMsgs();
         }

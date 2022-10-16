@@ -93,6 +93,11 @@ namespace RRModelingSystem
                     default:
                         if(simRunWindows.ContainsKey(treeView1.SelectedNode.Text))
                         {
+                            //simRunWindows[treeView1.SelectedNode.Text].listView1.BeginInvoke((Action)(() =>
+                            //{
+                            //    splitContainer1.Panel2.Controls.Add(simRunWindows[treeView1.SelectedNode.Text]);
+                            //    simRunWindows[treeView1.SelectedNode.Text].Dock = DockStyle.Fill;
+                            //}));
                             splitContainer1.Panel2.Controls.Add(simRunWindows[treeView1.SelectedNode.Text]);
                             simRunWindows[treeView1.SelectedNode.Text].Dock = DockStyle.Fill;
                         }

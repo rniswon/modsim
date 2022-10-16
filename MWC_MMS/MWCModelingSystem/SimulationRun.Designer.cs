@@ -29,12 +29,6 @@ namespace RRModelingSystem
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.ListViewItem listViewItem1 = new System.Windows.Forms.ListViewItem("Run ID:");
-            System.Windows.Forms.ListViewItem listViewItem2 = new System.Windows.Forms.ListViewItem(new string[] {
-            "Time",
-            "Start Time: ",
-            "Elapsed Time:"}, -1);
-            System.Windows.Forms.ListViewItem listViewItem3 = new System.Windows.Forms.ListViewItem("Log File:");
             System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Errors: 0");
             System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Convergence Issues: 0");
             this.textBoxHeading = new System.Windows.Forms.TextBox();
@@ -44,7 +38,6 @@ namespace RRModelingSystem
             this.splitContainer3 = new System.Windows.Forms.SplitContainer();
             this.button2 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.treeViewMsgGroup = new System.Windows.Forms.TreeView();
             this.richTextBox2 = new System.Windows.Forms.RichTextBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -52,6 +45,9 @@ namespace RRModelingSystem
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.buttonUpdate = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.comboBoxSearch = new System.Windows.Forms.ComboBox();
+            this.columnItem = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnValue = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -119,18 +115,17 @@ namespace RRModelingSystem
             // 
             // listView1
             // 
+            this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnItem,
+            this.columnValue});
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.HideSelection = false;
-            this.listView1.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
-            listViewItem1,
-            listViewItem2,
-            listViewItem3});
             this.listView1.Location = new System.Drawing.Point(0, 0);
             this.listView1.Name = "listView1";
             this.listView1.Size = new System.Drawing.Size(198, 134);
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
-            this.listView1.View = System.Windows.Forms.View.List;
+            this.listView1.View = System.Windows.Forms.View.Details;
             // 
             // splitContainer3
             // 
@@ -141,9 +136,9 @@ namespace RRModelingSystem
             // 
             // splitContainer3.Panel1
             // 
+            this.splitContainer3.Panel1.Controls.Add(this.comboBoxSearch);
             this.splitContainer3.Panel1.Controls.Add(this.button2);
             this.splitContainer3.Panel1.Controls.Add(this.label1);
-            this.splitContainer3.Panel1.Controls.Add(this.textBox1);
             this.splitContainer3.Panel1.Controls.Add(this.treeViewMsgGroup);
             // 
             // splitContainer3.Panel2
@@ -155,12 +150,14 @@ namespace RRModelingSystem
             // 
             // button2
             // 
+            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button2.Location = new System.Drawing.Point(319, 21);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(22, 23);
             this.button2.TabIndex = 3;
             this.button2.Text = "Search";
             this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // label1
             // 
@@ -170,13 +167,6 @@ namespace RRModelingSystem
             this.label1.Size = new System.Drawing.Size(41, 13);
             this.label1.TabIndex = 2;
             this.label1.Text = "Search";
-            // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(174, 21);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(139, 20);
-            this.textBox1.TabIndex = 1;
             // 
             // treeViewMsgGroup
             // 
@@ -246,6 +236,26 @@ namespace RRModelingSystem
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "";
             // 
+            // comboBoxSearch
+            // 
+            this.comboBoxSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBoxSearch.FormattingEnabled = true;
+            this.comboBoxSearch.Location = new System.Drawing.Point(179, 21);
+            this.comboBoxSearch.Name = "comboBoxSearch";
+            this.comboBoxSearch.Size = new System.Drawing.Size(134, 21);
+            this.comboBoxSearch.TabIndex = 4;
+            // 
+            // columnItem
+            // 
+            this.columnItem.Text = "Item";
+            this.columnItem.Width = 65;
+            // 
+            // columnValue
+            // 
+            this.columnValue.Text = "Value";
+            this.columnValue.Width = 126;
+            // 
             // SimulationRun
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -254,6 +264,7 @@ namespace RRModelingSystem
             this.Controls.Add(this.textBoxHeading);
             this.Name = "SimulationRun";
             this.Size = new System.Drawing.Size(547, 424);
+            this.Load += new System.EventHandler(this.SimulationRun_Load);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             this.splitContainer1.Panel2.PerformLayout();
@@ -279,18 +290,20 @@ namespace RRModelingSystem
 
         private System.Windows.Forms.TextBox textBoxHeading;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.ListView listView1;
         private System.Windows.Forms.Button buttonUpdate;
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.SplitContainer splitContainer3;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.TreeView treeViewMsgGroup;
         private System.Windows.Forms.RichTextBox richTextBox2;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.ComboBox comboBoxSearch;
+        private System.Windows.Forms.ColumnHeader columnItem;
+        private System.Windows.Forms.ColumnHeader columnValue;
+        public System.Windows.Forms.ListView listView1;
     }
 }
