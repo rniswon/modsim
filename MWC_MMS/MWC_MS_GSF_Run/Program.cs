@@ -56,7 +56,7 @@ namespace MODSIM_GSFLOW
 						
 						Console.WriteLine("\tActivating riparian logic allocation...");
 						allocationTool = new RiparianAllocation(ref myModel, _riparianCost);
-						allocationTool.messageOut += OnMessage;
+						allocationTool.messageOutRun += OnMessage;
 					}
 
 					sSurfGWModule.InitializeRUN(ref myModel);

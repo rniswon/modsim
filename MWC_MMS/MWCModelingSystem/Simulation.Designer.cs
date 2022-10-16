@@ -442,13 +442,13 @@
             this.groupBoxRunInfo.Controls.Add(this.label4);
             this.groupBoxRunInfo.Controls.Add(this.richTextBoxRunNotes);
             this.groupBoxRunInfo.Controls.Add(this.comboBoxKeyword);
+            this.groupBoxRunInfo.Enabled = false;
             this.groupBoxRunInfo.Location = new System.Drawing.Point(6, 38);
             this.groupBoxRunInfo.Name = "groupBoxRunInfo";
             this.groupBoxRunInfo.Size = new System.Drawing.Size(382, 328);
             this.groupBoxRunInfo.TabIndex = 21;
             this.groupBoxRunInfo.TabStop = false;
             this.groupBoxRunInfo.Text = "Run Info";
-            this.groupBoxRunInfo.Visible = false;
             // 
             // checkBoxUseInName
             // 

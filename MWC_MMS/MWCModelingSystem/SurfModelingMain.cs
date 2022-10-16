@@ -12,7 +12,7 @@ using System.Windows.Forms;
 
 namespace RRModelingSystem
 {
-    public delegate void ProcessSimulationRum(int runID, string fileName);  // delegate
+    public delegate void ProcessSimulationRum(int runID, string fileName, List<string> MODSIMMsgs);  // delegate
     public partial class RRSurfModelingMain : Form
     {
         private Simulation m_SimUserControl;
@@ -102,15 +102,20 @@ namespace RRModelingSystem
             }
         }
 
-        private void startSimulationRunWindow(int runID, string fileName)
+        private void startSimulationRunWindow(int runID, string fileName,List<string> runMgs)
         {
-            SimulationRun sRWin = new SimulationRun(runID, fileName);
-            simRunWindows.Add(runID.ToString(),sRWin);
-            treeView1.BeginInvoke((Action)(() =>
+            string nodeName = "Run: " + runID.ToString();
+            SimulationRun sRWin = new SimulationRun(runID, fileName,runMgs);
+            if (simRunWindows.ContainsKey(nodeName))
+                simRunWindows[nodeName] = sRWin;
+            else
             {
-                treeView1.Nodes["Node2"].Nodes.Add(runID.ToString(), runID.ToString());
-            }));
-            
+                simRunWindows.Add(nodeName, sRWin);
+                treeView1.BeginInvoke((Action)(() =>
+                {
+                    treeView1.Nodes["Node2"].Nodes.Add(nodeName, nodeName);
+                }));
+            }
         }
 
         private void ProcessMessage(string msg)
@@ -178,58 +183,27 @@ namespace RRModelingSystem
 
         private void newMMSProjectToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // Set the help text description for the FolderBrowserDialog.
-            FolderBrowserDialog folderBrowserDialog1 = new FolderBrowserDialog();
-            folderBrowserDialog1.Description =
-                "Select the workspace location for the new project.";
-
-            // Do not allow the user to create new files via the FolderBrowserDialog.
-            folderBrowserDialog1.ShowNewFolderButton = true;
-
-            // Default to the My Documents folder.
-            //this.folderBrowserDialog1.RootFolder = Environment.SpecialFolder.Personal;
-
-
-            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
-            {
-                string pName = "New Project";
-                if (InputBox("New MMS Project", "New project name:", ref pName) == DialogResult.OK)
-                {
-                    this.Cursor = Cursors.WaitCursor;
-                    string newProject = folderBrowserDialog1.SelectedPath + $"\\{pName}.sqlite";
-                    if(CreateProjectDatabase(newProject))
-                    {
-                        ProcessMessage($"INFO: project database created sucessfully.");
-                        LoadProject(newProject);
-                    }
-                    else
-                    {
-                        ProcessMessage($"WARNING: project creation not completed.");
-                    }
-                    this.Cursor = Cursors.Default;
-                }
-            }
+            
 
         }
 
-        private bool CreateProjectDatabase(string db_file)
+        private bool CreateProjectDatabase(string db_file, bool newProject)
         {
             try
             {
-                if (File.Exists(db_file))
+                if (newProject && File.Exists(db_file))
                 {
                     if (MessageBox.Show("The project file already exist. Do you want to ovewrite the project file?", "New project name", MessageBoxButtons.YesNo) == DialogResult.No)
                         return false;
                     File.Delete(db_file);
                 }
-                if (!File.Exists(db_file))
+
+                using (MyDBSqlite sqhelper = new MyDBSqlite())
                 {
-                    using (MyDBSqlite sqhelper = new MyDBSqlite())
-                    {
-                        sqhelper.messageOut += ProcessMessage;
-                        sqhelper.SetupDatabase(db_file);
-                    }
+                    sqhelper.messageOut += ProcessMessage;
+                    sqhelper.SetupDatabase(db_file);
                 }
+
                 return true;
             }
             catch (Exception ex)
@@ -289,6 +263,61 @@ namespace RRModelingSystem
         private void navigationPaneToolStripMenuItem_Click(object sender, EventArgs e)
         {
             splitContainer1.Panel1Collapsed = !navigationPaneToolStripMenuItem.Checked;
+        }
+
+        private void newDatabaseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Set the help text description for the FolderBrowserDialog.
+            FolderBrowserDialog folderBrowserDialog1 = new FolderBrowserDialog();
+            folderBrowserDialog1.Description =
+                "Select the workspace location for the new project.";
+
+            // Do not allow the user to create new files via the FolderBrowserDialog.
+            folderBrowserDialog1.ShowNewFolderButton = true;
+
+            // Default to the My Documents folder.
+            //this.folderBrowserDialog1.RootFolder = Environment.SpecialFolder.Personal;
+
+
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                string pName = "New Project";
+                if (InputBox("New MMS Project", "New project name:", ref pName) == DialogResult.OK)
+                {
+                    string newProject = folderBrowserDialog1.SelectedPath + $"\\{pName}.sqlite";
+                    CreateNewProjectInDB(newProject,isNewProject:true);
+
+                    
+                }
+            }
+        }
+
+        private void CreateNewProjectInDB(string newProject, bool isNewProject)
+        {
+            this.Cursor = Cursors.WaitCursor;
+            if (CreateProjectDatabase(newProject, isNewProject))
+            {
+                ProcessMessage($"INFO: project database created sucessfully.");
+                LoadProject(newProject);
+            }
+            else
+            {
+                ProcessMessage($"WARNING: project creation not completed.");
+            }
+            this.Cursor = Cursors.Default;
+        }
+
+        private void inExistingDatabaseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog dlg = new OpenFileDialog())
+            {
+                dlg.Filter = "SQLite Database File (*.sqlite)|*.sqlite|WaterALLOC Database File (*.waprj)|*.waprj|All files (*.*)|*.*";
+                dlg.RestoreDirectory = true;
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    CreateNewProjectInDB(dlg.FileName,isNewProject:false);
+                }
+            }
         }
     }
 

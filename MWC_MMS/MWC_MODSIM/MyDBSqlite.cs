@@ -78,6 +78,7 @@ namespace RTI.CWR.MWC_MODSIMUtils
                             if (r[0].ToString() == tablename)
                             {
                                 isexist = true;
+                                break;
                             }
                         }
                     }
@@ -382,14 +383,14 @@ namespace RTI.CWR.MWC_MODSIMUtils
                     SQLiteConnection.CreateFile(dbfile);
                     ConnectionString = GetSqLiteConnectionString(dbfile);
                 }
-                else
-                {
-                    if (!IsTableExist("MMS_Preferences"))
-                    {
-                        messageOut("WARNING [DATABASE]: database is missing MMS tables. ");
-                        messageOut("WARNING [DATABASE]: start preparing the database... ");
-                    }
-                }
+                //else
+                //{
+                //    if (!IsTableExist("MMS_Preferences"))
+                //    {
+                //        messageOut("WARNING [DATABASE]: database is missing MMS tables. ");
+                //        messageOut("WARNING [DATABASE]: start preparing the database... ");
+                //    }
+                //}
                 ConnectionString = GetSqLiteConnectionString(dbfile);
                 
 
@@ -461,6 +462,17 @@ namespace RTI.CWR.MWC_MODSIMUtils
 	                                BasePath	TEXT,
 	                                PRIMARY KEY(runID AUTOINCREMENT)
                                 )";
+                    ExecuteNonQuery(sql);
+                }
+
+                if (!IsTableExist("MMS_RunsParameters"))
+                {
+                    string sql = @"CREATE TABLE MMS_RunsParameters (
+                                        runID INTEGER NOT NULL,
+	                                    KeyParameter  TEXT,
+	                                    [Value] TEXT,
+	                                    PRIMARY KEY(runID,KeyParameter)
+                                    )";
                     ExecuteNonQuery(sql);
                 }
 

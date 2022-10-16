@@ -24,7 +24,7 @@ namespace RTI.CWR.MWC_MODSIMUtils
         private int countLocked;
         private int _riparianCost;
 
-        public event ProcessMessage messageOut;     //event
+        public event ProcessMessage messageOutRun;     //event
 
         public RiparianAllocation (ref Model model, int riparianCost = -999)
         {
@@ -33,6 +33,8 @@ namespace RTI.CWR.MWC_MODSIMUtils
             model.IterBottom += OnIterationBottom;
             model.IterTop += OnIterationTop;
             model.Converged += OnIterationConverge;
+            model.OnMessage += OnMessageOut;
+            model.OnModsimError += OnMessageOut;
             model.End += OnFinished;
 
             m_Model = model;
@@ -40,7 +42,13 @@ namespace RTI.CWR.MWC_MODSIMUtils
             _riparianCost = riparianCost;
             
         }
-      
+
+        private void OnMessageOut(string message)
+        {
+            //if (messageOut != null)
+            messageOutRun(message);
+        }
+
         private long AccuracyConversionToReal(long value)
         {
             long newValue = (long)Math.Round(value/m_Model.ScaleFactor,0);
@@ -70,7 +78,7 @@ namespace RTI.CWR.MWC_MODSIMUtils
                 }
                 l = l.next;
             }
-            messageOut($"Found {riparianLinks.Count} ripian right lins");
+            messageOutRun($"Found {riparianLinks.Count} ripian right lins");
         }
 
         private  void OnIterationTop()
@@ -154,7 +162,7 @@ namespace RTI.CWR.MWC_MODSIMUtils
                 if ((Math.Abs(UBRed) < 1 / (m_Model.ScaleFactor ) && (minSP < 0.99999 && UBRed < 0)) || (minSP == 1 && UBPerc == 1) )
                 {
 
-                    messageOut($"   ---");
+                    messageOutRun($"   ---");
                     foreach (string name in riparianLinks.Keys)
                     {
                         if ((riparianLinks[name].shortPercent < 1 && riparianLinks[name].clusterLocked == false) || (riparianLinks[name].shortPercent == 1 && UBPerc == 1 && riparianLinks[name].clusterLocked == false))
@@ -169,14 +177,14 @@ namespace RTI.CWR.MWC_MODSIMUtils
                             riparianLinks[name].clusterLocked = true;
                             riparianLinks[name].riparianLink.mlInfo.cost = -50999;
                             countLocked += 1;
-                            messageOut($"   right {name} locked in riparian processing. Set to: {UBPerc * 100}%");
-                            messageOut($"      right:{Math.Round((double)riparianLinks[name].riparianLink.mlInfo.hiVariable[m_Model.mInfo.CurrentModelTimeStepIndex, 0])},flow:{riparianLinks[name].riparianLink.mlInfo.flow }, hi:{ riparianLinks[name].riparianLink.mlInfo.hi }");
+                            messageOutRun($"   right {name} locked in riparian processing. Set to: {UBPerc * 100}%");
+                            messageOutRun($"      right:{Math.Round((double)riparianLinks[name].riparianLink.mlInfo.hiVariable[m_Model.mInfo.CurrentModelTimeStepIndex, 0])},flow:{riparianLinks[name].riparianLink.mlInfo.flow }, hi:{ riparianLinks[name].riparianLink.mlInfo.hi }");
                         }
 
                     }
                     if (countLocked == riparianLinks.Count)
                     {
-                        messageOut($"   riparian rights set to: {UBPerc * 100}%");
+                        messageOutRun($"   riparian rights set to: {UBPerc * 100}%");
                         //Accept convergence and move to the next time step
                         m_Model.mInfo.convg = true;
                         RipAllocLoopCount = 0;

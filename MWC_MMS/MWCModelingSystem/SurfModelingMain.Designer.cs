@@ -28,10 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Preferences");
-            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Pre-Processing");
-            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("Coupled Simulation");
-            System.Windows.Forms.TreeNode treeNode4 = new System.Windows.Forms.TreeNode("Post-Processing");
+            System.Windows.Forms.TreeNode treeNode13 = new System.Windows.Forms.TreeNode("Preferences");
+            System.Windows.Forms.TreeNode treeNode14 = new System.Windows.Forms.TreeNode("Pre-Processing");
+            System.Windows.Forms.TreeNode treeNode15 = new System.Windows.Forms.TreeNode("Coupled Simulation");
+            System.Windows.Forms.TreeNode treeNode16 = new System.Windows.Forms.TreeNode("Post-Processing");
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -47,6 +47,8 @@
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.richTextBoxMsgs = new System.Windows.Forms.RichTextBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.newDatabaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.inExistingDatabaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -76,19 +78,19 @@
             this.treeView1.HideSelection = false;
             this.treeView1.Location = new System.Drawing.Point(0, 0);
             this.treeView1.Name = "treeView1";
-            treeNode1.Name = "Node0";
-            treeNode1.Text = "Preferences";
-            treeNode2.Name = "NodePreProcess";
-            treeNode2.Text = "Pre-Processing";
-            treeNode3.Name = "Node2";
-            treeNode3.Text = "Coupled Simulation";
-            treeNode4.Name = "Node3";
-            treeNode4.Text = "Post-Processing";
+            treeNode13.Name = "Node0";
+            treeNode13.Text = "Preferences";
+            treeNode14.Name = "NodePreProcess";
+            treeNode14.Text = "Pre-Processing";
+            treeNode15.Name = "Node2";
+            treeNode15.Text = "Coupled Simulation";
+            treeNode16.Name = "Node3";
+            treeNode16.Text = "Post-Processing";
             this.treeView1.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1,
-            treeNode2,
-            treeNode3,
-            treeNode4});
+            treeNode13,
+            treeNode14,
+            treeNode15,
+            treeNode16});
             this.treeView1.Size = new System.Drawing.Size(144, 571);
             this.treeView1.TabIndex = 0;
             this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
@@ -120,6 +122,9 @@
             // 
             // newMMSProjectToolStripMenuItem
             // 
+            this.newMMSProjectToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.newDatabaseToolStripMenuItem,
+            this.inExistingDatabaseToolStripMenuItem});
             this.newMMSProjectToolStripMenuItem.Name = "newMMSProjectToolStripMenuItem";
             this.newMMSProjectToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
             this.newMMSProjectToolStripMenuItem.Text = "New MMS Project";
@@ -219,6 +224,20 @@
             this.label1.TabIndex = 1;
             this.label1.Text = "Log:";
             // 
+            // newDatabaseToolStripMenuItem
+            // 
+            this.newDatabaseToolStripMenuItem.Name = "newDatabaseToolStripMenuItem";
+            this.newDatabaseToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.newDatabaseToolStripMenuItem.Text = "New Database";
+            this.newDatabaseToolStripMenuItem.Click += new System.EventHandler(this.newDatabaseToolStripMenuItem_Click);
+            // 
+            // inExistingDatabaseToolStripMenuItem
+            // 
+            this.inExistingDatabaseToolStripMenuItem.Name = "inExistingDatabaseToolStripMenuItem";
+            this.inExistingDatabaseToolStripMenuItem.Size = new System.Drawing.Size(247, 22);
+            this.inExistingDatabaseToolStripMenuItem.Text = "In Existing Database (Upgrade) ...";
+            this.inExistingDatabaseToolStripMenuItem.Click += new System.EventHandler(this.inExistingDatabaseToolStripMenuItem_Click);
+            // 
             // RRSurfModelingMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -260,6 +279,8 @@
         private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem navigationPaneToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem logWindowToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem newDatabaseToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem inExistingDatabaseToolStripMenuItem;
     }
 }
 
