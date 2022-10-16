@@ -66,6 +66,12 @@ namespace RRModelingSystem
                     else
                         item.SubItems[0].Text = line;
                 }
+                if (line.Contains("percent done"))
+                {
+                    toolStripProgressBar1.Value = Convert.ToInt32(line.Replace("percent done ", ""));
+                }
+                if (line.StartsWith("Done"))
+                    toolStripProgressBar1.Value = 0;
             }
             treeViewMsgGroup.Nodes["NodeErrors"].Text = "Errors: " + errorLines.Count;
             treeViewMsgGroup.Nodes["NodeConvergence"].Text = "Convergence Issues: " + maxLines.Count;

@@ -694,7 +694,7 @@ namespace RRModelingSystem
                 else
                     UpdateStatusMessage(message);
 
-                if (message == "Done")
+                if (message.StartsWith("Done"))
                 {
                     SetStatusStripProgressValue(0);
                 }
