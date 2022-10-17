@@ -36,8 +36,8 @@ namespace RRModelingSystem
         public bool modelReady { get; set; }
         private DataTable ISFTargetsTbl { get; set; }
         private Dictionary<string,long> nodeSetCost { get; set; }
-        private static MyDBSqlite sqliteDB { get; set; }
-        private static MyDBSqlite sqliteDBsync_db { get; set; }
+        private  MyDBSqlite sqliteDB { get; set; }
+        private  MyDBSqlite sqliteDBsync_db { get; set; }
         private string _rutaPumping;
 
         private static StreamReader _standardOutput;
@@ -411,7 +411,7 @@ namespace RRModelingSystem
             }
         }
 
-            static void ProcessDB(string opcion)
+            void ProcessDB(string opcion)
             {
                 string sql;
             if (opcion == "1")

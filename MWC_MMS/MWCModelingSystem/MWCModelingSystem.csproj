@@ -168,6 +168,12 @@
     <Compile Include="RRPreferences.Designer.cs">
       <DependentUpon>RRPreferences.cs</DependentUpon>
     </Compile>
+    <Compile Include="RunsManager.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="RunsManager.Designer.cs">
+      <DependentUpon>RunsManager.cs</DependentUpon>
+    </Compile>
     <Compile Include="SimulationRun.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -197,6 +203,9 @@
     <Compile Include="TextUtils.cs" />
     <EmbeddedResource Include="RRPreferences.resx">
       <DependentUpon>RRPreferences.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RunsManager.resx">
+      <DependentUpon>RunsManager.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SimulationRun.resx">
       <DependentUpon>SimulationRun.cs</DependentUpon>

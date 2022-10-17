@@ -18,6 +18,7 @@ namespace RRModelingSystem
         private Simulation m_SimUserControl;
         private DataProcessing m_DataProcessing;
         private RRPreferences m_RRPreferences;
+        private RunsManager m_RunsManager;
         private string MMSDatabase { get; set; }
         private Dictionary<string,SimulationRun> simRunWindows;
         public RRSurfModelingMain()
@@ -89,6 +90,17 @@ namespace RRModelingSystem
 
                         splitContainer1.Panel2.Controls.Add(m_SimUserControl);
                         m_SimUserControl.Dock = DockStyle.Fill;
+                        break;
+                    case "Runs Manager":
+                        if (m_RunsManager == null || m_RRPreferences.hasChanges)
+                        {
+                            m_RunsManager = new RunsManager(Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMMSDatabase.Text));
+                            m_RunsManager.messageOut += ProcessMessage;
+                            
+                        }
+                        splitContainer1.Panel2.Controls.Add(m_RunsManager);
+                        m_RunsManager.Dock = DockStyle.Fill;
+                        m_RunsManager.ReLoadForm();
                         break;
                     default:
                         if(simRunWindows.ContainsKey(treeView1.SelectedNode.Text))
