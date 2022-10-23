@@ -125,19 +125,24 @@ namespace RRModelingSystem
 
         private void CheckFilesExist()
         {
-            ProcessExistFile(textBoxMODSIMFile.Text, "MODSIM");
-            ProcessExistFile(textBoxSyncingDB.Text, "Syncing DB");
-            ProcessExistFile(textBoxPumpingFile.Text, "Pumping");
-            ProcessExistFile(textBoxControlFile.Text, "Control");
+            ProcessExistFile(textBoxMODSIMFile, "MODSIM");
+            ProcessExistFile(textBoxSyncingDB, "Syncing DB");
+            ProcessExistFile(textBoxPumpingFile, "Pumping");
+            ProcessExistFile(textBoxControlFile, "Control");
         }
 
-        private void ProcessExistFile(string text, string v)
+        private void ProcessExistFile(TextBox textBox, string v)
         {
-            if (text != "")
+            if (textBox.Text != "")
             {
-                string filePath = Path.Combine(textBoxWorkspace.Text, text);
+                string filePath = Path.Combine(textBoxWorkspace.Text, textBox.Text);
                 if (!File.Exists(filePath))
-                    messageOut($"\t WARNING [missing file] {v} file {filePath} does not exist.");
+                {
+                    messageOut($"\t ERROR [missing file] {v} file {filePath} does not exist.");
+                    textBox.BackColor = Color.Pink;
+                }
+                else
+                    textBox.BackColor = System.Drawing.SystemColors.Window;
             }
         }
 
@@ -209,6 +214,7 @@ namespace RRModelingSystem
                     }
                 }
                 textBoxMODSIMFile.Text= textBoxMODSIMFile.Text.StartsWith("\\") ? textBoxMODSIMFile.Text.Substring(1) : textBoxMODSIMFile.Text;
+                CheckFilesExist();
             }
         }
 
@@ -226,7 +232,8 @@ namespace RRModelingSystem
                     return;
                 }
                 textBoxWorkspace.Text = folderBrowserDialog1.SelectedPath + "\\";
-                UpdatePreferences("Workspace", textBoxWorkspace.Text);
+                //UpdatePreferences("Workspace", textBoxWorkspace.Text);
+                CheckFilesExist();
             }
 
         }
@@ -273,6 +280,7 @@ namespace RRModelingSystem
                         textBoxSyncingDB.Text = "";
                     }
                     textBoxSyncingDB.Text = textBoxSyncingDB.Text.StartsWith("\\") ? textBoxSyncingDB.Text.Substring(1) : textBoxSyncingDB.Text;
+                    CheckFilesExist();
                 }
             }
         }
@@ -294,6 +302,7 @@ namespace RRModelingSystem
                         textBoxControlFile.Text = "";
                     }
                     textBoxControlFile.Text = textBoxControlFile.Text.StartsWith("\\") ? textBoxControlFile.Text.Substring(1) : textBoxControlFile.Text;
+                    CheckFilesExist();
                 }
             }
         }
@@ -334,6 +343,7 @@ namespace RRModelingSystem
                         textBoxPumpingFile.Text = "";
                     }
                     textBoxPumpingFile.Text = textBoxPumpingFile.Text.StartsWith("\\") ? textBoxPumpingFile.Text.Substring(1) : textBoxPumpingFile.Text;
+                    CheckFilesExist();
                 }
             }
             if (textBoxPumpingFile.Text.Trim() == "")
