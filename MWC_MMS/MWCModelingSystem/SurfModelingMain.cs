@@ -145,7 +145,7 @@ namespace RRModelingSystem
                     richTextBoxMsgs.SelectionColor = richTextBoxMsgs.ForeColor;
                     if (msg.ToLower().Contains("error"))
                         richTextBoxMsgs.SelectionColor = System.Drawing.Color.Red;
-                    if (msg.ToLower().StartsWith("warning"))
+                    if (msg.ToLower().Contains("warning"))
                         richTextBoxMsgs.SelectionColor = System.Drawing.Color.Orange;
                     richTextBoxMsgs.AppendText(DateTime.Now.ToString() + " " + msg + Environment.NewLine);
                     richTextBoxMsgs.ScrollToCaret();
@@ -185,6 +185,7 @@ namespace RRModelingSystem
             this.Text = $"RTI-USGS Conjunctive SW-GW Modeling System - {fileName}";
             MMSDatabase = fileName;
             m_RRPreferences = new RRPreferences(MMSDatabase);
+            m_RRPreferences.messageOut += ProcessMessage;
             treeView1.SelectedNode = treeView1.Nodes["Node0"];
             treeView1_AfterSelect(null, null);
         }
