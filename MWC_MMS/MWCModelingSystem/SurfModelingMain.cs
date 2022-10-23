@@ -175,7 +175,7 @@ namespace RRModelingSystem
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
                     LoadProject(dlg.FileName);
-                   
+                    m_RRPreferences.hasChanges = true;
                 }
             }
         }
