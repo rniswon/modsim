@@ -57,7 +57,6 @@ namespace RRModelingSystem
             loading = true;
             MMSPrefs = new Dictionary<string, DataRow>();
             ClearPrefsText();
-            //textBoxWorkspace.Text = Path.GetDirectoryName(_MMSDatabase) + "\\";
             
             prefsTbl = m_DBUtils.GetTableFromDB("SELECT * FROM MMS_Preferences", "MMS_Preferences");
 
@@ -72,7 +71,7 @@ namespace RRModelingSystem
                         break;
                     case "Workspace":
                         //Get the full path
-                        string fullPath = dr[1].ToString();// Path.GetFullPath(Path.Combine(Path.GetDirectoryName(_MMSDatabase), dr[1].ToString()));
+                        string fullPath = dr[1].ToString();
                         textBoxWorkspace.Text = fullPath.EndsWith("\\")?fullPath:fullPath + "\\";
                         Directory.SetCurrentDirectory(textBoxWorkspace.Text);
                         break;
@@ -151,29 +150,6 @@ namespace RRModelingSystem
                     textBox.Text = Path.Combine(Path.GetDirectoryName(textBox.Text), Path.GetFileName(textBox.Text));
                     if(!textBox.Text.StartsWith(".."))
                         textBox.Text = Path.GetFullPath(Path.Combine(textBoxWorkspace.Text, textBox.Text)).Replace(textBoxWorkspace.Text, "");
-                    //if (textBoxWorkspace.Text.Length < oldWorspace.Length)
-                    //{
-                    //    newWorkspace = CommonString(textBoxWorkspace.Text, oldWorspace);
-                    //    textBox.Text = newWorkspace[0] + textBox.Text;
-                    //    textBox.Text = Path.Combine(Path.GetDirectoryName(textBox.Text), Path.GetFileName(textBox.Text));
-                    //    textBox.Text = Path.GetFullPath(Path.Combine(textBoxWorkspace.Text, textBox.Text)).Replace(textBoxWorkspace.Text,"");
-
-                    //}
-                    //else
-                    //{
-                    //    textBox.Text = newUri.MakeRelativeUri(oldUri).ToString() + textBox.Text;
-                    //    textBox.Text = Path.Combine(Path.GetDirectoryName(textBox.Text), Path.GetFileName(textBox.Text));
-                    //    //newWorkspace = CommonString( oldWorspace, textBoxWorkspace.Text);
-                    //    //string[] folders = newWorkspace[0].Split(new char[] { '\\' },StringSplitOptions.RemoveEmptyEntries);
-                    //    //foreach(string s in folders)
-                    //    //{
-                    //    //    if (textBox.Text.StartsWith(s))
-                    //    //        textBox.Text = textBox.Text.Replace(s+"\\", "");
-                    //    //    if (textBox.Text.Contains(s))
-                    //    //        textBox.Text = textBox.Text.Replace(s, "..");
-                    //    //}
-                    //    ////textBox.Text = Path.GetFullPath(textBox.Text);
-                    //}
                 }
                 filePath = Path.Combine(textBoxWorkspace.Text, textBox.Text);
 
@@ -185,11 +161,6 @@ namespace RRModelingSystem
                 else
                 {
                     textBox.BackColor = System.Drawing.SystemColors.Window;
-                    if (oldWorspace != "")
-                    {
-                        //update location
-
-                    }
                 }
                     
             }
