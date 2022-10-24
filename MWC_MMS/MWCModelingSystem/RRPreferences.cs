@@ -57,7 +57,7 @@ namespace RRModelingSystem
             loading = true;
             MMSPrefs = new Dictionary<string, DataRow>();
             ClearPrefsText();
-            textBoxWorkspace.Text = Path.GetDirectoryName(_MMSDatabase) + "\\";
+            //textBoxWorkspace.Text = Path.GetDirectoryName(_MMSDatabase) + "\\";
             
             prefsTbl = m_DBUtils.GetTableFromDB("SELECT * FROM MMS_Preferences", "MMS_Preferences");
 
@@ -72,8 +72,9 @@ namespace RRModelingSystem
                         break;
                     case "Workspace":
                         //Get the full path
-                        string fullPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(_MMSDatabase), dr[1].ToString()));
+                        string fullPath = dr[1].ToString();// Path.GetFullPath(Path.Combine(Path.GetDirectoryName(_MMSDatabase), dr[1].ToString()));
                         textBoxWorkspace.Text = fullPath.EndsWith("\\")?fullPath:fullPath + "\\";
+                        Directory.SetCurrentDirectory(textBoxWorkspace.Text);
                         break;
                     case "Priority Cost":
                         textBoxPREFSRiparianCost.Text = dr[1].ToString();
@@ -98,17 +99,19 @@ namespace RRModelingSystem
             //Check for paths change
             loading = false;
             textBoxMMSDatabase.Text = _MMSDatabase.Replace(textBoxWorkspace.Text, "");
-
-            string[] newWorkspace = CommonString(Path.GetDirectoryName(Path.Combine(textBoxWorkspace.Text, _baseMMSDatabase)),Path.GetDirectoryName( _MMSDatabase));
-            if(newWorkspace.Length>0 && newWorkspace[0].Length>0)
+            if (Path.IsPathRooted(textBoxMMSDatabase.Text))
             {
-                
-                textBoxWorkspace.Text = Path.Combine(newWorkspace[0],newWorkspace[1]).Replace(Path.GetDirectoryName(_baseMMSDatabase), "");
-                messageOut($"Found a new workspace path.  Updating the path to: {textBoxWorkspace.Text}");
-                textBoxMMSDatabase.Text = _baseMMSDatabase;
-                _baseMMSDatabase = Path.Combine(textBoxWorkspace.Text, textBoxMMSDatabase.Text);
+                string[] newWorkspace = CommonString(Path.GetDirectoryName(Path.Combine(textBoxWorkspace.Text, _baseMMSDatabase)), Path.GetDirectoryName(_MMSDatabase));
+                if (newWorkspace.Length > 0 && newWorkspace[0].Length > 0)
+                {
+
+                    textBoxWorkspace.Text = Path.Combine(newWorkspace[0], newWorkspace[1]).Replace(Path.GetDirectoryName(_baseMMSDatabase), "");
+                    messageOut($"Found a new workspace path.  Updating the path to: {textBoxWorkspace.Text}");
+                    textBoxMMSDatabase.Text = _baseMMSDatabase;
+                    _baseMMSDatabase = Path.Combine(textBoxWorkspace.Text, textBoxMMSDatabase.Text);
+                }
             }
-            if (Path.GetFileName(_baseMMSDatabase) != Path.GetFileName(_MMSDatabase))
+            if (_baseMMSDatabase!="" && Path.GetFileName(_baseMMSDatabase) != Path.GetFileName(_MMSDatabase))
             {
                 messageOut("WARNING [Database name] Change detected preferences updated");
                 textBoxMMSDatabase.Text = textBoxMMSDatabase.Text.Replace(Path.GetFileName(_baseMMSDatabase), Path.GetFileName(_MMSDatabase));
@@ -123,26 +126,72 @@ namespace RRModelingSystem
            
         }
 
-        private void CheckFilesExist()
+        private void CheckFilesExist(string oldWorspace = "")
         {
-            ProcessExistFile(textBoxMODSIMFile, "MODSIM");
-            ProcessExistFile(textBoxSyncingDB, "Syncing DB");
-            ProcessExistFile(textBoxPumpingFile, "Pumping");
-            ProcessExistFile(textBoxControlFile, "Control");
+            ProcessExistFile(textBoxMODSIMFile, "MODSIM", oldWorspace);
+            ProcessExistFile(textBoxSyncingDB, "Syncing DB", oldWorspace);
+            ProcessExistFile(textBoxPumpingFile, "Pumping", oldWorspace);
+            ProcessExistFile(textBoxControlFile, "Control", oldWorspace);
+            if(oldWorspace!="")
+            {
+                textBoxMMSDatabase.Text = _MMSDatabase.Replace(textBoxWorkspace.Text, "");
+            }
         }
 
-        private void ProcessExistFile(TextBox textBox, string v)
+        private void ProcessExistFile(TextBox textBox, string v, string oldWorspace)
         {
             if (textBox.Text != "")
             {
                 string filePath = Path.Combine(textBoxWorkspace.Text, textBox.Text);
+                if (oldWorspace != "")
+                {
+                    Uri oldUri = new Uri(oldWorspace);
+                    Uri newUri = new Uri(textBoxWorkspace.Text);
+                    textBox.Text = newUri.MakeRelativeUri(oldUri).ToString() + textBox.Text;
+                    textBox.Text = Path.Combine(Path.GetDirectoryName(textBox.Text), Path.GetFileName(textBox.Text));
+                    if(!textBox.Text.StartsWith(".."))
+                        textBox.Text = Path.GetFullPath(Path.Combine(textBoxWorkspace.Text, textBox.Text)).Replace(textBoxWorkspace.Text, "");
+                    //if (textBoxWorkspace.Text.Length < oldWorspace.Length)
+                    //{
+                    //    newWorkspace = CommonString(textBoxWorkspace.Text, oldWorspace);
+                    //    textBox.Text = newWorkspace[0] + textBox.Text;
+                    //    textBox.Text = Path.Combine(Path.GetDirectoryName(textBox.Text), Path.GetFileName(textBox.Text));
+                    //    textBox.Text = Path.GetFullPath(Path.Combine(textBoxWorkspace.Text, textBox.Text)).Replace(textBoxWorkspace.Text,"");
+
+                    //}
+                    //else
+                    //{
+                    //    textBox.Text = newUri.MakeRelativeUri(oldUri).ToString() + textBox.Text;
+                    //    textBox.Text = Path.Combine(Path.GetDirectoryName(textBox.Text), Path.GetFileName(textBox.Text));
+                    //    //newWorkspace = CommonString( oldWorspace, textBoxWorkspace.Text);
+                    //    //string[] folders = newWorkspace[0].Split(new char[] { '\\' },StringSplitOptions.RemoveEmptyEntries);
+                    //    //foreach(string s in folders)
+                    //    //{
+                    //    //    if (textBox.Text.StartsWith(s))
+                    //    //        textBox.Text = textBox.Text.Replace(s+"\\", "");
+                    //    //    if (textBox.Text.Contains(s))
+                    //    //        textBox.Text = textBox.Text.Replace(s, "..");
+                    //    //}
+                    //    ////textBox.Text = Path.GetFullPath(textBox.Text);
+                    //}
+                }
+                filePath = Path.Combine(textBoxWorkspace.Text, textBox.Text);
+
                 if (!File.Exists(filePath))
                 {
                     messageOut($"\t ERROR [missing file] {v} file {filePath} does not exist.");
                     textBox.BackColor = Color.Pink;
                 }
                 else
+                {
                     textBox.BackColor = System.Drawing.SystemColors.Window;
+                    if (oldWorspace != "")
+                    {
+                        //update location
+
+                    }
+                }
+                    
             }
         }
 
@@ -172,6 +221,7 @@ namespace RRModelingSystem
             textBoxWorkspace.Text = "";
             textBoxMMSDatabase.Text = "";
             textBoxMODSIMFile.Text = "";
+            textBoxPumpingFile.Text = "";
         }
 
         private void PrintMessage(string msg)
@@ -193,7 +243,9 @@ namespace RRModelingSystem
                 //find the relative path for workspace 
                 //Uri MMSDB = new Uri(_MMSDatabase);
                 UpdatePreferences("Workspace", textBoxWorkspace.Text);
+                Directory.SetCurrentDirectory(textBoxWorkspace.Text);
             }
+            
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -224,6 +276,7 @@ namespace RRModelingSystem
             // Show the FolderBrowserDialog.
             folderBrowserDialog1 = new FolderBrowserDialog();
             DialogResult result = folderBrowserDialog1.ShowDialog();
+            string oldWorspace = textBoxWorkspace.Text;
             if (result == DialogResult.OK)
             {
                 if (!_MMSDatabase.StartsWith(folderBrowserDialog1.SelectedPath))
@@ -233,7 +286,8 @@ namespace RRModelingSystem
                 }
                 textBoxWorkspace.Text = folderBrowserDialog1.SelectedPath + "\\";
                 //UpdatePreferences("Workspace", textBoxWorkspace.Text);
-                CheckFilesExist();
+
+                CheckFilesExist(oldWorspace);
             }
 
         }
