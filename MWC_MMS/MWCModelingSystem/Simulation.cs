@@ -58,16 +58,17 @@ namespace RRModelingSystem
                 groupBox2.Visible = false;
             }
 
-            _ModsimFile = ModsimFile;
-            _OpsDB = opsDB;
+            _ModsimFile = Path.Combine(workSpace,ModsimFile);
+            _OpsDB = Path.Combine(workSpace, opsDB);
             _riparianCost = riparianCost;
-            _controlFile = controlFile;
-            _rutaPumping = rutaPumping;
+            _controlFile = Path.Combine(workSpace, controlFile);
+            if(rutaPumping!="")
+                _rutaPumping = Path.Combine(workSpace, rutaPumping);
             _workSpace = workSpace;
             modelReady = false;
-            sqliteDB = new MyDBSqlite(MMS_db);
+            sqliteDB = new MyDBSqlite(Path.Combine(workSpace, MMS_db));
             sqliteDB.messageOut += ProcessMessageOut;
-            sqliteDBsync_db = new MyDBSqlite(opsDB);
+            sqliteDBsync_db = new MyDBSqlite(Path.Combine(workSpace, opsDB));
             sqliteDBsync_db.messageOut += ProcessMessageOut;
 
         }

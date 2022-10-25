@@ -16,13 +16,13 @@ namespace RRModelingSystem
     public partial class RunsManager : UserControl
     {
         private MyDBSqlite sqliteDB { get; set; }
-        public event ProcessMessage messageOut; // event
+        public event ProcessMessage MessageOut; // event
         private string _workSpace;
 
         public RunsManager(string MMS_db, string workSpace)
         {
             InitializeComponent();
-            sqliteDB = new MyDBSqlite(MMS_db);
+            sqliteDB = new MyDBSqlite(Path.Combine(workSpace,MMS_db));
             _workSpace = workSpace;
         }
 
@@ -82,7 +82,7 @@ namespace RRModelingSystem
         {
             using (OpenFileDialog dlg = new OpenFileDialog())
             {
-                dlg.Filter = "Control File (*.sqlite)|*.sqlite";
+                dlg.Filter = "MODSIM Output File (*.sqlite)|*.sqlite";
                 dlg.RestoreDirectory = true;
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
@@ -97,7 +97,7 @@ namespace RRModelingSystem
         {
             if (txtOutputDB.Text.Trim() == "")
             {
-                messageOut("Select a SQLite database output with the 'Browse DB' button or select a row of text box.");
+                MessageOut("Select a SQLite database output with the 'Browse DB' button or select a row of text box.");
                 btnBrowseDB.Focus();
             }
             else {
@@ -121,6 +121,7 @@ namespace RRModelingSystem
                             sql1 = sql1 + @"UPDATE " + prefsTbl1.GetString(0) + " SET scenario = '" + nomArchivo + "';\n";
                         }
                     }
+                    c.Close();
                 }
 
                 using (SQLiteConnection c = new SQLiteConnection(strConn))
@@ -131,7 +132,7 @@ namespace RRModelingSystem
                         cmd.ExecuteNonQuery();
                     }
                 }
-                messageOut("Updated SQLite database output.");
+                MessageOut("Updated SQLite database output.");
             }
         }
     }
