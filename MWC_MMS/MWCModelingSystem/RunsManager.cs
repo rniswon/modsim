@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Data.SQLite;
+using System.IO;
 
 namespace RRModelingSystem
 {
@@ -15,11 +17,13 @@ namespace RRModelingSystem
     {
         private MyDBSqlite sqliteDB { get; set; }
         public event ProcessMessage messageOut; // event
+        private string _workSpace;
 
-        public RunsManager(string MMS_db)
+        public RunsManager(string MMS_db, string workSpace)
         {
             InitializeComponent();
             sqliteDB = new MyDBSqlite(MMS_db);
+            _workSpace = workSpace;
         }
 
         private void RunsManager_Load(object sender, EventArgs e)
@@ -27,7 +31,7 @@ namespace RRModelingSystem
             string sql = "SELECT * FROM MMS_RunsInfo ORDER BY runID";
             DataTable dtRuns = sqliteDB.GetTableFromDB(sql, "keywords");
             dataGridView1.DataSource = dtRuns;
-            splitContainer1.Panel2Collapsed = true;
+            //splitContainer1.Panel2Collapsed = true;
         }
 
         public void ReLoadForm()
@@ -48,6 +52,9 @@ namespace RRModelingSystem
             richTextBox1.AppendText(currentRow.Cells["Options"].Value.ToString() + "\n");
             richTextBox1.AppendText("\n__________Notes____________\n");
             richTextBox1.AppendText(currentRow.Cells["Notes"].Value.ToString());
+
+            txtOutputDB.Text = currentRow.Cells["BasePath"].Value.ToString();
+            txtOutputDB.Text = txtOutputDB.Text.Replace(".xy", "OUTPUT.sqlite");
         }
 
         private void dataGridView1_RowEnter(object sender, DataGridViewCellEventArgs e)
@@ -69,6 +76,63 @@ namespace RRModelingSystem
         {
             if (dataGridView1.SelectedRows.Count > 0)
                 UpdateInfo(((DataGridView)sender).CurrentRow);
+        }
+
+        private void btnBrowseDB_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog dlg = new OpenFileDialog())
+            {
+                dlg.Filter = "Control File (*.sqlite)|*.sqlite";
+                dlg.RestoreDirectory = true;
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    txtOutputDB.Text = Uri.UnescapeDataString(dlg.FileName);
+                    txtOutputDB.Text = txtOutputDB.Text.Replace(_workSpace,"");
+                }
+            }
+
+        }
+
+        private void btnAdaptDB_Click(object sender, EventArgs e)
+        {
+            if (txtOutputDB.Text.Trim() == "")
+            {
+                messageOut("Select a SQLite database output with the 'Browse DB' button or select a row of text box.");
+                btnBrowseDB.Focus();
+            }
+            else {
+                string strConn, nomArchivo;
+                SQLiteDataReader prefsTbl1;
+                strConn = string.Format("Data Source={0};Version={1}", _workSpace + txtOutputDB.Text, 3);
+                nomArchivo = Path.GetFileName(string.Format(_workSpace + txtOutputDB.Text));
+                nomArchivo = nomArchivo.Substring(0, nomArchivo.Length - 13);
+
+                string sql = @"SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY 1;";
+                string sql1 = "";
+                using (SQLiteConnection c = new SQLiteConnection(strConn))
+                {
+                    c.Open();
+                    using (SQLiteCommand cmd = new SQLiteCommand(sql, c))
+                    {
+                        prefsTbl1 = cmd.ExecuteReader();
+                        while (prefsTbl1.Read())
+                        {
+                            sql1 = sql1 + @"ALTER TABLE " + prefsTbl1.GetString(0) + " ADD scenario VARCHAR(20) NULL;\n";
+                            sql1 = sql1 + @"UPDATE " + prefsTbl1.GetString(0) + " SET scenario = '" + nomArchivo + "';\n";
+                        }
+                    }
+                }
+
+                using (SQLiteConnection c = new SQLiteConnection(strConn))
+                {
+                    c.Open();
+                    using (SQLiteCommand cmd = new SQLiteCommand(sql1, c))
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                messageOut("Updated SQLite database output.");
+            }
         }
     }
 }

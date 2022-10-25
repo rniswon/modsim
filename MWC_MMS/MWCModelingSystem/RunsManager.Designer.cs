@@ -34,14 +34,20 @@ namespace RRModelingSystem
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.textBoxHeading = new System.Windows.Forms.TextBox();
+            this.txtOutputDB = new System.Windows.Forms.TextBox();
+            this.btnAdaptDB = new System.Windows.Forms.Button();
+            this.btnBrowseDB = new System.Windows.Forms.Button();
+            this.gBoxAdaptDB = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.gBoxAdaptDB.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer1
@@ -54,6 +60,10 @@ namespace RRModelingSystem
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.Controls.Add(this.splitContainer2);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.gBoxAdaptDB);
             this.splitContainer1.Size = new System.Drawing.Size(725, 488);
             this.splitContainer1.SplitterDistance = 299;
             this.splitContainer1.TabIndex = 0;
@@ -117,6 +127,50 @@ namespace RRModelingSystem
             this.textBoxHeading.TabStop = false;
             this.textBoxHeading.Text = "Run Preferences";
             // 
+            // txtOutputDB
+            // 
+            this.txtOutputDB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.txtOutputDB.Location = new System.Drawing.Point(6, 24);
+            this.txtOutputDB.Name = "txtOutputDB";
+            this.txtOutputDB.ReadOnly = true;
+            this.txtOutputDB.Size = new System.Drawing.Size(259, 20);
+            this.txtOutputDB.TabIndex = 3;
+            // 
+            // btnAdaptDB
+            // 
+            this.btnAdaptDB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnAdaptDB.Location = new System.Drawing.Point(346, 21);
+            this.btnAdaptDB.Name = "btnAdaptDB";
+            this.btnAdaptDB.Size = new System.Drawing.Size(75, 23);
+            this.btnAdaptDB.TabIndex = 1;
+            this.btnAdaptDB.Text = "Adapt DB";
+            this.btnAdaptDB.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.btnAdaptDB.UseVisualStyleBackColor = true;
+            this.btnAdaptDB.Click += new System.EventHandler(this.btnAdaptDB_Click);
+            // 
+            // btnBrowseDB
+            // 
+            this.btnBrowseDB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnBrowseDB.Location = new System.Drawing.Point(271, 22);
+            this.btnBrowseDB.Name = "btnBrowseDB";
+            this.btnBrowseDB.Size = new System.Drawing.Size(75, 23);
+            this.btnBrowseDB.TabIndex = 2;
+            this.btnBrowseDB.Text = "Browse DB";
+            this.btnBrowseDB.UseVisualStyleBackColor = true;
+            this.btnBrowseDB.Click += new System.EventHandler(this.btnBrowseDB_Click);
+            // 
+            // gBoxAdaptDB
+            // 
+            this.gBoxAdaptDB.Controls.Add(this.txtOutputDB);
+            this.gBoxAdaptDB.Controls.Add(this.btnAdaptDB);
+            this.gBoxAdaptDB.Controls.Add(this.btnBrowseDB);
+            this.gBoxAdaptDB.Location = new System.Drawing.Point(3, 3);
+            this.gBoxAdaptDB.Name = "gBoxAdaptDB";
+            this.gBoxAdaptDB.Size = new System.Drawing.Size(427, 62);
+            this.gBoxAdaptDB.TabIndex = 4;
+            this.gBoxAdaptDB.TabStop = false;
+            this.gBoxAdaptDB.Text = "Adapt SQLite DB Output";
+            // 
             // RunsManager
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -126,6 +180,7 @@ namespace RRModelingSystem
             this.Size = new System.Drawing.Size(725, 488);
             this.Load += new System.EventHandler(this.RunsManager_Load);
             this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.splitContainer2.Panel1.ResumeLayout(false);
@@ -134,6 +189,8 @@ namespace RRModelingSystem
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            this.gBoxAdaptDB.ResumeLayout(false);
+            this.gBoxAdaptDB.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -145,5 +202,9 @@ namespace RRModelingSystem
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.TextBox textBoxHeading;
+        private System.Windows.Forms.Button btnAdaptDB;
+        private System.Windows.Forms.TextBox txtOutputDB;
+        private System.Windows.Forms.Button btnBrowseDB;
+        private System.Windows.Forms.GroupBox gBoxAdaptDB;
     }
 }

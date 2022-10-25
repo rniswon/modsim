@@ -81,7 +81,7 @@ namespace RRModelingSystem
                                                                 int.Parse(m_RRPreferences.textBoxPREFSRiparianCost.Text),
                                                                 Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMMSDatabase.Text),
                                                                 Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxControlFile.Text),
-                                                                pumpFile);
+                                                                pumpFile,m_RRPreferences.textBoxWorkspace.Text);
                             m_SimUserControl.messageOut += ProcessMessage;
                             m_SimUserControl.simulationStarted += startSimulationRunWindow;
                             ProcessMessage($"Base MODSIM File: {m_RRPreferences.textBoxMODSIMFile.Text}");
@@ -94,7 +94,8 @@ namespace RRModelingSystem
                     case "Runs Manager":
                         if (m_RunsManager == null || m_RRPreferences.hasChanges)
                         {
-                            m_RunsManager = new RunsManager(Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMMSDatabase.Text));
+                            m_RunsManager = new RunsManager(Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMMSDatabase.Text),
+                                m_RRPreferences.textBoxWorkspace.Text);
                             m_RunsManager.messageOut += ProcessMessage;
                             
                         }

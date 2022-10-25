@@ -44,12 +44,13 @@ namespace RRModelingSystem
         private Process process;
         private Thread standardOutputThread;
         private List<string> runMsgs;
+        private string _workSpace;
 
-        public Simulation(string ModsimFile, string opsDB, int riparianCost, string MMS_db, string controlFile, string rutaPumping)
+        public Simulation(string ModsimFile, string opsDB, int riparianCost, string MMS_db, string controlFile, string rutaPumping, string workSpace)
         {
             InitializeComponent();
 
-             if (RRPreferences.rutaPumping && radioButtonMS_GS.Checked)
+            if (rutaPumping != "" && radioButtonMS_GS.Checked)
             {
                 groupBox2.Visible = true;
             }
@@ -62,6 +63,7 @@ namespace RRModelingSystem
             _riparianCost = riparianCost;
             _controlFile = controlFile;
             _rutaPumping = rutaPumping;
+            _workSpace = workSpace;
             modelReady = false;
             sqliteDB = new MyDBSqlite(MMS_db);
             sqliteDB.messageOut += ProcessMessageOut;
@@ -186,9 +188,17 @@ namespace RRModelingSystem
             //Reload active network
             comboBoxMODSIMFile_SelectedIndexChanged(null, null);
             Cursor.Current = Cursors.Default;
+
+            //prefsTbl = m_DBUtils.GetTableFromDB("SELECT * FROM MMS_Preferences", "MMS_Preferences");
+
         }
 
-        private void RunSimulation(object sender, DoWorkEventArgs e)
+        private void ModificarRuta()
+        {
+
+        }
+
+            private void RunSimulation(object sender, DoWorkEventArgs e)
         {
             object[] args = e.Argument as object[];
             string _runFile = args[0].ToString();
@@ -561,8 +571,7 @@ namespace RRModelingSystem
                 {
                     runInfoDT.Rows[0]["SimulationStatus"] = runIssues ? 3 : 2;
                     runInfoDT.Rows[0]["LastAccess"] = DateTime.Now.ToString();
-                    runInfoDT.Rows[0]["BasePath"] = basePath;
-
+                    runInfoDT.Rows[0]["BasePath"] = basePath.Replace(_workSpace, "");
                     sqliteDB.UpdateTableFromDB(runInfoDT);
                 }
             }
@@ -1176,7 +1185,7 @@ namespace RRModelingSystem
 
         private void radioButtonMS_GS_CheckedChanged(object sender, EventArgs e)
         {
-            if (RRPreferences.rutaPumping && radioButtonMS_GS.Checked)
+            if (_rutaPumping != "" && radioButtonMS_GS.Checked)
             {
                 groupBox2.Visible = true;
             }
