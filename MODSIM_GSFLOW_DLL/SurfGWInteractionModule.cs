@@ -335,7 +335,9 @@ namespace MODSIM_GSFLOW_C
                 foreach (DataRow m_Row in swgwUtils.m_SyncTblSEG.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
                 {
                     //MF_Acc_Dep_Identifier[i] = (double) m_Row["iseg"];
-                    if (i != (int)(double.Parse(m_Row["iseg"].ToString()) - 1)) throw new Exception("Iseg doesn't match the index of the array");
+                    if (i != (int)(double.Parse(m_Row["iseg"].ToString()) - 1)) 
+                        throw new Exception($"Iseg {m_Row["iseg"].ToString()} doesn't match the index of the array");
+                    
                     MS_Flows[i] = 0;
                     IDivert[i] = (int)double.Parse(m_Row["Diversion"].ToString());
                     IRelease[i] = (int)double.Parse(m_Row["ResRelease"].ToString());

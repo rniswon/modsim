@@ -16,13 +16,13 @@ namespace RRModelingSystem
     public partial class RunsManager : UserControl
     {
         private MyDBSqlite sqliteDB { get; set; }
-        public event ProcessMessage messageOut; // event
+        public event ProcessMessage MessageOut; // event
         private string _workSpace;
 
         public RunsManager(string MMS_db, string workSpace)
         {
             InitializeComponent();
-            sqliteDB = new MyDBSqlite(MMS_db);
+            sqliteDB = new MyDBSqlite(Path.Combine(workSpace,MMS_db));
             _workSpace = workSpace;
         }
 
@@ -64,7 +64,7 @@ namespace RRModelingSystem
             else
             {
                 btnAdaptDB.Enabled = false;
-                messageOut("El archivo SQLITE no existe");
+                MessageOut("El archivo SQLITE no existe");
             }
         }
 
@@ -93,7 +93,7 @@ namespace RRModelingSystem
         {
             using (OpenFileDialog dlg = new OpenFileDialog())
             {
-                dlg.Filter = "Control File (*.sqlite)|*.sqlite";
+                dlg.Filter = "MODSIM Output File (*.sqlite)|*.sqlite";
                 dlg.RestoreDirectory = true;
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
@@ -109,7 +109,7 @@ namespace RRModelingSystem
         {
             if (txtOutputDB.Text.Trim() == "")
             {
-                messageOut("Select a SQLite database output with the 'Browse DB' button or select a row of text box.");
+                MessageOut("Select a SQLite database output with the 'Browse DB' button or select a row of text box.");
                 btnBrowseDB.Focus();
             }
             else {
@@ -137,7 +137,7 @@ namespace RRModelingSystem
                                     {
                                         cmd1.ExecuteNonQuery();
                                     }
-                                messageOut("Field 'scenario' exists in table " + prefsTbl1.GetString(0) + " of " + nomArchivo + "OUTPUT.sqlite.");
+                                MessageOut("Field 'scenario' exists in table " + prefsTbl1.GetString(0) + " of " + nomArchivo + "OUTPUT.sqlite.");
                             }
                             catch (Exception ex) //catch block for catching errors
                             {
@@ -147,7 +147,7 @@ namespace RRModelingSystem
                                     {
                                         cmd2.ExecuteNonQuery();
                                     }
-                                messageOut("Added field 'scenario' in table " + prefsTbl1.GetString(0) + " of " + nomArchivo + "OUTPUT.sqlite.");
+                                MessageOut("Added field 'scenario' in table " + prefsTbl1.GetString(0) + " of " + nomArchivo + "OUTPUT.sqlite.");
                             }
                             sql1 = "";
                             sql1 = sql1 + @"UPDATE " + prefsTbl1.GetString(0) + " SET scenario = '" + nomArchivo + "';\n";
@@ -159,7 +159,7 @@ namespace RRModelingSystem
                     }
                     c.Close();
                 }
-                //messageOut("Updated SQLite database output.");
+                //MessageOut("Updated SQLite database output.");
             }
         }
     }

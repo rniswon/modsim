@@ -32,9 +32,9 @@ namespace RRModelingSystem
         {
             InitializeComponent();
             _MMSDatabase = MMSDatabase;
+           
 
-            
-            
+
         }
 
         private void RRPreferences_Load(object sender, EventArgs e)
@@ -56,10 +56,10 @@ namespace RRModelingSystem
             loading = true;
             MMSPrefs = new Dictionary<string, DataRow>();
             ClearPrefsText();
-            textBoxWorkspace.Text = Path.GetDirectoryName(_MMSDatabase) + "\\";
             
             prefsTbl = m_DBUtils.GetTableFromDB("SELECT * FROM MMS_Preferences", "MMS_Preferences");
 
+            string _baseMMSDatabase = "";
             foreach (DataRow dr in prefsTbl.Rows)
             {
                 MMSPrefs.Add(dr[0].ToString(), dr);
@@ -70,9 +70,9 @@ namespace RRModelingSystem
                         break;
                     case "Workspace":
                         //Get the full path
-                        string fullPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(_MMSDatabase), dr[1].ToString()));
+                        string fullPath = dr[1].ToString();
                         textBoxWorkspace.Text = fullPath.EndsWith("\\")?fullPath:fullPath + "\\";
-                        textBoxMMSDatabase.Text = _MMSDatabase.Replace(textBoxWorkspace.Text, "");
+                        Directory.SetCurrentDirectory(textBoxWorkspace.Text);
                         break;
                     case "Priority Cost":
                         textBoxPREFSRiparianCost.Text = dr[1].ToString();
@@ -86,12 +86,101 @@ namespace RRModelingSystem
                     case "Pumping File":
                         textBoxPumpingFile.Text = dr[1].ToString();
                         break;
+                    case "MMSDatabase":
+                        _baseMMSDatabase = dr[1].ToString();
+                        break;
                     default:
                         break;
                 }
             }
-            textBoxMMSDatabase.Text = _MMSDatabase.Replace(textBoxWorkspace.Text, "");
+
+            //Check for paths change
             loading = false;
+            textBoxMMSDatabase.Text = _MMSDatabase.Replace(textBoxWorkspace.Text, "");
+            if (Path.IsPathRooted(textBoxMMSDatabase.Text))
+            {
+                string[] newWorkspace = CommonString(Path.GetDirectoryName(Path.Combine(textBoxWorkspace.Text, _baseMMSDatabase)), Path.GetDirectoryName(_MMSDatabase));
+                if (newWorkspace.Length > 0 && newWorkspace[0].Length > 0)
+                {
+
+                    textBoxWorkspace.Text = Path.Combine(newWorkspace[0], newWorkspace[1]).Replace(Path.GetDirectoryName(_baseMMSDatabase), "");
+                    messageOut($"Found a new workspace path.  Updating the path to: {textBoxWorkspace.Text}");
+                    textBoxMMSDatabase.Text = _baseMMSDatabase;
+                    _baseMMSDatabase = Path.Combine(textBoxWorkspace.Text, textBoxMMSDatabase.Text);
+                }
+            }
+            if (_baseMMSDatabase!="" && Path.GetFileName(_baseMMSDatabase) != Path.GetFileName(_MMSDatabase))
+            {
+                messageOut("WARNING [Database name] Change detected preferences updated");
+                textBoxMMSDatabase.Text = textBoxMMSDatabase.Text.Replace(Path.GetFileName(_baseMMSDatabase), Path.GetFileName(_MMSDatabase));
+                
+            }
+            if (Path.Combine(textBoxWorkspace.Text, textBoxMMSDatabase.Text) != _MMSDatabase)
+            {
+                messageOut("ERROR [Procesing workspace] check and correct project paths.");
+            }
+            CheckFilesExist();
+
+           
+        }
+
+        private void CheckFilesExist(string oldWorspace = "")
+        {
+            ProcessExistFile(textBoxMODSIMFile, "MODSIM", oldWorspace);
+            ProcessExistFile(textBoxSyncingDB, "Syncing DB", oldWorspace);
+            ProcessExistFile(textBoxPumpingFile, "Pumping", oldWorspace);
+            ProcessExistFile(textBoxControlFile, "Control", oldWorspace);
+            if(oldWorspace!="")
+            {
+                textBoxMMSDatabase.Text = _MMSDatabase.Replace(textBoxWorkspace.Text, "");
+            }
+        }
+
+        private void ProcessExistFile(TextBox textBox, string v, string oldWorspace)
+        {
+            if (textBox.Text != "")
+            {
+                string filePath = Path.Combine(textBoxWorkspace.Text, textBox.Text);
+                if (oldWorspace != "")
+                {
+                    Uri oldUri = new Uri(oldWorspace);
+                    Uri newUri = new Uri(textBoxWorkspace.Text);
+                    textBox.Text = newUri.MakeRelativeUri(oldUri).ToString() + textBox.Text;
+                    textBox.Text = Path.Combine(Path.GetDirectoryName(textBox.Text), Path.GetFileName(textBox.Text));
+                    if(!textBox.Text.StartsWith(".."))
+                        textBox.Text = Path.GetFullPath(Path.Combine(textBoxWorkspace.Text, textBox.Text)).Replace(textBoxWorkspace.Text, "");
+                }
+                filePath = Path.Combine(textBoxWorkspace.Text, textBox.Text);
+
+                if (!File.Exists(filePath))
+                {
+                    messageOut($"\t ERROR [missing file] {v} file {filePath} does not exist.");
+                    textBox.BackColor = Color.Pink;
+                }
+                else
+                {
+                    textBox.BackColor = System.Drawing.SystemColors.Window;
+                }
+                    
+            }
+        }
+
+        public string[] CommonString(string left, string right)
+        {
+            List<string> result = new List<string>();
+
+            for (int i = 0; i < left.Length; i++)
+            {
+                if (right.Contains(left.Substring(i)) && !left.Substring(i).StartsWith("\\"))
+                {
+                    result.Add(right.Replace(left.Substring(i), ""));
+                    result.Add(left.Substring(i));
+                    
+                    break;
+                }
+            }
+
+            return result.Distinct().ToArray();
         }
 
         private void ClearPrefsText()
@@ -102,6 +191,7 @@ namespace RRModelingSystem
             textBoxWorkspace.Text = "";
             textBoxMMSDatabase.Text = "";
             textBoxMODSIMFile.Text = "";
+            textBoxPumpingFile.Text = "";
         }
 
         private void PrintMessage(string msg)
@@ -123,7 +213,9 @@ namespace RRModelingSystem
                 //find the relative path for workspace 
                 //Uri MMSDB = new Uri(_MMSDatabase);
                 UpdatePreferences("Workspace", textBoxWorkspace.Text);
+                Directory.SetCurrentDirectory(textBoxWorkspace.Text);
             }
+            
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -144,6 +236,7 @@ namespace RRModelingSystem
                     }
                 }
                 textBoxMODSIMFile.Text= textBoxMODSIMFile.Text.StartsWith("\\") ? textBoxMODSIMFile.Text.Substring(1) : textBoxMODSIMFile.Text;
+                CheckFilesExist();
             }
         }
 
@@ -153,6 +246,7 @@ namespace RRModelingSystem
             // Show the FolderBrowserDialog.
             folderBrowserDialog1 = new FolderBrowserDialog();
             DialogResult result = folderBrowserDialog1.ShowDialog();
+            string oldWorspace = textBoxWorkspace.Text;
             if (result == DialogResult.OK)
             {
                 if (!_MMSDatabase.StartsWith(folderBrowserDialog1.SelectedPath))
@@ -161,7 +255,9 @@ namespace RRModelingSystem
                     return;
                 }
                 textBoxWorkspace.Text = folderBrowserDialog1.SelectedPath + "\\";
-                UpdatePreferences("Workspace", textBoxWorkspace.Text);
+                //UpdatePreferences("Workspace", textBoxWorkspace.Text);
+
+                CheckFilesExist(oldWorspace);
             }
 
         }
@@ -208,6 +304,7 @@ namespace RRModelingSystem
                         textBoxSyncingDB.Text = "";
                     }
                     textBoxSyncingDB.Text = textBoxSyncingDB.Text.StartsWith("\\") ? textBoxSyncingDB.Text.Substring(1) : textBoxSyncingDB.Text;
+                    CheckFilesExist();
                 }
             }
         }
@@ -229,6 +326,7 @@ namespace RRModelingSystem
                         textBoxControlFile.Text = "";
                     }
                     textBoxControlFile.Text = textBoxControlFile.Text.StartsWith("\\") ? textBoxControlFile.Text.Substring(1) : textBoxControlFile.Text;
+                    CheckFilesExist();
                 }
             }
         }
@@ -269,6 +367,7 @@ namespace RRModelingSystem
                         textBoxPumpingFile.Text = "";
                     }
                     textBoxPumpingFile.Text = textBoxPumpingFile.Text.StartsWith("\\") ? textBoxPumpingFile.Text.Substring(1) : textBoxPumpingFile.Text;
+                    CheckFilesExist();
                 }
             }
         }
@@ -277,6 +376,12 @@ namespace RRModelingSystem
         {
             hasChanges = true;
             UpdatePreferences("Pumping File", textBoxPumpingFile.Text);
+        }
+
+        private void textBoxMMSDatabase_TextChanged(object sender, EventArgs e)
+        {
+            hasChanges = true;
+            UpdatePreferences("MMSDatabase", textBoxMMSDatabase.Text);
         }
     }
 }

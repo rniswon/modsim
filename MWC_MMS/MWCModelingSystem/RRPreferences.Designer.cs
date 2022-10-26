@@ -275,6 +275,7 @@
             this.textBoxMMSDatabase.Size = new System.Drawing.Size(433, 20);
             this.textBoxMMSDatabase.TabIndex = 0;
             this.textBoxMMSDatabase.Text = "MMS-Data\\MWC_MMSDatabase.sqlite";
+            this.textBoxMMSDatabase.TextChanged += new System.EventHandler(this.textBoxMMSDatabase_TextChanged);
             // 
             // textBoxPREFSRiparianCost
             // 

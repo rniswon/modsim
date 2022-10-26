@@ -58,16 +58,17 @@ namespace RRModelingSystem
                 groupBox2.Visible = false;
             }
 
-            _ModsimFile = ModsimFile;
-            _OpsDB = opsDB;
+            _ModsimFile = Path.Combine(workSpace,ModsimFile);
+            _OpsDB = Path.Combine(workSpace, opsDB);
             _riparianCost = riparianCost;
-            _controlFile = controlFile;
-            _rutaPumping = rutaPumping;
+            _controlFile = Path.Combine(workSpace, controlFile);
+            if(rutaPumping!="")
+                _rutaPumping = Path.Combine(workSpace, rutaPumping);
             _workSpace = workSpace;
             modelReady = false;
-            sqliteDB = new MyDBSqlite(MMS_db);
+            sqliteDB = new MyDBSqlite(Path.Combine(workSpace, MMS_db));
             sqliteDB.messageOut += ProcessMessageOut;
-            sqliteDBsync_db = new MyDBSqlite(opsDB);
+            sqliteDBsync_db = new MyDBSqlite(Path.Combine(workSpace, opsDB));
             sqliteDBsync_db.messageOut += ProcessMessageOut;
 
         }
@@ -351,21 +352,39 @@ namespace RRModelingSystem
             }
             else
             {
-                //Adding 'plug-ins'
-                if (checkBoxRiparianLogic.Checked)
+                try
                 {
-                    OnMessageRunOut("\tActivating riparian logic allocation...");
-                    allocationTool = new RiparianAllocation(ref _ActiveModel, _riparianCost);
-                    allocationTool.messageOutRun += OnMessageRunOut;
-                }
-                messageOut("\tExecuting MODSIM model...");
-                run = Modsim.RunSolver(_ActiveModel);
 
-                if (run == 0)
-                {
-                    messageOut("Sucessful completion of the MODSIM run!");
+                    //Adding 'plug-ins'
+                    if (checkBoxRiparianLogic.Checked)
+                    {
+                        OnMessageRunOut("\tActivating riparian logic allocation...");
+                        allocationTool = new RiparianAllocation(ref _ActiveModel, _riparianCost);
+                        allocationTool.messageOutRun += OnMessageRunOut;
+                    }
+                    else
+                    {
+                        _ActiveModel.OnMessage += OnMessageRunOut;
+                        _ActiveModel.OnModsimError += OnMessageRunOut;
+                    }
+                    messageOut($"\t [{Thread.CurrentThread.ManagedThreadId}] Executing MODSIM model...");
+                    OnMessageRunOut($"File: {_ActiveModel.fname}");
+                    run = Modsim.RunSolver(_ActiveModel);
+
+                    if (run == 0)
+                    {
+                        messageOut($"\t [{Thread.CurrentThread.ManagedThreadId}] Sucessful completion of the MODSIM run!");
+                    }
                 }
-                simulationStarted(_runid<0?0:_runid, "", runMsgs);
+                catch (Exception ex)
+                {
+                    OnMessageOut(ex.Message);
+                    throw;
+                }
+                finally
+                {
+                    simulationStarted(_runid < 0 ? 0 : _runid, "", runMsgs);
+                }
             }
 
             if (_runid != -1)
@@ -706,6 +725,7 @@ namespace RRModelingSystem
                 if (message.StartsWith("Done"))
                 {
                     SetStatusStripProgressValue(0);
+                    UpdateStatusMessage("Done.");
                 }
             }
         }
@@ -893,8 +913,12 @@ namespace RRModelingSystem
                             {
                                 Node ISFNode = l.to;
                                 double value = 0;
-                                if (ISFNode.m.adaDemandsM.dataTable != null && ISFNode.m.adaDemandsM.dataTable.Rows.Count > 0)
+                                if (ISFNode.m.adaDemandsM.dataTable != null)
                                 {
+                                    if (ISFNode.m.adaDemandsM.dataTable.Rows.Count == 0)
+                                    {
+                                        ISFNode.m.adaDemandsM.dataTable.Rows.Add(m_ActiveModel.TimeStepManager.dataStartDate, 0);
+                                    }
                                     if (ISFNode.m.adaDemandsM.dataTable.Rows.Count == 1)
                                     {
                                         value = double.Parse(ISFNode.m.adaDemandsM.dataTable.Rows[0][1].ToString()) / m_ActiveModel.ScaleFactor;
