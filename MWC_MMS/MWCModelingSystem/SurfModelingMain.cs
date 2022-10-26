@@ -122,7 +122,8 @@ namespace RRModelingSystem
         private void startSimulationRunWindow(int runID, string logFileName, string runFileName, bool riparianLogicOn, int riparianCost, List<string> runMgs = null)
         {
             string nodeName = "Run: " + runID.ToString();
-            SimulationRun sRWin = new SimulationRun(runID, logFileName, runFileName, riparianLogicOn, riparianCost,runMgs);
+            SimulationRun sRWin = new SimulationRun(runID, logFileName, runFileName, riparianLogicOn, riparianCost,
+                                                    Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMMSDatabase.Text),runMgs);
             sRWin.messageOut += ProcessMessage;
             if (simRunWindows.ContainsKey(nodeName))
                 simRunWindows[nodeName] = sRWin;

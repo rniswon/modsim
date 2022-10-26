@@ -34,10 +34,11 @@ namespace RRModelingSystem
         private List<string> _runMsgs;
         private long lastStatusTick = Environment.TickCount;
         private Model _ActiveModel;
+        private MyDBSqlite sqliteDB { get; set; }
 
         public event ProcessMessage messageOut; // event
 
-        public SimulationRun(int runID, string logFileName,string runFileName, bool riparianLogicOn,int riparianCost,List<string> runMgs=null)
+        public SimulationRun(int runID, string logFileName,string runFileName, bool riparianLogicOn,int riparianCost, string MMS_db, List<string> runMgs=null)
         {
             InitializeComponent();
             _fileName = logFileName;
@@ -62,8 +63,9 @@ namespace RRModelingSystem
                 _runMsgs = new List<string>();
                 toolStripStatusLabel1.Text = "Worker Initialized.";
             }
-                
 
+            sqliteDB = new MyDBSqlite(Path.Combine(MMS_db));
+            sqliteDB.messageOut += OnMessageOut;
         }
 
         private void SimulationRun_Load(object sender, EventArgs e)
@@ -126,6 +128,8 @@ namespace RRModelingSystem
                         toolStripProgressBar1.Value = 0;
                         toolStripStatusLabel1.Text = "Done.";
                     }));
+                    if (_runID != -1)
+                        UpdateRunInfo(_runID, run==0?2:3, _runFileName);
                 }
             }
             else
@@ -167,6 +171,28 @@ namespace RRModelingSystem
                 {
                     //simulationStarted(_runid < 0 ? 0 : _runid, "", _runMsgs);
                 }
+            }
+        }
+
+        private void UpdateRunInfo(int runid, int status, string basePath)
+        {
+            try
+            {
+                string sql = "SELECT * FROM MMS_RunsInfo WHERE (RunID = " + runid + ")";
+
+                DataTable runInfoDT = sqliteDB.GetTableFromDB(sql, "MMS_RunsInfo");
+
+                if (runInfoDT.Rows.Count > 0)
+                {
+                    runInfoDT.Rows[0]["SimulationStatus"] = status; // runIssues ? 3 : 2;
+                    runInfoDT.Rows[0]["LastAccess"] = DateTime.Now.ToString();
+                    runInfoDT.Rows[0]["BasePath"] = basePath.Replace(_workSpace, "");
+                    sqliteDB.UpdateTableFromDB(runInfoDT);
+                }
+            }
+            catch (Exception ex)
+            {
+                messageOut(String.Concat("ERROR: ", ex.Message));
             }
         }
 
