@@ -34,10 +34,10 @@ namespace RRModelingSystem
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.textBoxHeading = new System.Windows.Forms.TextBox();
+            this.gBoxAdaptDB = new System.Windows.Forms.GroupBox();
             this.txtOutputDB = new System.Windows.Forms.TextBox();
             this.btnAdaptDB = new System.Windows.Forms.Button();
             this.btnBrowseDB = new System.Windows.Forms.Button();
-            this.gBoxAdaptDB = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -127,6 +127,18 @@ namespace RRModelingSystem
             this.textBoxHeading.TabStop = false;
             this.textBoxHeading.Text = "Run Preferences";
             // 
+            // gBoxAdaptDB
+            // 
+            this.gBoxAdaptDB.Controls.Add(this.txtOutputDB);
+            this.gBoxAdaptDB.Controls.Add(this.btnAdaptDB);
+            this.gBoxAdaptDB.Controls.Add(this.btnBrowseDB);
+            this.gBoxAdaptDB.Location = new System.Drawing.Point(3, 3);
+            this.gBoxAdaptDB.Name = "gBoxAdaptDB";
+            this.gBoxAdaptDB.Size = new System.Drawing.Size(427, 62);
+            this.gBoxAdaptDB.TabIndex = 4;
+            this.gBoxAdaptDB.TabStop = false;
+            this.gBoxAdaptDB.Text = "Adapt SQLite DB Output";
+            // 
             // txtOutputDB
             // 
             this.txtOutputDB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -158,18 +170,6 @@ namespace RRModelingSystem
             this.btnBrowseDB.Text = "Browse DB";
             this.btnBrowseDB.UseVisualStyleBackColor = true;
             this.btnBrowseDB.Click += new System.EventHandler(this.btnBrowseDB_Click);
-            // 
-            // gBoxAdaptDB
-            // 
-            this.gBoxAdaptDB.Controls.Add(this.txtOutputDB);
-            this.gBoxAdaptDB.Controls.Add(this.btnAdaptDB);
-            this.gBoxAdaptDB.Controls.Add(this.btnBrowseDB);
-            this.gBoxAdaptDB.Location = new System.Drawing.Point(3, 3);
-            this.gBoxAdaptDB.Name = "gBoxAdaptDB";
-            this.gBoxAdaptDB.Size = new System.Drawing.Size(427, 62);
-            this.gBoxAdaptDB.TabIndex = 4;
-            this.gBoxAdaptDB.TabStop = false;
-            this.gBoxAdaptDB.Text = "Adapt SQLite DB Output";
             // 
             // RunsManager
             // 

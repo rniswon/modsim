@@ -48,6 +48,17 @@ namespace RTI.CWR.MWC_MODSIMUtils
             this.dbFile = dbfile;
         }
 
+        public bool IsColumnsExist(string tableName, string columnName)
+        {
+            string sql = $"SELECT * FROM [{tableName}] LIMIT 1";
+            DataTable dbTbl = GetTableFromDB(sql, tableName);
+            if (dbTbl.Columns.Contains(columnName))
+            {
+                return true;
+            }
+            return false;
+        }
+
         private string GetSqLiteConnectionString(string dbFileName)
         {
             SQLiteConnectionStringBuilder conn = new SQLiteConnectionStringBuilder
@@ -460,6 +471,9 @@ namespace RTI.CWR.MWC_MODSIMUtils
 	                                Notes	TEXT,
 	                                Options	TEXT,
 	                                BasePath	TEXT,
+                                    OutputDBScenario	INTEGER, 
+                                    RunType	TEXT,
+                                    RiparianON INTEGER,
 	                                PRIMARY KEY(runID AUTOINCREMENT)
                                 )";
                     ExecuteNonQuery(sql);
