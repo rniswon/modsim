@@ -45,6 +45,7 @@ namespace RRModelingSystem
         private Thread standardOutputThread;
         private List<string> runMsgs;
         private string _workSpace;
+        private bool simDatesSet;
 
         public Simulation(string ModsimFile, string opsDB, int riparianCost, string MMS_db, string controlFile, string rutaPumping, string workSpace)
         {
@@ -99,6 +100,20 @@ namespace RRModelingSystem
                 radioButtonMS_GS.Enabled = false;
                 messageOut("WARNING: MODSIM-GSFLOW Mode disabled.");
             }
+            else
+            {
+                if (File.Exists(_controlFile))
+                {
+                    MODSIM_GSFLOW_C.ControlHelper ctrHlpr = new MODSIM_GSFLOW_C.ControlHelper(_controlFile);
+                    string[] v = ctrHlpr.ReadKeyValue("start_time");
+                    dateTimePickerStart.Value = new DateTime(int.Parse(v[0]), int.Parse(v[1]), int.Parse(v[2]));
+                    v = ctrHlpr.ReadKeyValue("end_time");
+                    dateTimePickerEnd.Value = new DateTime(int.Parse(v[0]), int.Parse(v[1]), int.Parse(v[2]));
+                    messageOut("\tSimulation dates extracted from the control file.");
+                    simDatesSet = true;
+                }
+            }
+            
         }
 
 
@@ -108,28 +123,30 @@ namespace RRModelingSystem
             Cursor.Current = Cursors.WaitCursor;
             runMsgs = new List<string>();
             int runid = -1;
-            if (radioButtonMMSRun.Checked || radioButtonMS_GS.Checked)
-            {
-                string m_DateTime = DateTime.Now.ToString("yyyy-MM-dd HH:MM:ss");
-                string sql = "INSERT INTO MMS_RunsInfo (ScnName, SimulationStatus, Keyword, LastAccess, Notes, Options) VALUES ('{0}',{1},'{2}','{3}','{4}','{5}')";
-                string varTxt = BuildOptionsTxt(comboBox5.Text);
-                sql = string.Format(sql, textBoxScnName.Text, 0, comboBoxKeyword.Text, m_DateTime, richTextBoxRunNotes.Text, varTxt);
-                runid = sqliteDB.ExecuteQuery(sql);
-                messageOut($"Logged run {runid} to the MMS database under keyword {comboBoxKeyword.Text}.\n");
-                
-            }
+
+            string m_DateTime = DateTime.Now.ToString("yyyy-MM-dd HH:MM:ss");
+            string sql = "INSERT INTO MMS_RunsInfo (ScnName, SimulationStatus, Keyword, LastAccess, Notes, Options) VALUES ('{0}',{1},'{2}','{3}','{4}','{5}')";
+            if (!radioButtonMMSRun.Checked)
+                sql = "INSERT OR REPLACE INTO MMS_RunsInfo (runID, ScnName, SimulationStatus, Keyword, LastAccess, Notes, Options) VALUES (0,'{0}',{1},'{2}','{3}','{4}','{5}')";
+
+            string varTxt = BuildOptionsTxt(comboBoxPumpingScn.Text);
+            sql = string.Format(sql, textBoxScnName.Text, 0, comboBoxKeyword.Text, m_DateTime, richTextBoxRunNotes.Text, varTxt);
+            runid = sqliteDB.ExecuteQuery(sql);
+            messageOut($"Logged run {runid} to the MMS database under keyword {comboBoxKeyword.Text}.\n");
+
+
 
             //find output location and file name
-           
+
             string runFile = GetActiveMODSIMFile(comboBoxMODSIMFile.Text, _ModsimFile);
-            if (runid != -1)
+            if (runid >0)
             {
                 if (checkBoxUseInName.Checked)
                     runFile = runFile.Replace(".xy", $"_{textBoxScnName.Text}.xy");
                 runFile = runFile.Replace(".xy", $"_r{runid}.xy");
             }
 
-            if (runid != -1 && comboBoxKeyword.Text != "")
+            if (runid >0 && comboBoxKeyword.Text != "")
             {
                 string folder = Path.Combine(Path.GetDirectoryName(runFile), comboBoxKeyword.Text);
                 if (!Directory.Exists(folder))
@@ -138,6 +155,7 @@ namespace RRModelingSystem
             }
 
             //string runFile = "";
+            string runControlFile = _controlFile;
             try
             {
                 if (m_ActiveModel == null)
@@ -150,6 +168,11 @@ namespace RRModelingSystem
                 //Setting ISF Targets
                 OnMessageRunOut("\tSetting ISF targets...");
                 AdjustISFTargets(ref m_ActiveModel);
+
+                m_ActiveModel.TimeStepManager.startingDate = dateTimePickerStart.Value;
+                m_ActiveModel.TimeStepManager.endingDate = dateTimePickerEnd.Value;
+                m_ActiveModel.TimeStepManager.UpdateTimeStepsInfo(m_ActiveModel.timeStep); // redo the time steps info in case time step or dataend date changed.
+                OnMessageRunOut("\tSetting simulation start and end dates...");
 
                 OnMessageRunOut("\tSaving changes to active network...");
                 ////find output location and file name
@@ -170,6 +193,81 @@ namespace RRModelingSystem
                 //}
                 XYFileWriter.Write(m_ActiveModel, runFile);
 
+                //Processing GSFLOW Input files
+                if (radioButtonMS_GS.Checked)
+                {
+
+                    //radioButtonAgPckge
+                    if (radioButtonWRIMS.Checked)
+                    {
+                        ProcessDB("1");
+                    }
+                    if (radioButtonAgPckge.Checked)
+                    {
+                        ProcessDB("2");
+                    }
+
+                    buttonExecuteModel.BeginInvoke((Action)(() =>
+                    {
+                        buttonExecuteModel.Visible = false;
+                    }));
+
+                    toolStripStatusLabel1.Text = "MODSIM-GSFLOW Simulation in progress ...";
+                    messageOut("\tActivating MODSIM-GSFLOW simulation mode...");
+
+                    //ProcessPumpingFactor(RRPreferences.rutaPumping, Convert.ToDouble(txtFactor.Text), checkFactor.Checked);
+
+                    //// TODO: Need to update the xyfile in the control file.
+                    MODSIM_GSFLOW_C.ControlHelper ctrHlpr = new MODSIM_GSFLOW_C.ControlHelper(_controlFile);
+                    ctrHlpr.ReplaceKeyRelativePath("xyFileName", new string[] { runFile });
+                    ctrHlpr.ReplaceKeyRelativePath("mappingFileName", new string[] { _OpsDB });
+                    ctrHlpr.ReplaceKeyValue("start_time", new string[] { dateTimePickerStart.Value.Year.ToString(),
+                                                                                dateTimePickerStart.Value.Month.ToString(),
+                                                                                dateTimePickerStart.Value.Day.ToString(),"0","0","0"  });
+                    ctrHlpr.ReplaceKeyValue("end_time", new string[] { dateTimePickerEnd.Value.Year.ToString(),
+                                                                                dateTimePickerEnd.Value.Month.ToString(),
+                                                                                dateTimePickerEnd.Value.Day.ToString(),"0","0","0" });
+
+
+
+                    string[] namName = ctrHlpr.ReadKeyValue("modflow_name");
+                    string namPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(_controlFile), namName[0]));
+                    MODSIM_GSFLOW_C.ControlHelper namHlpr = new MODSIM_GSFLOW_C.ControlHelper(namPath);
+                    //Process pumping file with user factors - Only done if in MS-GSF mode
+                    if (_rutaPumping != null && _rutaPumping != "")
+                    {
+                        string[] wellVals = namHlpr.ReadLineWithKeyValue("WEL");
+                        string outputWELFile = Path.Combine(Path.GetDirectoryName(_controlFile), wellVals[2]);
+                        if (runid > 0)
+                            outputWELFile = outputWELFile.Replace("SRP_mf_strm_dpl_v0_run.wel", $"SRP_mf_strm_dpl_v0_run{runid}.wel");
+                        if (_rutaPumping == outputWELFile)
+                        {
+                            messageOut("The output .wel file is the same than the seed.  They should be different to avoid overwritting the seed pumping file.");
+                            throw new Exception("The seed.wel file would be overwritten - simulation stopped.");
+                        }
+                        ProcessPumpingFactor(checkFactor.Checked, Convert.ToDouble(txtFactor.Text), comboBoxPumpingScn.Text, outputWELFile);
+                        namHlpr.ReplaceString("SRP_mf_strm_dpl_v0_run.wel", $"SRP_mf_strm_dpl_v0_run{runid}.wel");
+                    }
+
+                    //Set ouput directories
+                    if (runid > 0)
+                    {
+                        ctrHlpr.ReplaceString("\\output\\", $"\\output_r{runid}\\");
+
+                        namHlpr.ReplaceString("\\output\\", $"\\output_r{runid}\\");
+                        namHlpr.SaveChangesToFile(namPath.Replace(".nam", $"r{runid}.nam"));
+                        ctrHlpr.ReplaceKeyValue("modflow_name", new string[] { namPath.Replace(".nam", $"r{runid}.nam") });
+                        runControlFile = _controlFile.Replace(".control", $"r{runid}.control");
+                        ctrHlpr.SaveChangesToFile(runControlFile);
+                    }
+                    else
+                    {
+                        //no changes in the output folder of base files
+                        ctrHlpr.SaveChangesToFile();  //save changes to the base control
+                        namHlpr.SaveChangesToFile();
+                    }
+                }
+
             }
             catch (Exception ex)
             {
@@ -182,12 +280,20 @@ namespace RRModelingSystem
                 bgworker.RunWorkerAsync(new object[]
                                         { runFile,
                                           //radioButtonMMSRun.Checked,
-                                          comboBox5.Text,
+                                          comboBoxPumpingScn.Text,
                                           runid,
-                                          m_ActiveModel.Clone()});
+                                          m_ActiveModel.Clone(),
+                                          runControlFile});
             }
             //Reload active network
-            comboBoxMODSIMFile_SelectedIndexChanged(null, null);
+            if (radioButtonMMSRun.Checked)
+                comboBoxMODSIMFile_SelectedIndexChanged(null, null);
+            else
+            {
+                comboBoxMODSIMFile.Text = "";
+                m_ActiveModel = null;
+            }
+                
             Cursor.Current = Cursors.Default;
 
             //prefsTbl = m_DBUtils.GetTableFromDB("SELECT * FROM MMS_Preferences", "MMS_Preferences");
@@ -208,6 +314,7 @@ namespace RRModelingSystem
             //string _comboBoxKeyword = args[3].ToString();
             int _runid = int.Parse(args[2].ToString());
             Model _ActiveModel = (Model)args[3];
+            string runControlFile = args[4].ToString();
             _ActiveModel.fname = _runFile;
 
             //Cursor.Current = Cursors.WaitCursor;
@@ -268,33 +375,82 @@ namespace RRModelingSystem
             {
                 try
                 {
-                    //Process pumping file with user factors - Only done if in MS-GSF mode
-                    if(_rutaPumping!="")
-                        ProcessPumpingFactor(checkFactor.Checked, Convert.ToDouble(txtFactor.Text), _comboPumpingText);
-                    //radioButtonAgPckge
-                    if (radioButtonWRIMS.Checked)
-                    {
-                        ProcessDB("1");
-                    }
-                    if (radioButtonAgPckge.Checked)
-                    {
-                        ProcessDB("2");
-                    }
+                    //Start the run execution/monitoring control
+                    string logFileName = Path.Combine(Path.GetDirectoryName(runControlFile), $"MMS_Run{_runid}Log.txt");
+                    _runFile = runControlFile;
+                    simulationStarted(_runid,logFileName, _runFile, checkBoxRiparianLogic.Checked,_riparianCost, null);
 
-                    buttonExecuteModel.BeginInvoke((Action)(() =>
-                    {
-                        buttonExecuteModel.Visible = false;
-                    }));
+                    ////radioButtonAgPckge
+                    //if (radioButtonWRIMS.Checked)
+                    //{
+                    //    ProcessDB("1");
+                    //}
+                    //if (radioButtonAgPckge.Checked)
+                    //{
+                    //    ProcessDB("2");
+                    //}
 
-                    toolStripStatusLabel1.Text = "MODSIM-GSFLOW Simulation in progress ...";
-                    messageOut("\tActivating MODSIM-GSFLOW simulation mode...");
+                    //buttonExecuteModel.BeginInvoke((Action)(() =>
+                    //{
+                    //    buttonExecuteModel.Visible = false;
+                    //}));
 
-                    //ProcessPumpingFactor(RRPreferences.rutaPumping, Convert.ToDouble(txtFactor.Text), checkFactor.Checked);
+                    //toolStripStatusLabel1.Text = "MODSIM-GSFLOW Simulation in progress ...";
+                    //messageOut("\tActivating MODSIM-GSFLOW simulation mode...");
 
-                    //// TODO: Need to update the xyfile in the control file.
-                    MODSIM_GSFLOW_C.ControlHelper ctrHlpr = new MODSIM_GSFLOW_C.ControlHelper(_controlFile);
-                    ctrHlpr.ReplaceKeyRelativePath("xyFileName", new string[] { _runFile });
-                    ctrHlpr.ReplaceKeyRelativePath("mappingFileName", new string[] { _OpsDB });
+                    ////ProcessPumpingFactor(RRPreferences.rutaPumping, Convert.ToDouble(txtFactor.Text), checkFactor.Checked);
+
+                    ////// TODO: Need to update the xyfile in the control file.
+                    //MODSIM_GSFLOW_C.ControlHelper ctrHlpr = new MODSIM_GSFLOW_C.ControlHelper(_controlFile);
+                    //ctrHlpr.ReplaceKeyRelativePath("xyFileName", new string[] { _runFile });
+                    //ctrHlpr.ReplaceKeyRelativePath("mappingFileName", new string[] { _OpsDB });
+                    //ctrHlpr.ReplaceKeyValue("start_time", new string[] { dateTimePickerStart.Value.Year.ToString(), 
+                    //                                                            dateTimePickerStart.Value.Month.ToString(), 
+                    //                                                            dateTimePickerStart.Value.Day.ToString(),"0","0","0"  });
+                    //ctrHlpr.ReplaceKeyValue("end_time", new string[] { dateTimePickerEnd.Value.Year.ToString(),
+                    //                                                            dateTimePickerEnd.Value.Month.ToString(),
+                    //                                                            dateTimePickerEnd.Value.Day.ToString(),"0","0","0" });
+
+
+
+                    //string[] namName = ctrHlpr.ReadKeyValue("modflow_name");
+                    //string namPath = Path.Combine(Path.GetDirectoryName(_controlFile), namName[0]);
+                    //MODSIM_GSFLOW_C.ControlHelper namHlpr = new MODSIM_GSFLOW_C.ControlHelper(namPath);
+                    ////Process pumping file with user factors - Only done if in MS-GSF mode
+                    //if (_rutaPumping != null && _rutaPumping != "")
+                    //{
+                    //    string[] wellVals = namHlpr.ReadLineWithKeyValue("WEL");
+                    //    string outputWELFile = Path.Combine(Path.GetDirectoryName(_controlFile), wellVals[2]);
+                    //    if(_runid>0)
+                    //        outputWELFile = outputWELFile.Replace("SRP_mf_strm_dpl_v0_run.wel",$"SRP_mf_strm_dpl_v0_run{_runid}.wel");
+                    //    if(_comboPumpingText==outputWELFile)
+                    //    {
+                    //        messageOut("The output .wel file is the same than the seed.  They should be different to avoid overwritting the seed pumping file.");
+                    //        throw new Exception("The seed.wel file would be overwritten - simulation stopped.");
+                    //    }
+                    //    ProcessPumpingFactor(checkFactor.Checked, Convert.ToDouble(txtFactor.Text), _comboPumpingText,outputWELFile);
+                    //    namHlpr.ReplaceString("SRP_mf_strm_dpl_v0_run.wel", $"SRP_mf_strm_dpl_v0_run{_runid}.wel");
+                    //}
+
+                    ////Set ouput directories
+                    //string runControlFile = _controlFile;
+                    //if (_runid > 0)
+                    //{
+                    //    ctrHlpr.ReplaceString("\\output\\", $"\\output_r{_runid}\\");
+
+                    //    namHlpr.ReplaceString("\\output\\", $"\\output_r{_runid}\\");
+                    //    namHlpr.SaveChangesToFile(namPath.Replace(".nam", $"r{_runid}.nam"));
+                    //    ctrHlpr.ReplaceKeyValue("modflow_name", new string[] { namPath.Replace(".nam", $"r{_runid}.nam") });
+                    //    runControlFile = _controlFile.Replace(".control", $"r{_runid}.control");
+                    //    ctrHlpr.SaveChangesToFile(runControlFile);
+                    //}
+                    //else
+                    //{
+                    //    //no changes in the output folder of base files
+                    //    ctrHlpr.SaveChangesToFile();  //save changes to the base control
+                    //    namHlpr.SaveChangesToFile();
+                    //}
+
 
                     //messageOut(Directory.GetCurrentDirectory());
                     //Directory.SetCurrentDirectory( Path.GetDirectoryName(_controlFile));
@@ -308,24 +464,24 @@ namespace RRModelingSystem
 
                     //sSurfGWModule.InitializeRUN(ref m_ActiveModel);
 
-                    process = new Process();
-                    process.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "MWC_MS_GSF_Run.exe";
-                    string riparianArgs = checkBoxRiparianLogic.Checked ? $"-RiparianON {_riparianCost} " : "";
-                    process.StartInfo.Arguments = riparianArgs + "\"" + Path.GetFileName(_controlFile) + "\"";
-                    process.StartInfo.WorkingDirectory = Path.GetDirectoryName(_controlFile);
-                    process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
-                    process.StartInfo.UseShellExecute = false;
-                    process.StartInfo.RedirectStandardOutput = true;
-                    toolStripProgressBar1.GetCurrentParent().BeginInvoke((Action)(() =>
-                    {
-                        toolStripProgressBar1.Value = 50;
-                    }));
-                    process.Start();
-                    _standardOutput = process.StandardOutput;
-                    standardOutputThread = startThread("StandardOutput", Path.Combine(Path.GetDirectoryName(_controlFile), $"MMS_Run{_runid}Log.txt"));
-                    simulationStarted(_runid, Path.Combine(Path.GetDirectoryName(_controlFile), $"MMS_Run{_runid}Log.txt"), null);
-                    process.WaitForExit();
-                    run = 0;
+                    //process = new Process();
+                    //process.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "MWC_MS_GSF_Run.exe";
+                    //string riparianArgs = checkBoxRiparianLogic.Checked ? $"-RiparianON {_riparianCost} " : "";
+                    //process.StartInfo.Arguments = riparianArgs + "\"" + Path.GetFileName(runControlFile) + "\"";
+                    //process.StartInfo.WorkingDirectory = Path.GetDirectoryName(runControlFile);
+                    //process.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;
+                    //process.StartInfo.UseShellExecute = false;
+                    //process.StartInfo.RedirectStandardOutput = true;
+                    //toolStripProgressBar1.GetCurrentParent().BeginInvoke((Action)(() =>
+                    //{
+                    //    toolStripProgressBar1.Value = 50;
+                    //}));
+                    //process.Start();
+                    //_standardOutput = process.StandardOutput;
+                    //standardOutputThread = startThread("StandardOutput", Path.Combine(Path.GetDirectoryName(runControlFile), $"MMS_Run{_runid}Log.txt"));
+                    //simulationStarted(_runid, Path.Combine(Path.GetDirectoryName(runControlFile), $"MMS_Run{_runid}Log.txt"), null);
+                    //process.WaitForExit();
+                    //run = 0;
                 }
                 catch (Exception ex)
                 {
@@ -352,29 +508,31 @@ namespace RRModelingSystem
             }
             else
             {
+                
                 try
                 {
+                    simulationStarted(_runid, "", _runFile, checkBoxRiparianLogic.Checked, _riparianCost, null);
 
-                    //Adding 'plug-ins'
-                    if (checkBoxRiparianLogic.Checked)
-                    {
-                        OnMessageRunOut("\tActivating riparian logic allocation...");
-                        allocationTool = new RiparianAllocation(ref _ActiveModel, _riparianCost);
-                        allocationTool.messageOutRun += OnMessageRunOut;
-                    }
-                    else
-                    {
-                        _ActiveModel.OnMessage += OnMessageRunOut;
-                        _ActiveModel.OnModsimError += OnMessageRunOut;
-                    }
-                    messageOut($"\t [{Thread.CurrentThread.ManagedThreadId}] Executing MODSIM model...");
-                    OnMessageRunOut($"File: {_ActiveModel.fname}");
-                    run = Modsim.RunSolver(_ActiveModel);
+                    ////Adding 'plug-ins'
+                    //if (checkBoxRiparianLogic.Checked)
+                    //{
+                    //    OnMessageRunOut("\tActivating riparian logic allocation...");
+                    //    allocationTool = new RiparianAllocation(ref _ActiveModel, _riparianCost);
+                    //    allocationTool.messageOutRun += OnMessageRunOut;
+                    //}
+                    //else
+                    //{
+                    //    _ActiveModel.OnMessage += OnMessageRunOut;
+                    //    _ActiveModel.OnModsimError += OnMessageRunOut;
+                    //}
+                    //messageOut($"\t [{Thread.CurrentThread.ManagedThreadId}] Executing MODSIM model...");
+                    //OnMessageRunOut($"File: {_ActiveModel.fname}");
+                    //run = Modsim.RunSolver(_ActiveModel);
 
-                    if (run == 0)
-                    {
-                        messageOut($"\t [{Thread.CurrentThread.ManagedThreadId}] Sucessful completion of the MODSIM run!");
-                    }
+                    //if (run == 0)
+                    //{
+                    //    messageOut($"\t [{Thread.CurrentThread.ManagedThreadId}] Sucessful completion of the MODSIM run!");
+                    //}
                 }
                 catch (Exception ex)
                 {
@@ -383,66 +541,67 @@ namespace RRModelingSystem
                 }
                 finally
                 {
-                    simulationStarted(_runid < 0 ? 0 : _runid, "", runMsgs);
+                    //simulationStarted(_runid < 0 ? 0 : _runid, "", runMsgs);
                 }
             }
 
             if (_runid != -1)
-                UpdateRunInfo(_runid<0?0:_runid, run == 0 ? false : true, _runFile);
+                UpdateRunInfo(_runid, 1, _runFile);
+            messageOut($"\n\t Simulation worker for run {_runid} initialized on thread [{Thread.CurrentThread.ManagedThreadId}].");
 
             ////Reload active network
             //comboBoxMODSIMFile_SelectedIndexChanged(null, null);
             //Cursor.Current = Cursors.Default;
         }
 
-        /// <summary>Start a thread.</summary>
-        /// <param name="startInfo">start information for this thread</param>
-        /// <param name="name">name of the thread</param>
-        /// <returns>thread object</returns>
-        private static Thread startThread(string name, string parameter)
+        ///// <summary>Start a thread.</summary>
+        ///// <param name="startInfo">start information for this thread</param>
+        ///// <param name="name">name of the thread</param>
+        ///// <returns>thread object</returns>
+        //private static Thread startThread(string name, string parameter)
+        //{
+        //    //Thread t = new Thread(startInfo);
+        //    var t = new Thread(() => writeStandardOutput(parameter));
+        //    t.IsBackground = true;
+        //    t.Name = name;
+        //    t.Start();
+        //    return t;
+        //}
+
+        ///// <summary>Thread which outputs standard output from the running executable to the appropriate file.</summary>
+        //private static void writeStandardOutput(string logFileName)
+        //{
+        //    string _standardOutputFileName = logFileName;
+        //    using (StreamWriter writer = File.CreateText(_standardOutputFileName))
+        //    using (StreamReader reader = _standardOutput)
+        //    {
+        //        writer.AutoFlush = true;
+
+        //        for (; ; )
+        //        {
+        //            string textLine = reader.ReadLine();
+
+        //            if (textLine == null)
+        //                break;
+
+        //            writer.WriteLine(textLine);
+        //        }
+        //    }
+
+        //    if (File.Exists(_standardOutputFileName))
+        //    {
+        //        FileInfo info = new FileInfo(_standardOutputFileName);
+
+        //        // if the error info is empty or just contains eof etc.
+
+        //        if (info.Length < 4)
+        //            info.Delete();
+        //    }
+        //}
+
+        void ProcessDB(string opcion)
         {
-            //Thread t = new Thread(startInfo);
-            var t = new Thread(() => writeStandardOutput(parameter));
-            t.IsBackground = true;
-            t.Name = name;
-            t.Start();
-            return t;
-        }
-
-        /// <summary>Thread which outputs standard output from the running executable to the appropriate file.</summary>
-        private static void writeStandardOutput(string logFileName)
-        {
-            string _standardOutputFileName = logFileName;
-            using (StreamWriter writer = File.CreateText(_standardOutputFileName))
-            using (StreamReader reader = _standardOutput)
-            {
-                writer.AutoFlush = true;
-
-                for (; ; )
-                {
-                    string textLine = reader.ReadLine();
-
-                    if (textLine == null)
-                        break;
-
-                    writer.WriteLine(textLine);
-                }
-            }
-
-            if (File.Exists(_standardOutputFileName))
-            {
-                FileInfo info = new FileInfo(_standardOutputFileName);
-
-                // if the error info is empty or just contains eof etc.
-
-                if (info.Length < 4)
-                    info.Delete();
-            }
-        }
-
-            void ProcessDB(string opcion)
-            {
-                string sql;
+            string sql;
             if (opcion == "1")
             {
                 sql = "UPDATE [MS-GSF_mapping_Info] SET AgDem = 0 WHERE AssocDem Is not null";
@@ -454,7 +613,8 @@ namespace RRModelingSystem
                 sqliteDBsync_db.ExecuteQuery(sql);
             }
         }
-        private void ProcessPumpingFactor(Boolean aplicafactor, double factor, string tipo)
+
+        private void ProcessPumpingFactor(Boolean aplicafactor, double factor, string tipo, string outputWELFile)
         {
             int line = 0;
             string lineOut;
@@ -486,7 +646,7 @@ namespace RRModelingSystem
             }
             if (aplicafactor)
             {
-                StreamWriter sw = new StreamWriter(_rutaPumping.Replace(".wel", "_run" + ".wel"));
+                StreamWriter sw = new StreamWriter(outputWELFile);
                 using (StreamReader sr = File.OpenText(_rutaPumping))
                 {
                     while ((lineIn = sr.ReadLine()) != null)
@@ -566,19 +726,19 @@ namespace RRModelingSystem
                 }
 
                 sw.Close();
-                messageOut($"Pumping factor applied in file {_rutaPumping.Replace(".wel", "_run" + ".wel")}");
+                messageOut($"Pumping factor applied in file {outputWELFile}");
             }
             else
             {
-                File.Copy(_rutaPumping, _rutaPumping.Replace(".wel", "_run" + ".wel"),true);
-                messageOut($"Copying base file of pumping flows {_rutaPumping.Replace(".wel", "_run" + ".wel")}");
+                File.Copy(_rutaPumping, outputWELFile, true);
+                messageOut($"Copying base file of pumping flows {outputWELFile}");
             }
         }
         /// <summary>
         /// update run status in project database
         /// </summary>
         /// <param name="runid"></param>
-        private void UpdateRunInfo(int runid, bool runIssues,string basePath)
+        private void UpdateRunInfo(int runid, int status,string basePath)
         {
             try
             {
@@ -588,7 +748,7 @@ namespace RRModelingSystem
 
                 if (runInfoDT.Rows.Count > 0)
                 {
-                    runInfoDT.Rows[0]["SimulationStatus"] = runIssues ? 3 : 2;
+                    runInfoDT.Rows[0]["SimulationStatus"] = status; // runIssues ? 3 : 2;
                     runInfoDT.Rows[0]["LastAccess"] = DateTime.Now.ToString();
                     runInfoDT.Rows[0]["BasePath"] = basePath.Replace(_workSpace, "");
                     sqliteDB.UpdateTableFromDB(runInfoDT);
@@ -731,6 +891,7 @@ namespace RRModelingSystem
         }
 
         private long lastStatusTick = Environment.TickCount;
+        
         public void UpdateStatusMessage(string message, bool runError = false)
         {
             //If a model is running limit message display to once per milisecond
@@ -782,29 +943,24 @@ namespace RRModelingSystem
             }
         }
 
-        public void RunCommandCom(string command, string arguments, bool permanent, string workingDir)
-        {
-            // runs model in the command line
-            using (Process p = new Process())
-            {
-                ProcessStartInfo pi = new ProcessStartInfo();
-                pi.Arguments = " " + (permanent ? "/K" : "/C") + " " + command + " " + arguments;
-                pi.FileName = "cmd.exe";
-                pi.WorkingDirectory = workingDir;
-                p.StartInfo = pi;
-                //pi.UseShellExecute = true;
-                p.Start();
+        //public void RunCommandCom(string command, string arguments, bool permanent, string workingDir)
+        //{
+        //    // runs model in the command line
+        //    using (Process p = new Process())
+        //    {
+        //        ProcessStartInfo pi = new ProcessStartInfo();
+        //        pi.Arguments = " " + (permanent ? "/K" : "/C") + " " + command + " " + arguments;
+        //        pi.FileName = "cmd.exe";
+        //        pi.WorkingDirectory = workingDir;
+        //        p.StartInfo = pi;
+        //        //pi.UseShellExecute = true;
+        //        p.Start();
 
-                // when window closes, the thread will continue 
-                //p.WaitForExit();
-                //p.Close();
-            }
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-
-        }
+        //        // when window closes, the thread will continue 
+        //        //p.WaitForExit();
+        //        //p.Close();
+        //    }
+        //}
 
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
@@ -975,6 +1131,13 @@ namespace RRModelingSystem
                 {
                     labelActFile.Text = "Active File: " + m_FileName;
                 }));
+
+                if(!simDatesSet)
+                {
+                    dateTimePickerStart.Value = m_ActiveModel.TimeStepManager.startingDate;
+                    dateTimePickerEnd.Value = m_ActiveModel.TimeStepManager.endingDate;
+                    messageOut("\tSimulation dates set from MODSIM active file.");
+                }
 
                 modelReady = true;
             }
@@ -1203,7 +1366,7 @@ namespace RRModelingSystem
 
         private void checkFactor_CheckStateChanged(object sender, EventArgs e)
         {
-            comboBox5.Visible = checkFactor.Checked;
+            comboBoxPumpingScn.Visible = checkFactor.Checked;
             txtFactor.Visible = checkFactor.Checked;
         }
 
@@ -1219,6 +1382,11 @@ namespace RRModelingSystem
             }
 
 
+        }
+
+        private void radioButtonGSFLOWRun_CheckedChanged(object sender, EventArgs e)
+        {
+            checkBoxRiparianLogic.Checked = !radioButtonGSFLOWRun.Checked;
         }
     }
 }

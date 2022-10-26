@@ -47,7 +47,7 @@
             this.checkBoxOutdoorDomON = new System.Windows.Forms.CheckBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.txtFactor = new System.Windows.Forms.TextBox();
-            this.comboBox5 = new System.Windows.Forms.ComboBox();
+            this.comboBoxPumpingScn = new System.Windows.Forms.ComboBox();
             this.checkFactor = new System.Windows.Forms.CheckBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
@@ -77,6 +77,11 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.groupBoxDataDates = new System.Windows.Forms.GroupBox();
+            this.dateTimePickerEnd = new System.Windows.Forms.DateTimePicker();
+            this.label8 = new System.Windows.Forms.Label();
+            this.dateTimePickerStart = new System.Windows.Forms.DateTimePicker();
+            this.radioButtonGSFLOWRun = new System.Windows.Forms.RadioButton();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -93,13 +98,14 @@
             this.groupBox6.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxStatus)).BeginInit();
             this.statusStrip1.SuspendLayout();
+            this.groupBoxDataDates.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonExecuteModel
             // 
             this.buttonExecuteModel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonExecuteModel.Enabled = false;
-            this.buttonExecuteModel.Location = new System.Drawing.Point(475, 245);
+            this.buttonExecuteModel.Location = new System.Drawing.Point(461, 343);
             this.buttonExecuteModel.Name = "buttonExecuteModel";
             this.buttonExecuteModel.Size = new System.Drawing.Size(98, 23);
             this.buttonExecuteModel.TabIndex = 6;
@@ -122,7 +128,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxScnName.Location = new System.Drawing.Point(101, 10);
             this.textBoxScnName.Name = "textBoxScnName";
-            this.textBoxScnName.Size = new System.Drawing.Size(184, 20);
+            this.textBoxScnName.Size = new System.Drawing.Size(154, 20);
             this.textBoxScnName.TabIndex = 8;
             // 
             // groupBox1
@@ -290,9 +296,9 @@
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.Controls.Add(this.txtFactor);
-            this.groupBox2.Controls.Add(this.comboBox5);
+            this.groupBox2.Controls.Add(this.comboBoxPumpingScn);
             this.groupBox2.Controls.Add(this.checkFactor);
-            this.groupBox2.Location = new System.Drawing.Point(6, 113);
+            this.groupBox2.Location = new System.Drawing.Point(30, 137);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(208, 91);
             this.groupBox2.TabIndex = 10;
@@ -312,12 +318,12 @@
             this.txtFactor.Visible = false;
             this.txtFactor.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
             // 
-            // comboBox5
+            // comboBoxPumpingScn
             // 
-            this.comboBox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.comboBoxPumpingScn.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox5.FormattingEnabled = true;
-            this.comboBox5.Items.AddRange(new object[] {
+            this.comboBoxPumpingScn.FormattingEnabled = true;
+            this.comboBoxPumpingScn.Items.AddRange(new object[] {
             "Multiplier factor in agricultural groundwater pumping",
             "Multiplier factor in municipal and industrial groundwater pumping",
             "Multiplier factor in all groundwater pumping",
@@ -326,11 +332,11 @@
             "Multiplier factor in indoor residential groundwater pumping",
             "Multiplier factor transfer of agricultural groundwater pumping to residential gro" +
                 "undwater pumping"});
-            this.comboBox5.Location = new System.Drawing.Point(6, 40);
-            this.comboBox5.Name = "comboBox5";
-            this.comboBox5.Size = new System.Drawing.Size(196, 21);
-            this.comboBox5.TabIndex = 0;
-            this.comboBox5.Visible = false;
+            this.comboBoxPumpingScn.Location = new System.Drawing.Point(6, 40);
+            this.comboBoxPumpingScn.Name = "comboBoxPumpingScn";
+            this.comboBoxPumpingScn.Size = new System.Drawing.Size(196, 21);
+            this.comboBoxPumpingScn.TabIndex = 0;
+            this.comboBoxPumpingScn.Visible = false;
             // 
             // checkFactor
             // 
@@ -402,6 +408,7 @@
             this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox4.Controls.Add(this.groupBoxDataDates);
             this.groupBox4.Controls.Add(this.buttonExecuteModel);
             this.groupBox4.Controls.Add(this.groupBox9);
             this.groupBox4.Controls.Add(this.checkBoxRiparianLogic);
@@ -425,7 +432,7 @@
             this.groupBox9.Controls.Add(this.radioButtonRunActive);
             this.groupBox9.Location = new System.Drawing.Point(6, 15);
             this.groupBox9.Name = "groupBox9";
-            this.groupBox9.Size = new System.Drawing.Size(394, 372);
+            this.groupBox9.Size = new System.Drawing.Size(364, 372);
             this.groupBox9.TabIndex = 4;
             this.groupBox9.TabStop = false;
             this.groupBox9.Text = "Run Type";
@@ -445,7 +452,7 @@
             this.groupBoxRunInfo.Enabled = false;
             this.groupBoxRunInfo.Location = new System.Drawing.Point(6, 38);
             this.groupBoxRunInfo.Name = "groupBoxRunInfo";
-            this.groupBoxRunInfo.Size = new System.Drawing.Size(382, 328);
+            this.groupBoxRunInfo.Size = new System.Drawing.Size(352, 328);
             this.groupBoxRunInfo.TabIndex = 21;
             this.groupBoxRunInfo.TabStop = false;
             this.groupBoxRunInfo.Text = "Run Info";
@@ -454,7 +461,9 @@
             // 
             this.checkBoxUseInName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.checkBoxUseInName.AutoSize = true;
-            this.checkBoxUseInName.Location = new System.Drawing.Point(291, 12);
+            this.checkBoxUseInName.Checked = true;
+            this.checkBoxUseInName.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxUseInName.Location = new System.Drawing.Point(261, 12);
             this.checkBoxUseInName.Name = "checkBoxUseInName";
             this.checkBoxUseInName.Size = new System.Drawing.Size(85, 17);
             this.checkBoxUseInName.TabIndex = 20;
@@ -487,7 +496,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.richTextBoxRunNotes.Location = new System.Drawing.Point(101, 33);
             this.richTextBoxRunNotes.Name = "richTextBoxRunNotes";
-            this.richTextBoxRunNotes.Size = new System.Drawing.Size(275, 258);
+            this.richTextBoxRunNotes.Size = new System.Drawing.Size(245, 258);
             this.richTextBoxRunNotes.TabIndex = 17;
             this.richTextBoxRunNotes.Text = "";
             // 
@@ -498,7 +507,7 @@
             this.comboBoxKeyword.FormattingEnabled = true;
             this.comboBoxKeyword.Location = new System.Drawing.Point(101, 297);
             this.comboBoxKeyword.Name = "comboBoxKeyword";
-            this.comboBoxKeyword.Size = new System.Drawing.Size(277, 21);
+            this.comboBoxKeyword.Size = new System.Drawing.Size(247, 21);
             this.comboBoxKeyword.TabIndex = 18;
             // 
             // radioButtonMMSRun
@@ -531,7 +540,7 @@
             this.checkBoxRiparianLogic.AutoSize = true;
             this.checkBoxRiparianLogic.Checked = true;
             this.checkBoxRiparianLogic.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxRiparianLogic.Location = new System.Drawing.Point(406, 15);
+            this.checkBoxRiparianLogic.Location = new System.Drawing.Point(385, 307);
             this.checkBoxRiparianLogic.Name = "checkBoxRiparianLogic";
             this.checkBoxRiparianLogic.Size = new System.Drawing.Size(179, 17);
             this.checkBoxRiparianLogic.TabIndex = 3;
@@ -541,13 +550,14 @@
             // groupBox5
             // 
             this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox5.Controls.Add(this.radioButtonGSFLOWRun);
             this.groupBox5.Controls.Add(this.groupBox2);
             this.groupBox5.Controls.Add(this.radioButtonMS_GS);
             this.groupBox5.Controls.Add(this.radioButtonMODSIMOnly);
             this.groupBox5.Controls.Add(this.groupBox6);
-            this.groupBox5.Location = new System.Drawing.Point(406, 34);
+            this.groupBox5.Location = new System.Drawing.Point(382, 70);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(220, 209);
+            this.groupBox5.Size = new System.Drawing.Size(244, 237);
             this.groupBox5.TabIndex = 1;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Simulation Mode";
@@ -555,7 +565,7 @@
             // radioButtonMS_GS
             // 
             this.radioButtonMS_GS.AutoSize = true;
-            this.radioButtonMS_GS.Location = new System.Drawing.Point(19, 32);
+            this.radioButtonMS_GS.Location = new System.Drawing.Point(19, 48);
             this.radioButtonMS_GS.Name = "radioButtonMS_GS";
             this.radioButtonMS_GS.Size = new System.Drawing.Size(160, 17);
             this.radioButtonMS_GS.TabIndex = 1;
@@ -581,7 +591,7 @@
             this.groupBox6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox6.Controls.Add(this.radioButtonAgPckge);
             this.groupBox6.Controls.Add(this.radioButtonWRIMS);
-            this.groupBox6.Location = new System.Drawing.Point(6, 55);
+            this.groupBox6.Location = new System.Drawing.Point(30, 79);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Size = new System.Drawing.Size(166, 55);
             this.groupBox6.TabIndex = 2;
@@ -678,6 +688,61 @@
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(77, 17);
             this.toolStripStatusLabel1.Text = "Status: Ready";
             // 
+            // groupBoxDataDates
+            // 
+            this.groupBoxDataDates.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBoxDataDates.Controls.Add(this.dateTimePickerEnd);
+            this.groupBoxDataDates.Controls.Add(this.label8);
+            this.groupBoxDataDates.Controls.Add(this.dateTimePickerStart);
+            this.groupBoxDataDates.Location = new System.Drawing.Point(382, 15);
+            this.groupBoxDataDates.Name = "groupBoxDataDates";
+            this.groupBoxDataDates.Size = new System.Drawing.Size(244, 52);
+            this.groupBoxDataDates.TabIndex = 15;
+            this.groupBoxDataDates.TabStop = false;
+            this.groupBoxDataDates.Text = "Model Time Series Period";
+            // 
+            // dateTimePickerEnd
+            // 
+            this.dateTimePickerEnd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.dateTimePickerEnd.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dateTimePickerEnd.Location = new System.Drawing.Point(138, 20);
+            this.dateTimePickerEnd.Name = "dateTimePickerEnd";
+            this.dateTimePickerEnd.Size = new System.Drawing.Size(95, 20);
+            this.dateTimePickerEnd.TabIndex = 3;
+            this.dateTimePickerEnd.Value = new System.DateTime(2022, 7, 6, 0, 0, 0, 0);
+            // 
+            // label8
+            // 
+            this.label8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(120, 26);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(16, 13);
+            this.label8.TabIndex = 2;
+            this.label8.Text = "to";
+            // 
+            // dateTimePickerStart
+            // 
+            this.dateTimePickerStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.dateTimePickerStart.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dateTimePickerStart.Location = new System.Drawing.Point(23, 20);
+            this.dateTimePickerStart.Name = "dateTimePickerStart";
+            this.dateTimePickerStart.Size = new System.Drawing.Size(95, 20);
+            this.dateTimePickerStart.TabIndex = 1;
+            this.dateTimePickerStart.Value = new System.DateTime(1980, 1, 1, 0, 0, 0, 0);
+            // 
+            // radioButtonGSFLOWRun
+            // 
+            this.radioButtonGSFLOWRun.AutoSize = true;
+            this.radioButtonGSFLOWRun.Enabled = false;
+            this.radioButtonGSFLOWRun.Location = new System.Drawing.Point(19, 31);
+            this.radioButtonGSFLOWRun.Name = "radioButtonGSFLOWRun";
+            this.radioButtonGSFLOWRun.Size = new System.Drawing.Size(95, 17);
+            this.radioButtonGSFLOWRun.TabIndex = 11;
+            this.radioButtonGSFLOWRun.Text = "GSFLOW Only";
+            this.radioButtonGSFLOWRun.UseVisualStyleBackColor = true;
+            this.radioButtonGSFLOWRun.CheckedChanged += new System.EventHandler(this.radioButtonGSFLOWRun_CheckedChanged);
+            // 
             // Simulation
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -716,6 +781,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxStatus)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            this.groupBoxDataDates.ResumeLayout(false);
+            this.groupBoxDataDates.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -727,7 +794,7 @@
         private System.Windows.Forms.TextBox textBoxScnName;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.ComboBox comboBox5;
+        private System.Windows.Forms.ComboBox comboBoxPumpingScn;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.GroupBox groupBox6;
@@ -771,5 +838,10 @@
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.GroupBox groupBoxDataDates;
+        private System.Windows.Forms.DateTimePicker dateTimePickerEnd;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.DateTimePicker dateTimePickerStart;
+        private System.Windows.Forms.RadioButton radioButtonGSFLOWRun;
     }
 }

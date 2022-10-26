@@ -96,7 +96,8 @@ namespace RRModelingSystem
 
             //Check for paths change
             loading = false;
-            textBoxMMSDatabase.Text = _MMSDatabase.Replace(textBoxWorkspace.Text, "");
+            if(textBoxWorkspace.Text.Length>0)
+                textBoxMMSDatabase.Text = _MMSDatabase.Replace(textBoxWorkspace.Text, "");
             if (Path.IsPathRooted(textBoxMMSDatabase.Text))
             {
                 string[] newWorkspace = CommonString(Path.GetDirectoryName(Path.Combine(textBoxWorkspace.Text, _baseMMSDatabase)), Path.GetDirectoryName(_MMSDatabase));

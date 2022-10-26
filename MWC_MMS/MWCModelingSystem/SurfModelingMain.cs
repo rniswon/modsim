@@ -12,7 +12,7 @@ using System.Windows.Forms;
 
 namespace RRModelingSystem
 {
-    public delegate void ProcessSimulationRum(int runID, string fileName, List<string> MODSIMMsgs);  // delegate
+    public delegate void ProcessSimulationRum(int runID, string logFileName, string runFileName, bool riparianLogicOn, int riparianCost, List<string> runMgs = null);  // delegate
     public partial class RRSurfModelingMain : Form
     {
         private Simulation m_SimUserControl;
@@ -119,10 +119,11 @@ namespace RRModelingSystem
             }
         }
 
-        private void startSimulationRunWindow(int runID, string fileName,List<string> runMgs)
+        private void startSimulationRunWindow(int runID, string logFileName, string runFileName, bool riparianLogicOn, int riparianCost, List<string> runMgs = null)
         {
             string nodeName = "Run: " + runID.ToString();
-            SimulationRun sRWin = new SimulationRun(runID, fileName,runMgs);
+            SimulationRun sRWin = new SimulationRun(runID, logFileName, runFileName, riparianLogicOn, riparianCost,runMgs);
+            sRWin.messageOut += ProcessMessage;
             if (simRunWindows.ContainsKey(nodeName))
                 simRunWindows[nodeName] = sRWin;
             else
@@ -133,6 +134,8 @@ namespace RRModelingSystem
                     treeView1.Nodes["Node2"].Nodes.Add(nodeName, nodeName);
                 }));
             }
+            //Start simulation worker
+            sRWin.StartSimulation();
         }
 
         private void ProcessMessage(string msg)
