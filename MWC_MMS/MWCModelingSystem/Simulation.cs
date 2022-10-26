@@ -237,7 +237,7 @@ namespace RRModelingSystem
                     if (_rutaPumping != null && _rutaPumping != "")
                     {
                         string[] wellVals = namHlpr.ReadLineWithKeyValue("WEL");
-                        string outputWELFile = Path.Combine(Path.GetDirectoryName(_controlFile), wellVals[2]);
+                        string outputWELFile = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(_controlFile), wellVals[2]));
                         if (runid > 0)
                             outputWELFile = outputWELFile.Replace("SRP_mf_strm_dpl_v0_run.wel", $"SRP_mf_strm_dpl_v0_run{runid}.wel");
                         if (_rutaPumping == outputWELFile)
@@ -253,8 +253,10 @@ namespace RRModelingSystem
                     if (runid > 0)
                     {
                         ctrHlpr.ReplaceString("\\output\\", $"\\output_r{runid}\\");
+                        ctrHlpr.CreatePaths($"\\output_r{runid}\\");
 
                         namHlpr.ReplaceString("\\output\\", $"\\output_r{runid}\\");
+                        namHlpr.CreatePaths($"\\output_r{runid}\\");
                         namHlpr.SaveChangesToFile(namPath.Replace(".nam", $"r{runid}.nam"));
                         ctrHlpr.ReplaceKeyValue("modflow_name", new string[] { namPath.Replace(".nam", $"r{runid}.nam") });
                         runControlFile = _controlFile.Replace(".control", $"r{runid}.control");
@@ -300,8 +302,8 @@ namespace RRModelingSystem
         {
             object[] args = e.Argument as object[];
             string _runFile = args[0].ToString();
-            int _runid = int.Parse(args[2].ToString());
-            string runControlFile = args[3].ToString();
+            int _runid = int.Parse(args[1].ToString());
+            string runControlFile = args[2].ToString();
             
             //standardOutputThread = null;
             messageOut($"\n\t Simulation worker for run {_runid} initializing on thread [{Thread.CurrentThread.ManagedThreadId}].");

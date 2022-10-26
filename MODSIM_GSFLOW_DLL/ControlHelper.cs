@@ -121,5 +121,32 @@ namespace MODSIM_GSFLOW_C
             File.WriteAllLines(locFileName, settings);
             //onMessage($"Changes saved to {locFileName}");
         }
+
+        public void CreatePaths(string v)
+        {
+            string workspace = Path.GetDirectoryName(_filePath);
+            for (int i = 0; i < settings.Length; i++)
+            {
+                if(settings[i].Contains(v))
+                {
+                    try
+                    {
+                        string relPath = settings[i];
+                        if(Path.GetExtension(_filePath)==".nam")
+                        {
+                            string[] lineValues = settings[i].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                            relPath = lineValues[2];
+                        }
+                        string dirPath = Path.GetDirectoryName(Path.GetFullPath(Path.Combine(workspace, relPath)));
+                        if (!Directory.Exists(dirPath))
+                            Directory.CreateDirectory(dirPath);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+                
+            }
+        }
     }
 }
