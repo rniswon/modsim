@@ -29,8 +29,8 @@ namespace RRModelingSystem
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Errors: 0");
-            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Convergence Issues: 0");
+            System.Windows.Forms.TreeNode treeNode5 = new System.Windows.Forms.TreeNode("Errors: 0");
+            System.Windows.Forms.TreeNode treeNode6 = new System.Windows.Forms.TreeNode("Convergence Issues: 0");
             this.textBoxHeading = new System.Windows.Forms.TextBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
@@ -197,13 +197,13 @@ namespace RRModelingSystem
             // 
             this.treeViewMsgGroup.Location = new System.Drawing.Point(3, 3);
             this.treeViewMsgGroup.Name = "treeViewMsgGroup";
-            treeNode1.Name = "NodeErrors";
-            treeNode1.Text = "Errors: 0";
-            treeNode2.Name = "NodeConvergence";
-            treeNode2.Text = "Convergence Issues: 0";
+            treeNode5.Name = "NodeErrors";
+            treeNode5.Text = "Errors: 0";
+            treeNode6.Name = "NodeConvergence";
+            treeNode6.Text = "Convergence Issues: 0";
             this.treeViewMsgGroup.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1,
-            treeNode2});
+            treeNode5,
+            treeNode6});
             this.treeViewMsgGroup.Size = new System.Drawing.Size(166, 42);
             this.treeViewMsgGroup.TabIndex = 0;
             this.treeViewMsgGroup.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewMsgGroup_AfterSelect);
@@ -263,12 +263,14 @@ namespace RRModelingSystem
             // 
             // buttonRestart
             // 
+            this.buttonRestart.Enabled = false;
             this.buttonRestart.Location = new System.Drawing.Point(110, 111);
             this.buttonRestart.Name = "buttonRestart";
             this.buttonRestart.Size = new System.Drawing.Size(86, 20);
             this.buttonRestart.TabIndex = 1;
             this.buttonRestart.Text = "Re-Start Run";
             this.buttonRestart.UseVisualStyleBackColor = true;
+            this.buttonRestart.Click += new System.EventHandler(this.buttonRestart_Click);
             // 
             // SimulationRun
             // 

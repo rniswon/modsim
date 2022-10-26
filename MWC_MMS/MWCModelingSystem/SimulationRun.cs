@@ -128,8 +128,7 @@ namespace RRModelingSystem
                         toolStripProgressBar1.Value = 0;
                         toolStripStatusLabel1.Text = "Done.";
                     }));
-                    if (_runID != -1)
-                        UpdateRunInfo(_runID, run==0?2:3, _runFileName);
+                    
                 }
             }
             else
@@ -161,6 +160,7 @@ namespace RRModelingSystem
                     {
                         OnMessageOut($"Sucessful completion of the MODSIM run!");
                     }
+                    
                 }
                 catch (Exception ex)
                 {
@@ -172,9 +172,12 @@ namespace RRModelingSystem
                     //simulationStarted(_runid < 0 ? 0 : _runid, "", _runMsgs);
                 }
             }
+            if (_runID != -1)
+                UpdateRunInfo(_runID, run == 0 ? 2 : 3);
+            buttonRestart.Enabled = true;
         }
 
-        private void UpdateRunInfo(int runid, int status, string basePath)
+        private void UpdateRunInfo(int runid, int status)
         {
             try
             {
@@ -186,13 +189,13 @@ namespace RRModelingSystem
                 {
                     runInfoDT.Rows[0]["SimulationStatus"] = status; // runIssues ? 3 : 2;
                     runInfoDT.Rows[0]["LastAccess"] = DateTime.Now.ToString();
-                    runInfoDT.Rows[0]["BasePath"] = basePath.Replace(_workSpace, "");
+                    //runInfoDT.Rows[0]["BasePath"] = basePath.Replace(_workSpace, "");
                     sqliteDB.UpdateTableFromDB(runInfoDT);
                 }
             }
             catch (Exception ex)
             {
-                messageOut(String.Concat("ERROR: ", ex.Message));
+                OnMessageOut(String.Concat("ERROR: ", ex.Message));
             }
         }
 
@@ -392,7 +395,13 @@ namespace RRModelingSystem
             richTextBox2.Lines = searchLines.ToArray();
         }
 
-        
+        private void buttonRestart_Click(object sender, EventArgs e)
+        {
+            _runMsgs = new List<string>();
+            if(_fileName!="")
+                File.WriteAllText(_fileName, String.Empty);
+            StartSimulation();
+        }
 
         private void UpdateTxtFile()
         {
