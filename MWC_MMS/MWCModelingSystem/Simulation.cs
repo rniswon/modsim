@@ -328,9 +328,18 @@ namespace RRModelingSystem
                 throw;
             }
 
-            
             if (_runid != -1)
-                UpdateRunInfo(_runid, 1, _runFile);
+            {
+                Dictionary<string, object> runInfo = new Dictionary<string, object>();
+                runInfo.Add("SimulationStatus", 1);
+                runInfo.Add("LastAccess", DateTime.Now.ToString());
+                runInfo.Add("BasePath", _runFile.Replace(_workSpace, ""));
+                runInfo.Add("RiparianON", checkBoxRiparianLogic.Checked);
+                runInfo.Add("OutputDBScenario", false);
+                runInfo.Add("RunType", radioButtonMODSIMOnly.Checked ? "MODSIMOnly" : "MODSIM-GSFLOW");
+                sqliteDB.UpdateRunsInfoTable(_runid, runInfo);
+                //UpdateRunInfo(_runid, 1, _runFile);
+            }
             
         }
 

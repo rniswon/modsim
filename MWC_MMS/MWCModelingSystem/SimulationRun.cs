@@ -173,30 +173,14 @@ namespace RRModelingSystem
                 }
             }
             if (_runID != -1)
-                UpdateRunInfo(_runID, run == 0 ? 2 : 3);
+            {
+                Dictionary<string, object> runInfo = new Dictionary<string, object>();
+                runInfo.Add("SimulationStatus", run == 0 ? 2 : 3);
+                runInfo.Add("LastAccess", DateTime.Now.ToString());
+                sqliteDB.UpdateRunsInfoTable(_runID, runInfo);
+                //UpdateRunInfo(_runID, run == 0 ? 2 : 3);
+            }
             buttonRestart.Enabled = true;
-        }
-
-        private void UpdateRunInfo(int runid, int status)
-        {
-            try
-            {
-                string sql = "SELECT * FROM MMS_RunsInfo WHERE (RunID = " + runid + ")";
-
-                DataTable runInfoDT = sqliteDB.GetTableFromDB(sql, "MMS_RunsInfo");
-
-                if (runInfoDT.Rows.Count > 0)
-                {
-                    runInfoDT.Rows[0]["SimulationStatus"] = status; // runIssues ? 3 : 2;
-                    runInfoDT.Rows[0]["LastAccess"] = DateTime.Now.ToString();
-                    //runInfoDT.Rows[0]["BasePath"] = basePath.Replace(_workSpace, "");
-                    sqliteDB.UpdateTableFromDB(runInfoDT);
-                }
-            }
-            catch (Exception ex)
-            {
-                OnMessageOut(String.Concat("ERROR: ", ex.Message));
-            }
         }
 
         private void OnMessageOut(string message)
@@ -367,6 +351,7 @@ namespace RRModelingSystem
             }
             treeViewMsgGroup.Nodes["NodeErrors"].Text = "Errors: " + errorLines.Count;
             treeViewMsgGroup.Nodes["NodeConvergence"].Text = "Convergence Issues: " + maxLines.Count;
+            listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
         }
 
         private void button1_Click(object sender, EventArgs e)
