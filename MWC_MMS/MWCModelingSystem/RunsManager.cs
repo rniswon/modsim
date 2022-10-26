@@ -55,6 +55,17 @@ namespace RRModelingSystem
 
             txtOutputDB.Text = currentRow.Cells["BasePath"].Value.ToString();
             txtOutputDB.Text = txtOutputDB.Text.Replace(".xy", "OUTPUT.sqlite");
+
+            string pathDB = string.Format(_workSpace + txtOutputDB.Text);
+            if (File.Exists(pathDB))
+            {
+                btnAdaptDB.Enabled = true;
+            }
+            else
+            {
+                btnAdaptDB.Enabled = false;
+                messageOut("El archivo SQLITE no existe");
+            }
         }
 
         private void dataGridView1_RowEnter(object sender, DataGridViewCellEventArgs e)
@@ -90,6 +101,7 @@ namespace RRModelingSystem
                     txtOutputDB.Text = txtOutputDB.Text.Replace(_workSpace,"");
                 }
             }
+            btnAdaptDB.Enabled = true;
 
         }
 
@@ -117,21 +129,37 @@ namespace RRModelingSystem
                         prefsTbl1 = cmd.ExecuteReader();
                         while (prefsTbl1.Read())
                         {
-                            sql1 = sql1 + @"ALTER TABLE " + prefsTbl1.GetString(0) + " ADD scenario VARCHAR(20) NULL;\n";
+                            sql1 = "";
+                            try
+                            {
+                                sql1 = sql1 + @"SELECT scenario FROM " + prefsTbl1.GetString(0) + " where 1=2;";
+                                    using (SQLiteCommand cmd1 = new SQLiteCommand(sql1, c))
+                                    {
+                                        cmd1.ExecuteNonQuery();
+                                    }
+                                messageOut("Field 'scenario' exists in table " + prefsTbl1.GetString(0) + " of " + nomArchivo + "OUTPUT.sqlite.");
+                            }
+                            catch (Exception ex) //catch block for catching errors
+                            {
+                                sql1 = "";
+                                sql1 = sql1 + @"ALTER TABLE " + prefsTbl1.GetString(0) + " ADD scenario VARCHAR(20) NULL;";
+                                    using (SQLiteCommand cmd2 = new SQLiteCommand(sql1, c))
+                                    {
+                                        cmd2.ExecuteNonQuery();
+                                    }
+                                messageOut("Added field 'scenario' in table " + prefsTbl1.GetString(0) + " of " + nomArchivo + "OUTPUT.sqlite.");
+                            }
+                            sql1 = "";
                             sql1 = sql1 + @"UPDATE " + prefsTbl1.GetString(0) + " SET scenario = '" + nomArchivo + "';\n";
+                                using (SQLiteCommand cmd3 = new SQLiteCommand(sql1, c))
+                                {
+                                    cmd3.ExecuteNonQuery();
+                                }
                         }
                     }
+                    c.Close();
                 }
-
-                using (SQLiteConnection c = new SQLiteConnection(strConn))
-                {
-                    c.Open();
-                    using (SQLiteCommand cmd = new SQLiteCommand(sql1, c))
-                    {
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-                messageOut("Updated SQLite database output.");
+                //messageOut("Updated SQLite database output.");
             }
         }
     }
