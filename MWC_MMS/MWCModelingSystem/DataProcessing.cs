@@ -1417,9 +1417,9 @@ namespace RRModelingSystem
         private void buttonUpdateFeatures_Click(object sender, EventArgs e)
         {
             string m_FileName = ProcessModsimFile;
-            if (comboBoxMODSIMFile.Text.Contains("_DIV.xy"))
+            if (comboBoxMODSIMFile2.Text.Contains("_DIV.xy"))
                 m_FileName = m_FileName.Replace(".xy", "_DIV.xy");
-            if (comboBoxMODSIMFile.Text.Contains("_DIV_WR.xy"))
+            if (comboBoxMODSIMFile2.Text.Contains("_DIV_WR.xy"))
                 m_FileName = m_FileName.Replace(".xy", "_DIV_WR.xy");
 
             if (File.Exists(m_FileName))
