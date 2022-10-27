@@ -163,7 +163,7 @@ namespace RRModelingSystem
                 try
                 {
                     string sql2;
-                    sql2 = @"UPDATE [MMS_RunsInfo] SET DBStatus = 1 WHERE BasePath LIKE '%" + nomArchivo + "%';";
+                    sql2 = @"UPDATE [MMS_RunsInfo] SET OutputDBScenario = 1 WHERE BasePath LIKE '%" + nomArchivo + "%';";
                     sqliteDB.ExecuteQuery(sql2);
                 }
                 catch (Exception ex)

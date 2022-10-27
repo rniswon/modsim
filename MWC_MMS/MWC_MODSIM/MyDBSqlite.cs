@@ -471,9 +471,10 @@ namespace RTI.CWR.MWC_MODSIMUtils
 	                                Notes	TEXT,
 	                                Options	TEXT,
 	                                BasePath	TEXT,
-                                    DBStatus	INTEGER, 
+                                    OutputDBScenario	INTEGER, 
                                     RunType	TEXT,
                                     RiparianON INTEGER,
+                                    ModsimFile	TEXT,
 	                                PRIMARY KEY(runID AUTOINCREMENT)
                                 )";
                     ExecuteNonQuery(sql);
