@@ -10,14 +10,59 @@ namespace MODSIM_GSFLOW_C
     public class ControlHelper
     {
         private string _filePath;
+        private string[] settings;
+
+        public event ProcessMessage messageOut; // event
+
         public ControlHelper(string filePath)
         {
             _filePath = filePath;
+            settings = File.ReadAllLines(_filePath);
+        }
+
+        public string[] ReadKeyValue(string key)
+        {
+            List<string> value = new List<string>();
+            //string[] settings = File.ReadAllLines(_filePath);
+            for (int i = 0; i < settings.Length; i++)
+            {
+                if (settings[i].StartsWith("###"))
+                {
+                    if (settings[i + 1] == key)
+                    {
+                        for (int j = 0; j < int.Parse(settings[i + 2]); j++)
+                        {
+                            value.Add(settings[i + j + 4]);
+                        }
+                        break;
+                    }
+                }
+            }
+            return value.ToArray();
+        }
+
+        public string[] ReadLineWithKeyValue(string key)
+        {
+            List<string> value = new List<string>();
+            //string[] settings = File.ReadAllLines(_filePath);
+            for (int i = 0; i < settings.Length; i++)
+            {
+                if (settings[i].StartsWith(key))
+                {
+                    string[] lineValues = settings[i].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        for (int j = 0; j < lineValues.Length; j++)
+                        {
+                            value.Add(lineValues[j]);
+                        }
+                        break;
+                }
+            }
+            return value.ToArray();
         }
 
         public void ReplaceKeyValue (string key, string[] newValue)
         {
-            string[] settings = File.ReadAllLines(_filePath);
+            //string[] settings = File.ReadAllLines(_filePath);
             for(int i=0;i<settings.Length;i++)
             {
                 if(settings[i].StartsWith("###"))
@@ -36,12 +81,12 @@ namespace MODSIM_GSFLOW_C
                     }
                 }
             }
-            File.WriteAllLines(_filePath, settings);
+           // File.WriteAllLines(_filePath, settings);
         }
 
         public void ReplaceKeyRelativePath(string key, string[] newValue)
         {
-            string[] settings = File.ReadAllLines(_filePath);
+            //string[] settings = File.ReadAllLines(_filePath);
             for (int i = 0; i < settings.Length; i++)
             {
                 if (settings[i].StartsWith("###"))
@@ -62,16 +107,50 @@ namespace MODSIM_GSFLOW_C
                     }
                 }
             }
-            File.WriteAllLines(_filePath, settings);
+           // File.WriteAllLines(_filePath, settings);
         }
         public void ReplaceString(string basestr, string newstr)
         {
-            string[] settings = File.ReadAllLines(_filePath);
             for (int i = 0; i < settings.Length; i++)
             {
                 settings[i] = settings[i].Replace(basestr, newstr);
             }
-            File.WriteAllLines(_filePath, settings);
+        }
+        public void SaveChangesToFile(string newFile = "")
+        {
+            string locFileName = _filePath;
+            if (newFile != "")
+                locFileName = newFile;
+            File.WriteAllLines(locFileName, settings);
+            if(messageOut!=null)
+                messageOut($"Changes saved to {locFileName}");
+        }
+
+        public void CreatePaths(string v)
+        {
+            string workspace = Path.GetDirectoryName(_filePath);
+            for (int i = 0; i < settings.Length; i++)
+            {
+                if(settings[i].Contains(v))
+                {
+                    try
+                    {
+                        string relPath = settings[i];
+                        if(Path.GetExtension(_filePath)==".nam")
+                        {
+                            string[] lineValues = settings[i].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                            relPath = lineValues[2];
+                        }
+                        string dirPath = Path.GetDirectoryName(Path.GetFullPath(Path.Combine(workspace, relPath)));
+                        if (!Directory.Exists(dirPath))
+                            Directory.CreateDirectory(dirPath);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+                
+            }
         }
     }
 }

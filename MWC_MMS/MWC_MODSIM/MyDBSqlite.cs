@@ -580,6 +580,30 @@ namespace RTI.CWR.MWC_MODSIMUtils
             return true;
         }
 
+        public void UpdateRunsInfoTable(int runid, Dictionary<string, object> valuePairs)
+        {
+            try
+            {
+                string sql = "SELECT * FROM MMS_RunsInfo WHERE (RunID = " + runid + ")";
+
+                DataTable runInfoDT = GetTableFromDB(sql, "MMS_RunsInfo");
+
+                if (runInfoDT.Rows.Count > 0)
+                {
+                    foreach (string key in valuePairs.Keys)
+                    {
+                        if(key!= "runID")
+                            runInfoDT.Rows[0][key] = valuePairs[key];
+                    }
+                    UpdateTableFromDB(runInfoDT);
+                }
+            }
+            catch (Exception ex)
+            {
+                messageOut(String.Concat("ERROR: ", ex.Message));
+            }
+        }
+
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 

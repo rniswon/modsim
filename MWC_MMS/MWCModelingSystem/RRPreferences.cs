@@ -15,7 +15,7 @@ namespace RRModelingSystem
     {
         public event ProcessMessage messageOut; // event
 
-        public bool hasChanges;
+        public bool hasChanges = true;
         public string ProjectDatabase { get; set; }
         public string ModsimFile { get; set; }
         private FolderBrowserDialog folderBrowserDialog1;

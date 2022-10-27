@@ -181,7 +181,10 @@ namespace MODSIM_GSFLOW_C
             }
             catch (Exception ex)
             {
-                messageOut(ex.Message);
+                if (messageOut != null)
+                    messageOut(ex.Message);
+                else
+                    Console.WriteLine(ex.Message);
                 //Console.ReadLine();
             }
         }
