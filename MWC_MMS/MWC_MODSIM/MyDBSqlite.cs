@@ -471,7 +471,7 @@ namespace RTI.CWR.MWC_MODSIMUtils
 	                                Notes	TEXT,
 	                                Options	TEXT,
 	                                BasePath	TEXT,
-                                    OutputDBScenario	INTEGER, 
+                                    DBStatus	INTEGER, 
                                     RunType	TEXT,
 	                                PRIMARY KEY(runID AUTOINCREMENT)
                                 )";

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Data.SQLite;
 
 namespace RRModelingSystem
 {
@@ -176,6 +177,43 @@ namespace RRModelingSystem
                 {
                     LoadProject(dlg.FileName);
                     m_RRPreferences.hasChanges = true;
+                }
+                string strDB;
+                strDB = string.Format("Data Source={0};Version={1}", dlg.FileName, 3);
+//                SQLiteDataReader prefsTbl1;
+                string sql = @"SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY 1;";
+                string sql1 = "";
+                using (SQLiteConnection c = new SQLiteConnection(strDB))
+                {
+                    c.Open();
+                    using (SQLiteCommand cmd = new SQLiteCommand(sql, c))
+                    {
+//                        prefsTbl1 = cmd.ExecuteReader();
+//                        while (prefsTbl1.Read())
+//                        {
+                            sql1 = "";
+                        try
+                        {
+                            sql1 = sql1 + @"SELECT DBStatus FROM MMS_RunsInfo where 1=2;";
+                            using (SQLiteCommand cmd1 = new SQLiteCommand(sql1, c))
+                            {
+                                cmd1.ExecuteNonQuery();
+                            }
+                        }
+                        catch (Exception ex) //catch block for catching errors
+                        {
+                            sql1 = "";
+                            sql1 = sql1 + @"ALTER TABLE MMS_RunsInfo ADD DBStatus INT NULL; 
+                                            ALTER TABLE MMS_RunsInfo ADD RunType VARCHAR(20) NULL;";
+                                            //"UPDATE MMS_RunsInfo SET DBStatus = 0"
+                            using (SQLiteCommand cmd2 = new SQLiteCommand(sql1, c))
+                            {
+                                cmd2.ExecuteNonQuery();
+                            }
+                        }
+//                        }
+                    }
+                    c.Close();
                 }
             }
         }
