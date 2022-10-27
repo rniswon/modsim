@@ -42,13 +42,24 @@ namespace RRModelingSystem
             m_DBUtils = new MyDBSqlite(_MMSDatabase);
             m_DBUtils.messageOut += PrintMessage;
             LoadPreferences();
+            CheckTablesInDatabase();
 
-            
+
         }
 
         public void SavePreferencesToDatabase()
         {
             m_DBUtils.UpdateTableFromDB(prefsTbl);
+        }
+
+        public void CheckTablesInDatabase()
+        {
+            if(!m_DBUtils.IsColumnsExist("MMS_RunsInfo", "OutputDBScenario"))
+                m_DBUtils.ExecuteNonQuery(@"ALTER TABLE MMS_RunsInfo ADD OutputDBScenario INTEGER NULL;");
+            if (!m_DBUtils.IsColumnsExist("MMS_RunsInfo", "RunType"))
+                m_DBUtils.ExecuteNonQuery(@"ALTER TABLE MMS_RunsInfo ADD RunType TEXT NULL;");
+            if (!m_DBUtils.IsColumnsExist("MMS_RunsInfo", "RiparianON"))
+                m_DBUtils.ExecuteNonQuery(@"ALTER TABLE MMS_RunsInfo ADD RiparianON INTEGER NULL;");
         }
 
         private void LoadPreferences()
@@ -96,8 +107,11 @@ namespace RRModelingSystem
 
             //Check for paths change
             loading = false;
+            if (textBoxWorkspace.Text == "")
+                textBoxWorkspace.Text = Path.GetDirectoryName(_MMSDatabase) + "\\";
             textBoxMMSDatabase.Text = _MMSDatabase.Replace(textBoxWorkspace.Text, "");
-            if (Path.IsPathRooted(textBoxMMSDatabase.Text))
+            
+            if (Path.IsPathRooted(textBoxMMSDatabase.Text) && _baseMMSDatabase!="")
             {
                 string[] newWorkspace = CommonString(Path.GetDirectoryName(Path.Combine(textBoxWorkspace.Text, _baseMMSDatabase)), Path.GetDirectoryName(_MMSDatabase));
                 if (newWorkspace.Length > 0 && newWorkspace[0].Length > 0)

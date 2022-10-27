@@ -48,7 +48,7 @@ namespace RTI.CWR.MWC_MODSIMUtils
             this.dbFile = dbfile;
         }
 
-        private bool IsColumnsExist(string tableName, string columnName)
+        public bool IsColumnsExist(string tableName, string columnName)
         {
             string sql = $"SELECT * FROM [{tableName}] LIMIT 1";
             DataTable dbTbl = GetTableFromDB(sql, tableName);
@@ -473,6 +473,7 @@ namespace RTI.CWR.MWC_MODSIMUtils
 	                                BasePath	TEXT,
                                     DBStatus	INTEGER, 
                                     RunType	TEXT,
+                                    RiparianON INTEGER,
 	                                PRIMARY KEY(runID AUTOINCREMENT)
                                 )";
                     ExecuteNonQuery(sql);

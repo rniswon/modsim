@@ -224,6 +224,7 @@ namespace RRModelingSystem
             MMSDatabase = fileName;
             m_RRPreferences = new RRPreferences(MMSDatabase);
             m_RRPreferences.messageOut += ProcessMessage;
+            
             treeView1.SelectedNode = treeView1.Nodes["Node0"];
             treeView1_AfterSelect(null, null);
         }
