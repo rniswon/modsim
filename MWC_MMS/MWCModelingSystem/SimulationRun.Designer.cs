@@ -49,6 +49,7 @@ namespace RRModelingSystem
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.buttonUpdate = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.buttonStopRun = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -105,6 +106,7 @@ namespace RRModelingSystem
             // 
             // splitContainer2.Panel1
             // 
+            this.splitContainer2.Panel1.Controls.Add(this.buttonStopRun);
             this.splitContainer2.Panel1.Controls.Add(this.buttonRestart);
             this.splitContainer2.Panel1.Controls.Add(this.listView1);
             // 
@@ -273,6 +275,18 @@ namespace RRModelingSystem
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "";
             // 
+            // buttonStopRun
+            // 
+            this.buttonStopRun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonStopRun.Enabled = false;
+            this.buttonStopRun.Location = new System.Drawing.Point(18, 111);
+            this.buttonStopRun.Name = "buttonStopRun";
+            this.buttonStopRun.Size = new System.Drawing.Size(86, 20);
+            this.buttonStopRun.TabIndex = 2;
+            this.buttonStopRun.Text = "Stop Run";
+            this.buttonStopRun.UseVisualStyleBackColor = true;
+            this.buttonStopRun.Click += new System.EventHandler(this.buttonStopRun_Click);
+            // 
             // SimulationRun
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -323,5 +337,6 @@ namespace RRModelingSystem
         private System.Windows.Forms.ColumnHeader columnValue;
         public System.Windows.Forms.ListView listView1;
         private System.Windows.Forms.Button buttonRestart;
+        private System.Windows.Forms.Button buttonStopRun;
     }
 }

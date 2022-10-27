@@ -11,6 +11,9 @@ namespace MODSIM_GSFLOW_C
     {
         private string _filePath;
         private string[] settings;
+
+        public event ProcessMessage messageOut; // event
+
         public ControlHelper(string filePath)
         {
             _filePath = filePath;
@@ -119,7 +122,8 @@ namespace MODSIM_GSFLOW_C
             if (newFile != "")
                 locFileName = newFile;
             File.WriteAllLines(locFileName, settings);
-            //onMessage($"Changes saved to {locFileName}");
+            if(messageOut!=null)
+                messageOut($"Changes saved to {locFileName}");
         }
 
         public void CreatePaths(string v)

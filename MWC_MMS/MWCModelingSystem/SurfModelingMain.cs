@@ -136,7 +136,7 @@ namespace RRModelingSystem
                 }));
             }
             //Start simulation worker
-            sRWin.StartSimulation();
+            sRWin.StartSimulation(null,null);
         }
 
         private void ProcessMessage(string msg)

@@ -82,9 +82,10 @@ namespace RRModelingSystem
                 var item = listView1.Items.Add("Run File:");
                 item.SubItems.Add(_runFileName);
             }
+            listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
         }
 
-        public void StartSimulation()
+        public void StartSimulation(object sender, DoWorkEventArgs e)
         {
             toolStripStatusLabel1.Text = "Simulation initialized.";
             standardOutputThread = null;
@@ -180,7 +181,16 @@ namespace RRModelingSystem
                 sqliteDB.UpdateRunsInfoTable(_runID, runInfo);
                 //UpdateRunInfo(_runID, run == 0 ? 2 : 3);
             }
-            buttonRestart.Enabled = true;
+            if (buttonRestart.InvokeRequired)
+            {
+                buttonRestart.BeginInvoke((Action)(() =>
+                {
+                    buttonRestart.Enabled = true;
+                }));
+            } 
+            else
+                buttonRestart.Enabled = true;
+
         }
 
         private void OnMessageOut(string message)
@@ -385,7 +395,22 @@ namespace RRModelingSystem
             _runMsgs = new List<string>();
             if(_fileName!="")
                 File.WriteAllText(_fileName, String.Empty);
-            StartSimulation();
+            buttonRestart.Enabled = false;
+            using (BackgroundWorker bgworker = new BackgroundWorker())
+            {
+                bgworker.DoWork += StartSimulation;
+                bgworker.RunWorkerAsync(new object[] { });
+            }
+        }
+
+        private void buttonStopRun_Click(object sender, EventArgs e)
+        {
+            if (process != null)
+            {
+                process.Close();
+                process.Dispose();
+
+            }
         }
 
         private void UpdateTxtFile()
