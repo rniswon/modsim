@@ -26,7 +26,7 @@ namespace RRModelingSystem
 
         private DataTable prefsTbl;
         public bool loading = true;
-        
+        private string oldWorspace="";
 
         public RRPreferences(string MMSDatabase)
         {
@@ -61,7 +61,9 @@ namespace RRModelingSystem
             if (!m_DBUtils.IsColumnsExist("MMS_RunsInfo", "RiparianON"))
                 m_DBUtils.ExecuteNonQuery(@"ALTER TABLE MMS_RunsInfo ADD RiparianON INTEGER NULL;");
             if (!m_DBUtils.IsColumnsExist("MMS_RunsInfo", "ModsimFile"))
-                m_DBUtils.ExecuteNonQuery(@"ALTER TABLE MMS_RunsInfo ADD MpodsimFile TEXT NULL;");
+                m_DBUtils.ExecuteNonQuery(@"ALTER TABLE MMS_RunsInfo ADD ModsimFile TEXT NULL;");
+            if (!m_DBUtils.IsColumnsExist("MMS_RunsInfo", "ProcessID"))
+                m_DBUtils.ExecuteNonQuery(@"ALTER TABLE MMS_RunsInfo ADD ProcessID INTEGER NULL;");
         }
 
         private void LoadPreferences()
@@ -85,7 +87,12 @@ namespace RRModelingSystem
                         //Get the full path
                         string fullPath = dr[1].ToString();
                         textBoxWorkspace.Text = fullPath.EndsWith("\\")?fullPath:fullPath + "\\";
-                        Directory.SetCurrentDirectory(textBoxWorkspace.Text);
+                        try
+                        {
+                            Directory.SetCurrentDirectory(textBoxWorkspace.Text);
+                        }
+                        catch (Exception)
+                        {}
                         break;
                     case "Priority Cost":
                         textBoxPREFSRiparianCost.Text = dr[1].ToString();
@@ -118,8 +125,10 @@ namespace RRModelingSystem
                 string[] newWorkspace = CommonString(Path.GetDirectoryName(Path.Combine(textBoxWorkspace.Text, _baseMMSDatabase)), Path.GetDirectoryName(_MMSDatabase));
                 if (newWorkspace.Length > 0 && newWorkspace[0].Length > 0)
                 {
-
-                    textBoxWorkspace.Text = Path.Combine(newWorkspace[0], newWorkspace[1]).Replace(Path.GetDirectoryName(_baseMMSDatabase), "");
+                    if(Path.GetDirectoryName(_baseMMSDatabase)!="")
+                        textBoxWorkspace.Text = Path.Combine(newWorkspace[0], newWorkspace[1]).Replace(Path.GetDirectoryName(_baseMMSDatabase), "");
+                    else
+                        textBoxWorkspace.Text = Path.Combine(newWorkspace[0], newWorkspace[1]) + "\\";
                     messageOut($"Found a new workspace path.  Updating the path to: {textBoxWorkspace.Text}");
                     textBoxMMSDatabase.Text = _baseMMSDatabase;
                     _baseMMSDatabase = Path.Combine(textBoxWorkspace.Text, textBoxMMSDatabase.Text);
@@ -230,6 +239,9 @@ namespace RRModelingSystem
                 //Uri MMSDB = new Uri(_MMSDatabase);
                 UpdatePreferences("Workspace", textBoxWorkspace.Text);
                 Directory.SetCurrentDirectory(textBoxWorkspace.Text);
+                
+                CheckFilesExist(oldWorspace);
+                oldWorspace = textBoxWorkspace.Text;
             }
             
         }
@@ -262,7 +274,7 @@ namespace RRModelingSystem
             // Show the FolderBrowserDialog.
             folderBrowserDialog1 = new FolderBrowserDialog();
             DialogResult result = folderBrowserDialog1.ShowDialog();
-            string oldWorspace = textBoxWorkspace.Text;
+            //string oldWorspace = textBoxWorkspace.Text;
             if (result == DialogResult.OK)
             {
                 if (!_MMSDatabase.StartsWith(folderBrowserDialog1.SelectedPath))
@@ -273,7 +285,7 @@ namespace RRModelingSystem
                 textBoxWorkspace.Text = folderBrowserDialog1.SelectedPath + "\\";
                 //UpdatePreferences("Workspace", textBoxWorkspace.Text);
 
-                CheckFilesExist(oldWorspace);
+                //CheckFilesExist(oldWorspace);
             }
 
         }

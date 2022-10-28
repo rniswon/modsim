@@ -111,8 +111,14 @@ namespace RRModelingSystem
                     process.Start();
                     _standardOutput = process.StandardOutput;
                     standardOutputThread = startThread("StandardOutput", Path.Combine(Path.GetDirectoryName(_runFileName), $"MMS_Run{_runID}Log.txt"));
-                    SpinWait.SpinUntil(() => process.MainWindowHandle != IntPtr.Zero);
+                    //SpinWait.SpinUntil(() => process.MainWindowHandle != IntPtr.Zero);
+                    Thread.Sleep(100);  // <-- ugly hack
                     SetWindowText(process.MainWindowHandle, "MWC_MS_GSF_Run.exe - Run " + _runID);
+                    
+                    Dictionary<string, object> runInfo = new Dictionary<string, object>();
+                    runInfo.Add("ProcessID", process.Id);
+                    sqliteDB.UpdateRunsInfoTable(_runID, runInfo);
+
                     process.WaitForExit();
                     run = 0;
                 }
@@ -186,6 +192,7 @@ namespace RRModelingSystem
                 Dictionary<string, object> runInfo = new Dictionary<string, object>();
                 runInfo.Add("SimulationStatus", run == 0 ? 2 : 3);
                 runInfo.Add("LastAccess", DateTime.Now.ToString());
+                runInfo.Add("ProcessID", -1);
                 sqliteDB.UpdateRunsInfoTable(_runID, runInfo);
                 //UpdateRunInfo(_runID, run == 0 ? 2 : 3);
             }

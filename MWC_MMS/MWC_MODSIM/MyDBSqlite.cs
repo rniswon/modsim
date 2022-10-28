@@ -475,6 +475,7 @@ namespace RTI.CWR.MWC_MODSIMUtils
                                     RunType	TEXT,
                                     RiparianON INTEGER,
                                     ModsimFile	TEXT,
+                                    ProcessID INTEGER,
 	                                PRIMARY KEY(runID AUTOINCREMENT)
                                 )";
                     ExecuteNonQuery(sql);

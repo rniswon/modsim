@@ -311,7 +311,7 @@ namespace RRModelingSystem
                 runInfo.Add("RiparianON", checkBoxRiparianLogic.Checked);
                 runInfo.Add("OutputDBScenario", false);
                 runInfo.Add("RunType", radioButtonMODSIMOnly.Checked ? "MODSIMOnly" : "MODSIM-GSFLOW");
-                runInfo.Add("ModsimFile", Path.GetFileName(runFile));
+                runInfo.Add("ModsimFile", runFile.Replace(_workSpace, ""));
                 sqliteDB.UpdateRunsInfoTable(runid, runInfo);
                 //UpdateRunInfo(_runid, 1, _runFile);
             }
