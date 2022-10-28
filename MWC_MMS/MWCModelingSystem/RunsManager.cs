@@ -64,7 +64,7 @@ namespace RRModelingSystem
             else
             {
                 btnAdaptDB.Enabled = false;
-                MessageOut("El archivo SQLITE no existe");
+                MessageOut("SQLITE File does not exist");
             }
         }
 
@@ -112,7 +112,8 @@ namespace RRModelingSystem
                 MessageOut("Select a SQLite database output with the 'Browse DB' button or select a row of text box.");
                 btnBrowseDB.Focus();
             }
-            else {
+            else 
+            {
                 string strConn, nomArchivo;
                 SQLiteDataReader prefsTbl1;
                 strConn = string.Format("Data Source={0};Version={1}", _workSpace + txtOutputDB.Text, 3);
@@ -158,6 +159,16 @@ namespace RRModelingSystem
                         }
                     }
                     c.Close();
+                }
+                try
+                {
+                    string sql2;
+                    sql2 = @"UPDATE [MMS_RunsInfo] SET OutputDBScenario = 1 WHERE BasePath LIKE '%" + nomArchivo + "%';";
+                    sqliteDB.ExecuteQuery(sql2);
+                }
+                catch (Exception ex)
+                {
+                    MessageOut(ex.Message);
                 }
                 //MessageOut("Updated SQLite database output.");
             }
