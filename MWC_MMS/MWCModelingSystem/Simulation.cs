@@ -140,14 +140,14 @@ namespace RRModelingSystem
             //find output location and file name
 
             string runFile = GetActiveMODSIMFile(comboBoxMODSIMFile.Text, _ModsimFile);
-            if (runid >0)
+            if (runid >= 0)
             {
                 if (checkBoxUseInName.Checked)
                     runFile = runFile.Replace(".xy", $"_{textBoxScnName.Text}.xy");
                 runFile = runFile.Replace(".xy", $"_r{runid}.xy");
             }
 
-            if (runid >0 && comboBoxKeyword.Text != "")
+            if (runid >= 0 && comboBoxKeyword.Text != "")
             {
                 string folder = Path.Combine(Path.GetDirectoryName(runFile), comboBoxKeyword.Text);
                 if (!Directory.Exists(folder))
@@ -217,10 +217,12 @@ namespace RRModelingSystem
                     messageOut("\tActivating MODSIM-GSFLOW simulation mode...");
 
                     //Set input directories
-                    if (runid > 0)
+                    if (runid >= 0)
                     {
                         string inputFolder = Path.GetDirectoryName(_controlFile);
-                        CopyFilesRecursively(inputFolder, inputFolder + "_r" + runid,"output");
+                        string destFolder = inputFolder + "_r" + runid;
+                        RecursiveDelete(new DirectoryInfo(destFolder));
+                        CopyFilesRecursively(inputFolder, destFolder,"output");
                         runControlFile = Path.Combine(inputFolder + "_r" + runid, Path.GetFileName(_controlFile));
                         File.Move(runControlFile, runControlFile.Replace(".control", $"r{runid}.control"));
                         runControlFile = runControlFile.Replace(".control", $"r{runid}.control");
@@ -244,7 +246,7 @@ namespace RRModelingSystem
 
                     string[] namName = ctrHlpr.ReadKeyValue("modflow_name");
                     string namPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(runControlFile), namName[0]));
-                    if (runid > 0)
+                    if (runid >= 0)
                     {
                         File.Move(namPath, namPath.Replace(".nam", $"r{runid}.nam"));
                         namPath = namPath.Replace(".nam", $"r{runid}.nam");
@@ -256,7 +258,7 @@ namespace RRModelingSystem
                     {
                         string[] wellVals = namHlpr.ReadLineWithKeyValue("WEL");
                         string outputWELFile = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(runControlFile), wellVals[2]));
-                        if (runid > 0)
+                        if (runid >= 0)
                             outputWELFile = outputWELFile.Replace("SRP_mf_strm_dpl_v0_run.wel", $"SRP_mf_strm_dpl_v0_run{runid}.wel");
                         if (_rutaPumping == outputWELFile)
                         {
@@ -268,7 +270,7 @@ namespace RRModelingSystem
                     }
 
                     //Set ouput directories
-                    if (runid > 0)
+                    if (runid >= 0)
                     {
                         ctrHlpr.ReplaceString("output\\", $"output_r{runid}\\");
                         ctrHlpr.CreatePaths($"output_r{runid}\\");
@@ -302,7 +304,10 @@ namespace RRModelingSystem
                 Dictionary<string, object> runInfo = new Dictionary<string, object>();
                 runInfo.Add("SimulationStatus", 1);
                 runInfo.Add("LastAccess", DateTime.Now.ToString());
-                runInfo.Add("BasePath", runFile.Replace(_workSpace, ""));
+                if(radioButtonMODSIMOnly.Checked)
+                    runInfo.Add("BasePath", runFile.Replace(_workSpace, ""));
+                else
+                    runInfo.Add("BasePath", runControlFile.Replace(_workSpace, ""));
                 runInfo.Add("RiparianON", checkBoxRiparianLogic.Checked);
                 runInfo.Add("OutputDBScenario", false);
                 runInfo.Add("RunType", radioButtonMODSIMOnly.Checked ? "MODSIMOnly" : "MODSIM-GSFLOW");
@@ -333,6 +338,21 @@ namespace RRModelingSystem
                 
             Cursor.Current = Cursors.Default;
 
+        }
+
+        private static void RecursiveDelete(DirectoryInfo baseDir)
+        {
+            if (baseDir != null)
+            {
+                if (!baseDir.Exists)
+                    return;
+
+                foreach (var dir in baseDir.EnumerateDirectories())
+                {
+                    RecursiveDelete(dir);
+                }
+                baseDir.Delete(true);
+            }
         }
 
         private static void CopyFilesRecursively(string sourcePath, string targetPath, string omitFolderContaining ="")
@@ -523,31 +543,32 @@ namespace RRModelingSystem
                 messageOut($"Copying base file of pumping flows {outputWELFile}");
             }
         }
-        /// <summary>
-        /// update run status in project database
-        /// </summary>
-        /// <param name="runid"></param>
-        private void UpdateRunInfo(int runid, int status,string basePath)
-        {
-            try
-            {
-                string sql = "SELECT * FROM MMS_RunsInfo WHERE (RunID = " + runid + ")";
 
-                DataTable runInfoDT = sqliteDB.GetTableFromDB(sql, "MMS_RunsInfo");
+        ///// <summary>
+        ///// update run status in project database
+        ///// </summary>
+        ///// <param name="runid"></param>
+        //private void UpdateRunInfo(int runid, int status,string basePath)
+        //{
+        //    try
+        //    {
+        //        string sql = "SELECT * FROM MMS_RunsInfo WHERE (RunID = " + runid + ")";
 
-                if (runInfoDT.Rows.Count > 0)
-                {
-                    runInfoDT.Rows[0]["SimulationStatus"] = status; // runIssues ? 3 : 2;
-                    runInfoDT.Rows[0]["LastAccess"] = DateTime.Now.ToString();
-                    runInfoDT.Rows[0]["BasePath"] = basePath.Replace(_workSpace, "");
-                    sqliteDB.UpdateTableFromDB(runInfoDT);
-                }
-            }
-            catch (Exception ex)
-            {
-                messageOut(String.Concat("ERROR: ",ex.Message));
-            } 
-        }
+        //        DataTable runInfoDT = sqliteDB.GetTableFromDB(sql, "MMS_RunsInfo");
+
+        //        if (runInfoDT.Rows.Count > 0)
+        //        {
+        //            runInfoDT.Rows[0]["SimulationStatus"] = status; // runIssues ? 3 : 2;
+        //            runInfoDT.Rows[0]["LastAccess"] = DateTime.Now.ToString();
+        //            runInfoDT.Rows[0]["BasePath"] = basePath.Replace(_workSpace, "");
+        //            sqliteDB.UpdateTableFromDB(runInfoDT);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        messageOut(String.Concat("ERROR: ",ex.Message));
+        //    } 
+        //}
 
         private string BuildOptionsTxt(string comboPumpingText)
         {
@@ -719,7 +740,7 @@ namespace RRModelingSystem
             {
                 toolStripProgressBar1.GetCurrentParent().BeginInvoke((Action)(() =>
                 {
-                    toolStripProgressBar1.Value = 0;
+                    toolStripProgressBar1.Value = value;
                     //toolStripStatusLabel1.Text = "Done.";
                 }));
                 SetStatusStripProgressValueDelegate d =

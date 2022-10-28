@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,8 +24,8 @@ namespace RRModelingSystem
         private int _runID;
         private bool _riparianON;
         private int _riparianCost;
-        private Stopwatch sw ;
-        private List<string> errorLines,maxLines;
+        private Stopwatch sw;
+        private List<string> errorLines, maxLines;
 
         private Thread standardOutputThread;
         private Process process;
@@ -38,7 +39,11 @@ namespace RRModelingSystem
 
         public event ProcessMessage messageOut; // event
 
-        public SimulationRun(int runID, string logFileName,string runFileName, bool riparianLogicOn,int riparianCost, string MMS_db, List<string> runMgs=null)
+        [DllImport("user32.dll")]
+        static extern int SetWindowText(IntPtr hWnd, string text);
+
+
+        public SimulationRun(int runID, string logFileName, string runFileName, bool riparianLogicOn, int riparianCost, string MMS_db, List<string> runMgs = null)
         {
             InitializeComponent();
             _fileName = logFileName;
@@ -53,7 +58,7 @@ namespace RRModelingSystem
             {
 
                 richTextBox1.Lines = runMgs.ToArray();
-                buttonUpdate.Enabled = false;
+                SetButtonEnabled(buttonUpdate, false);
                 toolStripStatusLabel1.Text = "Simulation completed.";
                 sw.Stop();
                 _runMsgs = runMgs;
@@ -90,7 +95,7 @@ namespace RRModelingSystem
             toolStripStatusLabel1.Text = "Simulation initialized.";
             standardOutputThread = null;
             //Adding 'plug-ins'
-            if (Path.GetExtension(_runFileName) ==".control")
+            if (Path.GetExtension(_runFileName) == ".control")
             {
                 try
                 {
@@ -102,9 +107,12 @@ namespace RRModelingSystem
                     process.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;
                     process.StartInfo.UseShellExecute = false;
                     process.StartInfo.RedirectStandardOutput = true;
+                    SetButtonEnabled(buttonStopRun, true);
                     process.Start();
                     _standardOutput = process.StandardOutput;
                     standardOutputThread = startThread("StandardOutput", Path.Combine(Path.GetDirectoryName(_runFileName), $"MMS_Run{_runID}Log.txt"));
+                    SpinWait.SpinUntil(() => process.MainWindowHandle != IntPtr.Zero);
+                    SetWindowText(process.MainWindowHandle, "MWC_MS_GSF_Run.exe - Run " + _runID);
                     process.WaitForExit();
                     run = 0;
                 }
@@ -129,7 +137,7 @@ namespace RRModelingSystem
                         toolStripProgressBar1.Value = 0;
                         toolStripStatusLabel1.Text = "Done.";
                     }));
-                    
+
                 }
             }
             else
@@ -137,7 +145,7 @@ namespace RRModelingSystem
                 try
                 {
                     _ActiveModel = new Model();
-                    
+
                     OnMessageOut($"Reading MODSIM file: {_runFileName}");
                     XYFileReader.Read(_ActiveModel, _runFileName);
 
@@ -161,7 +169,7 @@ namespace RRModelingSystem
                     {
                         OnMessageOut($"Sucessful completion of the MODSIM run!");
                     }
-                    
+
                 }
                 catch (Exception ex)
                 {
@@ -181,22 +189,26 @@ namespace RRModelingSystem
                 sqliteDB.UpdateRunsInfoTable(_runID, runInfo);
                 //UpdateRunInfo(_runID, run == 0 ? 2 : 3);
             }
-            if (buttonRestart.InvokeRequired)
-            {
-                buttonRestart.BeginInvoke((Action)(() =>
-                {
-                    buttonRestart.Enabled = true;
-                }));
-            } 
-            else
-                buttonRestart.Enabled = true;
+            SetButtonEnabled(buttonRestart, true);
+        }
 
+        private void SetButtonEnabled(Button button, bool v)
+        {
+            if (button.InvokeRequired)
+            {
+                button.BeginInvoke((Action)(() =>
+                {
+                    button.Enabled = v;
+                }));
+            }
+            else
+                button.Enabled = v;
         }
 
         private void OnMessageOut(string message)
         {
             messageOut($"\t [r:{_runID}] {message}");
-            
+
         }
 
         private void OnMessageRunOut(string message)
@@ -259,8 +271,7 @@ namespace RRModelingSystem
             {
                 toolStripProgressBar1.GetCurrentParent().BeginInvoke((Action)(() =>
                 {
-                    toolStripProgressBar1.Value = 0;
-                    //toolStripStatusLabel1.Text = "Done.";
+                    toolStripProgressBar1.Value = value;
                 }));
                 SetStatusStripProgressValueDelegate d =
                     new SetStatusStripProgressValueDelegate(SetStatusStripProgressValue);
@@ -328,17 +339,17 @@ namespace RRModelingSystem
 
                 if (line.ToLower().Contains("max"))
                     maxLines.Add(line);
-                if(line.ToLower().Contains("elapsed run"))
+                if (line.ToLower().Contains("elapsed run"))
                 {
                     var item = listView1.FindItemWithText("GSFLOW");
                     if (item == null)
                     {
-                        item = listView1.Items.Add((new ListViewItem(new string[] { "GSFLOW Time elapsed : ", line})));
+                        item = listView1.Items.Add((new ListViewItem(new string[] { "GSFLOW Time elapsed : ", line })));
                     }
                     else
                         item.SubItems[1].Text = line;
                 }
-                if(line.ToLower().Contains("elapsed: "))
+                if (line.ToLower().Contains("elapsed: "))
                 {
                     var item = listView1.FindItemWithText("MODSIM Time elapsed");
                     if (item == null)
@@ -352,7 +363,7 @@ namespace RRModelingSystem
                 {
                     toolStripProgressBar1.Value = Convert.ToInt32(line.Replace("percent done ", ""));
                 }
-                if (line.StartsWith("Done"))
+                if (line == "Done")
                 {
                     toolStripProgressBar1.Value = 0;
                     toolStripStatusLabel1.Text = "Simulation completed.";
@@ -393,9 +404,10 @@ namespace RRModelingSystem
         private void buttonRestart_Click(object sender, EventArgs e)
         {
             _runMsgs = new List<string>();
-            if(_fileName!="")
+            if (_fileName != "")
                 File.WriteAllText(_fileName, String.Empty);
-            buttonRestart.Enabled = false;
+            SetButtonEnabled(buttonRestart, false);
+            richTextBox1.Clear();
             using (BackgroundWorker bgworker = new BackgroundWorker())
             {
                 bgworker.DoWork += StartSimulation;
@@ -407,10 +419,37 @@ namespace RRModelingSystem
         {
             if (process != null)
             {
-                process.Close();
-                process.Dispose();
-
+                Console.WriteLine("****** Processed killed by the user ********");
+                process.Kill();
+                process = null;
+                SetButtonEnabled(buttonStopRun, false);
             }
+        }
+
+        public bool IsProcessOpen(string name)
+        {
+            //here we're going to get a list of all running processes on
+            //the computer
+            foreach (Process clsProcess in Process.GetProcesses())
+            {
+                //now we're going to see if any of the running processes
+                //match the currently running processes. Be sure to not
+                //add the .exe to the name you provide, i.e: NOTEPAD,
+                //not NOTEPAD.EXE or false is always returned even if
+                //notepad is running.
+                //Remember, if you have the process running more than once, 
+                //say IE open 4 times the loop thr way it is now will close all 4,
+                //if you want it to just close the first one it finds
+                //then add a return; after the Kill
+                if (clsProcess.ProcessName.Contains(name))
+                {
+                    //if the process is found to be running then we
+                    //return a true
+                    return true;
+                }
+            }
+            //otherwise we return a false
+            return false;
         }
 
         private void UpdateTxtFile()
@@ -428,7 +467,7 @@ namespace RRModelingSystem
             {
                 richTextBox1.Lines = _runMsgs.ToArray();
             }
-            
+
             var item = listView1.FindItemWithText("Time elapsed (Run start) : ");
             if (item == null)
                 listView1.Items.Add(new ListViewItem(new string[] { "Time elapsed (Run start) : ", sw.Elapsed.TotalSeconds.ToString() + " sec." }));
@@ -436,6 +475,11 @@ namespace RRModelingSystem
                 item.SubItems[1].Text = sw.Elapsed.TotalSeconds.ToString() + " sec.";
 
             AnalyzeMsgs();
+
+            if (process != null)
+            {
+                SetButtonEnabled(buttonStopRun, true);
+            }
         }
     }
 }
