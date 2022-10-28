@@ -329,13 +329,13 @@ namespace RRModelingSystem
             buttonExecuteModel.Enabled = false;
             pictureBoxStatus.Image = Resources.icons8_error_64;
             m_ActiveModel = null;
-            if (radioButtonMMSRun.Checked)
-                comboBoxMODSIMFile_SelectedIndexChanged(null, null);
-            else
-            {   
-                //comboBoxMODSIMFile.Text = "";
-                //comboBoxMODSIMFile.SelectedIndex = -1;
-            }
+            //if (radioButtonMMSRun.Checked)
+            //    comboBoxMODSIMFile_SelectedIndexChanged(null, null);
+            //else
+            //{   
+            //    //comboBoxMODSIMFile.Text = "";
+            //    //comboBoxMODSIMFile.SelectedIndex = -1;
+            //}
                 
             Cursor.Current = Cursors.Default;
 
