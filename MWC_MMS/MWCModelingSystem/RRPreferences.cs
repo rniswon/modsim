@@ -61,7 +61,7 @@ namespace RRModelingSystem
             if (!m_DBUtils.IsColumnsExist("MMS_RunsInfo", "RiparianON"))
                 m_DBUtils.ExecuteNonQuery(@"ALTER TABLE MMS_RunsInfo ADD RiparianON INTEGER NULL;");
             if (!m_DBUtils.IsColumnsExist("MMS_RunsInfo", "ModsimFile"))
-                m_DBUtils.ExecuteNonQuery(@"ALTER TABLE MMS_RunsInfo ADD MpodsimFile TEXT NULL;");
+                m_DBUtils.ExecuteNonQuery(@"ALTER TABLE MMS_RunsInfo ADD ModsimFile TEXT NULL;");
         }
 
         private void LoadPreferences()
