@@ -941,8 +941,14 @@ namespace RRModelingSystem
 
                 if(!simDatesSet)
                 {
-                    dateTimePickerStart.Value = m_ActiveModel.TimeStepManager.startingDate;
-                    dateTimePickerEnd.Value = m_ActiveModel.TimeStepManager.endingDate;
+                    dateTimePickerStart.BeginInvoke((Action)(() =>
+                    {
+                        dateTimePickerStart.Value = m_ActiveModel.TimeStepManager.startingDate;
+                    }));
+                    dateTimePickerEnd.BeginInvoke((Action)(() =>
+                    {
+                        dateTimePickerEnd.Value = m_ActiveModel.TimeStepManager.endingDate;
+                    }));
                     messageOut("\tSimulation dates set from MODSIM active file.");
                 }
 
