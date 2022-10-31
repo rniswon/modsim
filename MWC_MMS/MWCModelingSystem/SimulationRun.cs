@@ -71,6 +71,7 @@ namespace RRModelingSystem
 
             sqliteDB = new MyDBSqlite(Path.Combine(MMS_db));
             sqliteDB.messageOut += OnMessageOut;
+
         }
 
         private void SimulationRun_Load(object sender, EventArgs e)
@@ -95,7 +96,7 @@ namespace RRModelingSystem
             toolStripStatusLabel1.Text = "Simulation initialized.";
             standardOutputThread = null;
             //Adding 'plug-ins'
-            if (Path.GetExtension(_runFileName) == ".control")
+            if (Path.GetExtension(_runFileName) == ".control" || Path.GetExtension(_runFileName) == ".xy")
             {
                 try
                 {
@@ -104,13 +105,14 @@ namespace RRModelingSystem
                     string riparianArgs = _riparianON ? $"-RiparianON {_riparianCost} " : "";
                     process.StartInfo.Arguments = riparianArgs + "\"" + Path.GetFileName(_runFileName) + "\"";
                     process.StartInfo.WorkingDirectory = Path.GetDirectoryName(_runFileName);
-                    process.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                     process.StartInfo.UseShellExecute = false;
                     process.StartInfo.RedirectStandardOutput = true;
                     SetButtonEnabled(buttonStopRun, true);
                     process.Start();
                     _standardOutput = process.StandardOutput;
                     standardOutputThread = startThread("StandardOutput", Path.Combine(Path.GetDirectoryName(_runFileName), $"MMS_Run{_runID}Log.txt"));
+                    _fileName = Path.Combine(Path.GetDirectoryName(_runFileName), $"MMS_Run{_runID}Log.txt");
                     //SpinWait.SpinUntil(() => process.MainWindowHandle != IntPtr.Zero);
                     Thread.Sleep(100);  // <-- ugly hack
                     SetWindowText(process.MainWindowHandle, "MWC_MS_GSF_Run.exe - Run " + _runID);
@@ -148,6 +150,7 @@ namespace RRModelingSystem
             }
             else
             {
+                // This is not used anymore - issues with static model in the simulation.cs!!!
                 try
                 {
                     _ActiveModel = new Model();
@@ -457,6 +460,19 @@ namespace RRModelingSystem
             }
             //otherwise we return a false
             return false;
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            UpdateTxtFile();
+        }
+
+        private void checkBoxAutoUpdate_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBoxAutoUpdate.Checked)
+                timer1.Start();
+            else
+                timer1.Stop();
         }
 
         private void UpdateTxtFile()

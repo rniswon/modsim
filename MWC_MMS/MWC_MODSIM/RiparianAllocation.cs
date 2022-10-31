@@ -154,60 +154,75 @@ namespace RTI.CWR.MWC_MODSIMUtils
             RipAllocLoopCount = RipAllocLoopCount + 1;
 
 
-
-            if ((minSP == 1 && UBRed >= 0) || (minSP < 1 && UBRed < 0) || (minSP == 1 && UBPerc == 1) || (minSP == 0 && UBPerc < (1 / (m_Model.ScaleFactor)))) //If True -- we want to KEEP moving in the direction of UBRed
+            if (RipAllocLoopCount < m_Model.maxit)
             {
-                
-                //If we have met precision for P, implement LOCK for users where SP = MinSP AND 
-                if ((Math.Abs(UBRed) < 1 / (m_Model.ScaleFactor ) && (minSP < 0.99999 && UBRed < 0)) || (minSP == 1 && UBPerc == 1) )
+
+                if ((minSP == 1 && UBRed >= 0) || (minSP < 1 && UBRed < 0) || (minSP == 1 && UBPerc == 1) || (minSP == 0 && UBPerc < (1 / (m_Model.ScaleFactor)))) //If True -- we want to KEEP moving in the direction of UBRed
                 {
 
-                    messageOutRun($"   ---");
-                    foreach (string name in riparianLinks.Keys)
+                    //If we have met precision for P, implement LOCK for users where SP = MinSP AND 
+                    if ((Math.Abs(UBRed) < 1 / (m_Model.ScaleFactor) && (minSP < 0.99999 && UBRed < 0)) || (minSP == 1 && UBPerc == 1))
                     {
-                        if ((riparianLinks[name].shortPercent < 1 && riparianLinks[name].clusterLocked == false) || (riparianLinks[name].shortPercent == 1 && UBPerc == 1 && riparianLinks[name].clusterLocked == false))
+
+                        messageOutRun($"   ---");
+                        foreach (string name in riparianLinks.Keys)
                         {
+                            if ((riparianLinks[name].shortPercent < 1 && riparianLinks[name].clusterLocked == false) || (riparianLinks[name].shortPercent == 1 && UBPerc == 1 && riparianLinks[name].clusterLocked == false))
+                            {
 
-                            //if(riparianLinks[name].GetRiverDWSFlow()==0) 
+                                //if(riparianLinks[name].GetRiverDWSFlow()==0) 
 
-                            //Implement upstream navigation + locking logic here
+                                //Implement upstream navigation + locking logic here
 
-                            //flag upstream 
-                            //flagUpstream(riparianLinks[name].riparianLink.from);
-                            riparianLinks[name].clusterLocked = true;
-                            riparianLinks[name].riparianLink.mlInfo.cost = -50999;
-                            countLocked += 1;
-                            messageOutRun($"   right {name} locked in riparian processing. Set to: {UBPerc * 100}%");
-                            messageOutRun($"      right:{Math.Round((double)riparianLinks[name].riparianLink.mlInfo.hiVariable[m_Model.mInfo.CurrentModelTimeStepIndex, 0])},flow:{riparianLinks[name].riparianLink.mlInfo.flow }, hi:{ riparianLinks[name].riparianLink.mlInfo.hi }");
+                                //flag upstream 
+                                //flagUpstream(riparianLinks[name].riparianLink.from);
+                                riparianLinks[name].clusterLocked = true;
+                                riparianLinks[name].riparianLink.mlInfo.cost = -50999;
+                                countLocked += 1;
+                                messageOutRun($"   right {name} locked in riparian processing. Set to: {UBPerc * 100}%");
+                                messageOutRun($"      right:{Math.Round((double)riparianLinks[name].riparianLink.mlInfo.hiVariable[m_Model.mInfo.CurrentModelTimeStepIndex, 0])},flow:{riparianLinks[name].riparianLink.mlInfo.flow }, hi:{ riparianLinks[name].riparianLink.mlInfo.hi }");
+                            }
+
+                        }
+                        if (countLocked == riparianLinks.Count)
+                        {
+                            messageOutRun($"   riparian rights set to: {(UBPerc * 100).ToString("0.####")}%");
+                            //Accept convergence and move to the next time step
+                            m_Model.mInfo.convg = true;
+                            RipAllocLoopCount = 0;
+                            countLocked = 0;
+
+
                         }
 
+                        //Reset UBRed        
+                        UBRed = 0.1;
                     }
-                    if (countLocked == riparianLinks.Count)
-                    {
-                        messageOutRun($"   riparian rights set to: {UBPerc * 100}%");
-                        //Accept convergence and move to the next time step
-                        m_Model.mInfo.convg = true;
-                        RipAllocLoopCount = 0;
-                        countLocked = 0;
-
-                        
-                    }
-
-                    //Reset UBRed        
-                    UBRed = 0.1;
                 }
-            }
+                else
+                {
+                    //allocation is lower than expected.
+                    //  diversion restriction it too high
+
+                    UBRed = UBRed * -0.5;
+                }
+                if(!m_Model.mInfo.convg)
+                    m_Model.mInfo.Iteration = 0;
+            } 
             else
             {
-                //allocation is lower than expected.
-                //  diversion restriction it too high
-
-                UBRed = UBRed * -0.5;
+                messageOutRun($"\tWARNING: Ran into maximum number of iterations (Riparian Logic). The model has not converged.");
+                int countUnlocked = 0;
+                foreach (string name in riparianLinks.Keys)
+                {
+                    if (riparianLinks[name].clusterLocked == false)
+                        countUnlocked += 1;
+                }
+                messageOutRun($"\t{countUnlocked} of {riparianLinks.Count} have not been locked.\nCurrent riparian fraction set to {(UBPerc*100).ToString("0.####")}%");
+                m_Model.mInfo.convg = true;
+                RipAllocLoopCount = 0;
+                countLocked = 0;
             }
-            
-         m_Model.mInfo.Iteration = 0;
-
-
         }
 
         //private  void flagUpstream(Node fromNode, Link currentDSLink)
