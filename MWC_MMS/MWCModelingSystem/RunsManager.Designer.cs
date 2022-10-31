@@ -34,10 +34,12 @@ namespace RRModelingSystem
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.textBoxHeading = new System.Windows.Forms.TextBox();
+            this.gBoxAdaptDB = new System.Windows.Forms.GroupBox();
             this.txtOutputDB = new System.Windows.Forms.TextBox();
             this.btnAdaptDB = new System.Windows.Forms.Button();
             this.btnBrowseDB = new System.Windows.Forms.Button();
-            this.gBoxAdaptDB = new System.Windows.Forms.GroupBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -48,6 +50,7 @@ namespace RRModelingSystem
             this.splitContainer2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.gBoxAdaptDB.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer1
@@ -63,7 +66,8 @@ namespace RRModelingSystem
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.gBoxAdaptDB);
+            this.splitContainer1.Panel2.Controls.Add(this.groupBox2);
+            this.splitContainer1.Panel2.Controls.Add(this.groupBox1);
             this.splitContainer1.Size = new System.Drawing.Size(725, 488);
             this.splitContainer1.SplitterDistance = 299;
             this.splitContainer1.TabIndex = 0;
@@ -127,19 +131,34 @@ namespace RRModelingSystem
             this.textBoxHeading.TabStop = false;
             this.textBoxHeading.Text = "Run Preferences";
             // 
+            // gBoxAdaptDB
+            // 
+            this.gBoxAdaptDB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.gBoxAdaptDB.Controls.Add(this.txtOutputDB);
+            this.gBoxAdaptDB.Controls.Add(this.btnAdaptDB);
+            this.gBoxAdaptDB.Controls.Add(this.btnBrowseDB);
+            this.gBoxAdaptDB.Location = new System.Drawing.Point(6, 10);
+            this.gBoxAdaptDB.Name = "gBoxAdaptDB";
+            this.gBoxAdaptDB.Size = new System.Drawing.Size(502, 62);
+            this.gBoxAdaptDB.TabIndex = 0;
+            this.gBoxAdaptDB.TabStop = false;
+            this.gBoxAdaptDB.Text = "Adapt SQLite DB Output";
+            // 
             // txtOutputDB
             // 
-            this.txtOutputDB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.txtOutputDB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.txtOutputDB.Location = new System.Drawing.Point(6, 24);
             this.txtOutputDB.Name = "txtOutputDB";
             this.txtOutputDB.ReadOnly = true;
-            this.txtOutputDB.Size = new System.Drawing.Size(259, 20);
+            this.txtOutputDB.Size = new System.Drawing.Size(331, 20);
             this.txtOutputDB.TabIndex = 3;
             // 
             // btnAdaptDB
             // 
             this.btnAdaptDB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnAdaptDB.Location = new System.Drawing.Point(346, 21);
+            this.btnAdaptDB.Location = new System.Drawing.Point(421, 22);
             this.btnAdaptDB.Name = "btnAdaptDB";
             this.btnAdaptDB.Size = new System.Drawing.Size(75, 23);
             this.btnAdaptDB.TabIndex = 1;
@@ -151,7 +170,7 @@ namespace RRModelingSystem
             // btnBrowseDB
             // 
             this.btnBrowseDB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnBrowseDB.Location = new System.Drawing.Point(271, 22);
+            this.btnBrowseDB.Location = new System.Drawing.Point(343, 22);
             this.btnBrowseDB.Name = "btnBrowseDB";
             this.btnBrowseDB.Size = new System.Drawing.Size(75, 23);
             this.btnBrowseDB.TabIndex = 2;
@@ -159,17 +178,27 @@ namespace RRModelingSystem
             this.btnBrowseDB.UseVisualStyleBackColor = true;
             this.btnBrowseDB.Click += new System.EventHandler(this.btnBrowseDB_Click);
             // 
-            // gBoxAdaptDB
+            // groupBox1
             // 
-            this.gBoxAdaptDB.Controls.Add(this.txtOutputDB);
-            this.gBoxAdaptDB.Controls.Add(this.btnAdaptDB);
-            this.gBoxAdaptDB.Controls.Add(this.btnBrowseDB);
-            this.gBoxAdaptDB.Location = new System.Drawing.Point(3, 3);
-            this.gBoxAdaptDB.Name = "gBoxAdaptDB";
-            this.gBoxAdaptDB.Size = new System.Drawing.Size(427, 62);
-            this.gBoxAdaptDB.TabIndex = 4;
-            this.gBoxAdaptDB.TabStop = false;
-            this.gBoxAdaptDB.Text = "Adapt SQLite DB Output";
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.gBoxAdaptDB);
+            this.groupBox1.Location = new System.Drawing.Point(0, 0);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(514, 185);
+            this.groupBox1.TabIndex = 1;
+            this.groupBox1.TabStop = false;
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox2.Location = new System.Drawing.Point(520, 0);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(202, 185);
+            this.groupBox2.TabIndex = 2;
+            this.groupBox2.TabStop = false;
             // 
             // RunsManager
             // 
@@ -191,6 +220,7 @@ namespace RRModelingSystem
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.gBoxAdaptDB.ResumeLayout(false);
             this.gBoxAdaptDB.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -206,5 +236,7 @@ namespace RRModelingSystem
         private System.Windows.Forms.TextBox txtOutputDB;
         private System.Windows.Forms.Button btnBrowseDB;
         private System.Windows.Forms.GroupBox gBoxAdaptDB;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.GroupBox groupBox1;
     }
 }

@@ -48,6 +48,17 @@ namespace RTI.CWR.MWC_MODSIMUtils
             this.dbFile = dbfile;
         }
 
+        public bool IsColumnsExist(string tableName, string columnName)
+        {
+            string sql = $"SELECT * FROM [{tableName}] LIMIT 1";
+            DataTable dbTbl = GetTableFromDB(sql, tableName);
+            if (dbTbl.Columns.Contains(columnName))
+            {
+                return true;
+            }
+            return false;
+        }
+
         private string GetSqLiteConnectionString(string dbFileName)
         {
             SQLiteConnectionStringBuilder conn = new SQLiteConnectionStringBuilder
@@ -460,6 +471,11 @@ namespace RTI.CWR.MWC_MODSIMUtils
 	                                Notes	TEXT,
 	                                Options	TEXT,
 	                                BasePath	TEXT,
+                                    OutputDBScenario	INTEGER, 
+                                    RunType	TEXT,
+                                    RiparianON INTEGER,
+                                    ModsimFile	TEXT,
+                                    ProcessID INTEGER,
 	                                PRIMARY KEY(runID AUTOINCREMENT)
                                 )";
                     ExecuteNonQuery(sql);
@@ -564,6 +580,30 @@ namespace RTI.CWR.MWC_MODSIMUtils
             }
 
             return true;
+        }
+
+        public void UpdateRunsInfoTable(int runid, Dictionary<string, object> valuePairs)
+        {
+            try
+            {
+                string sql = "SELECT * FROM MMS_RunsInfo WHERE (RunID = " + runid + ")";
+
+                DataTable runInfoDT = GetTableFromDB(sql, "MMS_RunsInfo");
+
+                if (runInfoDT.Rows.Count > 0)
+                {
+                    foreach (string key in valuePairs.Keys)
+                    {
+                        if(key!= "runID")
+                            runInfoDT.Rows[0][key] = valuePairs[key];
+                    }
+                    UpdateTableFromDB(runInfoDT);
+                }
+            }
+            catch (Exception ex)
+            {
+                messageOut(String.Concat("ERROR: ", ex.Message));
+            }
         }
 
         #region IDisposable Support
