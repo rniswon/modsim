@@ -181,7 +181,10 @@ namespace MODSIM_GSFLOW_C
             }
             catch (Exception ex)
             {
-                messageOut(ex.Message);
+                if (messageOut != null)
+                    messageOut(ex.Message);
+                else
+                    Console.WriteLine(ex.Message);
                 //Console.ReadLine();
             }
         }
@@ -335,7 +338,9 @@ namespace MODSIM_GSFLOW_C
                 foreach (DataRow m_Row in swgwUtils.m_SyncTblSEG.Rows)// i = 0; i < MF_Acc_Dep.Length; i++)
                 {
                     //MF_Acc_Dep_Identifier[i] = (double) m_Row["iseg"];
-                    if (i != (int)(double.Parse(m_Row["iseg"].ToString()) - 1)) throw new Exception("Iseg doesn't match the index of the array");
+                    if (i != (int)(double.Parse(m_Row["iseg"].ToString()) - 1)) 
+                        throw new Exception($"Iseg {m_Row["iseg"].ToString()} doesn't match the index of the array");
+                    
                     MS_Flows[i] = 0;
                     IDivert[i] = (int)double.Parse(m_Row["Diversion"].ToString());
                     IRelease[i] = (int)double.Parse(m_Row["ResRelease"].ToString());
@@ -639,6 +644,32 @@ namespace MODSIM_GSFLOW_C
                 }
             }
 
+            //Reset Demands for the Ag package new iteration
+            if (myModel.mInfo.Iteration == 0)
+            {
+                for (int i = 0; i < swgwUtils.m_SyncTblSEG.Rows.Count; i++)
+                {
+                    //Setting the MODSIM demand to the value set from GSFLOW
+                    //Assumes that the demand is connected to the link mapped to the segment.
+                    if (int.Parse(swgwUtils.m_SyncTblSEG.Rows[i]["AgDem"].ToString()) == 1)
+                    {
+                        Node demNode = MS_Links[i].to;
+                        if (swgwUtils.m_SyncTblSEG.Rows[i]["AssocDem"].ToString() != "")
+                            demNode = myModel.FindNode(swgwUtils.m_SyncTblSEG.Rows[i]["AssocDem"].ToString());
+                        if (demNode != null && demNode.nodeType == NodeType.Demand)
+                        {
+                            int hydState = demNode.mnInfo.hydStateIndex;
+                            demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * accuracy / uConvToMODFLOW, 0);
+                            messageOut($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
+                        }
+                        //else
+                        //    messageOut($"Demand node {demNode.name} not found in the model. Skipping MODSIM demand processing.");
+
+                    }
+
+                }
+            }
+
         }
 
         private void assignDepAcc(String m_Name, double m_Value)
@@ -897,7 +928,7 @@ namespace MODSIM_GSFLOW_C
 
                             MS_GSF_converge = false;
 
-                            //Processing Deamnds from Ag.Package
+                            //Processing Demands from Ag.Package
                             for (int i = 0; i < swgwUtils.m_SyncTblSEG.Rows.Count; i++)
                             {
                                 //Setting the MODSIM demand to the value set from GSFLOW
@@ -925,7 +956,7 @@ namespace MODSIM_GSFLOW_C
                         {
                             gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand); // converged mode
                             afr = true;
-                            messageOut("           MS_GSF Last Iteration: " + swgwUtils.iterCount + " Total time steps: " + myModel.mInfo.CurrentModelTimeStepIndex);
+                            messageOut("           MS_GSF Last Iteration: " + swgwUtils.iterCount + " Total time steps: " + myModel.mInfo.CurrentModelTimeStepIndex + 1);
                             swgwUtils.iterCount = 0;
                             MFRunYet = false;
 

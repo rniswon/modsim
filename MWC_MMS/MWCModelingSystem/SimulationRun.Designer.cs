@@ -29,25 +29,30 @@ namespace RRModelingSystem
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Errors: 0");
             System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Convergence Issues: 0");
             this.textBoxHeading = new System.Windows.Forms.TextBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.buttonStopRun = new System.Windows.Forms.Button();
+            this.buttonRestart = new System.Windows.Forms.Button();
             this.listView1 = new System.Windows.Forms.ListView();
+            this.columnItem = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnValue = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.splitContainer3 = new System.Windows.Forms.SplitContainer();
+            this.comboBoxSearch = new System.Windows.Forms.ComboBox();
             this.button2 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.treeViewMsgGroup = new System.Windows.Forms.TreeView();
             this.richTextBox2 = new System.Windows.Forms.RichTextBox();
+            this.checkBoxAutoUpdate = new System.Windows.Forms.CheckBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.buttonUpdate = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
-            this.comboBoxSearch = new System.Windows.Forms.ComboBox();
-            this.columnItem = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnValue = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -89,6 +94,7 @@ namespace RRModelingSystem
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.checkBoxAutoUpdate);
             this.splitContainer1.Panel2.Controls.Add(this.statusStrip1);
             this.splitContainer1.Panel2.Controls.Add(this.buttonUpdate);
             this.splitContainer1.Panel2.Controls.Add(this.richTextBox1);
@@ -104,6 +110,8 @@ namespace RRModelingSystem
             // 
             // splitContainer2.Panel1
             // 
+            this.splitContainer2.Panel1.Controls.Add(this.buttonStopRun);
+            this.splitContainer2.Panel1.Controls.Add(this.buttonRestart);
             this.splitContainer2.Panel1.Controls.Add(this.listView1);
             // 
             // splitContainer2.Panel2
@@ -113,23 +121,60 @@ namespace RRModelingSystem
             this.splitContainer2.SplitterDistance = 198;
             this.splitContainer2.TabIndex = 1;
             // 
+            // buttonStopRun
+            // 
+            this.buttonStopRun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonStopRun.Enabled = false;
+            this.buttonStopRun.Location = new System.Drawing.Point(18, 111);
+            this.buttonStopRun.Name = "buttonStopRun";
+            this.buttonStopRun.Size = new System.Drawing.Size(86, 20);
+            this.buttonStopRun.TabIndex = 2;
+            this.buttonStopRun.Text = "Stop Run";
+            this.buttonStopRun.UseVisualStyleBackColor = true;
+            this.buttonStopRun.Click += new System.EventHandler(this.buttonStopRun_Click);
+            // 
+            // buttonRestart
+            // 
+            this.buttonRestart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonRestart.Enabled = false;
+            this.buttonRestart.Location = new System.Drawing.Point(110, 111);
+            this.buttonRestart.Name = "buttonRestart";
+            this.buttonRestart.Size = new System.Drawing.Size(86, 20);
+            this.buttonRestart.TabIndex = 1;
+            this.buttonRestart.Text = "Re-Start Run";
+            this.buttonRestart.UseVisualStyleBackColor = true;
+            this.buttonRestart.Click += new System.EventHandler(this.buttonRestart_Click);
+            // 
             // listView1
             // 
+            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnItem,
             this.columnValue});
-            this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(0, 0);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(198, 134);
+            this.listView1.Size = new System.Drawing.Size(198, 109);
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
             // 
+            // columnItem
+            // 
+            this.columnItem.Text = "Item";
+            this.columnItem.Width = 65;
+            // 
+            // columnValue
+            // 
+            this.columnValue.Text = "Value";
+            this.columnValue.Width = 126;
+            // 
             // splitContainer3
             // 
             this.splitContainer3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer3.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
             this.splitContainer3.Location = new System.Drawing.Point(0, 0);
             this.splitContainer3.Name = "splitContainer3";
             this.splitContainer3.Orientation = System.Windows.Forms.Orientation.Horizontal;
@@ -147,6 +192,16 @@ namespace RRModelingSystem
             this.splitContainer3.Size = new System.Drawing.Size(345, 134);
             this.splitContainer3.SplitterDistance = 48;
             this.splitContainer3.TabIndex = 0;
+            // 
+            // comboBoxSearch
+            // 
+            this.comboBoxSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBoxSearch.FormattingEnabled = true;
+            this.comboBoxSearch.Location = new System.Drawing.Point(179, 21);
+            this.comboBoxSearch.Name = "comboBoxSearch";
+            this.comboBoxSearch.Size = new System.Drawing.Size(134, 21);
+            this.comboBoxSearch.TabIndex = 4;
             // 
             // button2
             // 
@@ -192,8 +247,21 @@ namespace RRModelingSystem
             this.richTextBox2.TabIndex = 0;
             this.richTextBox2.Text = "";
             // 
+            // checkBoxAutoUpdate
+            // 
+            this.checkBoxAutoUpdate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkBoxAutoUpdate.AutoSize = true;
+            this.checkBoxAutoUpdate.Location = new System.Drawing.Point(381, 4);
+            this.checkBoxAutoUpdate.Name = "checkBoxAutoUpdate";
+            this.checkBoxAutoUpdate.Size = new System.Drawing.Size(86, 17);
+            this.checkBoxAutoUpdate.TabIndex = 3;
+            this.checkBoxAutoUpdate.Text = "Auto Update";
+            this.checkBoxAutoUpdate.UseVisualStyleBackColor = true;
+            this.checkBoxAutoUpdate.CheckedChanged += new System.EventHandler(this.checkBoxAutoUpdate_CheckedChanged);
+            // 
             // statusStrip1
             // 
+            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripProgressBar1,
             this.toolStripStatusLabel1});
@@ -236,25 +304,10 @@ namespace RRModelingSystem
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "";
             // 
-            // comboBoxSearch
+            // timer1
             // 
-            this.comboBoxSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBoxSearch.FormattingEnabled = true;
-            this.comboBoxSearch.Location = new System.Drawing.Point(179, 21);
-            this.comboBoxSearch.Name = "comboBoxSearch";
-            this.comboBoxSearch.Size = new System.Drawing.Size(134, 21);
-            this.comboBoxSearch.TabIndex = 4;
-            // 
-            // columnItem
-            // 
-            this.columnItem.Text = "Item";
-            this.columnItem.Width = 65;
-            // 
-            // columnValue
-            // 
-            this.columnValue.Text = "Value";
-            this.columnValue.Width = 126;
+            this.timer1.Interval = 4000;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // SimulationRun
             // 
@@ -305,5 +358,9 @@ namespace RRModelingSystem
         private System.Windows.Forms.ColumnHeader columnItem;
         private System.Windows.Forms.ColumnHeader columnValue;
         public System.Windows.Forms.ListView listView1;
+        private System.Windows.Forms.Button buttonRestart;
+        private System.Windows.Forms.Button buttonStopRun;
+        private System.Windows.Forms.CheckBox checkBoxAutoUpdate;
+        private System.Windows.Forms.Timer timer1;
     }
 }

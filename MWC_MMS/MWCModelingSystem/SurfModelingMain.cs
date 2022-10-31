@@ -9,10 +9,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Data.SQLite;
 
 namespace RRModelingSystem
 {
-    public delegate void ProcessSimulationRum(int runID, string fileName, List<string> MODSIMMsgs);  // delegate
+    public delegate void ProcessSimulationRum(int runID, string logFileName, string runFileName, bool riparianLogicOn, int riparianCost, List<string> runMgs = null);  // delegate
     public partial class RRSurfModelingMain : Form
     {
         private Simulation m_SimUserControl;
@@ -73,15 +74,14 @@ namespace RRModelingSystem
                                 treeView1_AfterSelect(null, null);
                                 break;
                             }
-                            string pumpFile = "";
-                            if(m_RRPreferences.textBoxPumpingFile.Text!="")
-                                pumpFile = Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxPumpingFile.Text);
-                            m_SimUserControl = new Simulation(Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMODSIMFile.Text),
-                                                                Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxSyncingDB.Text),
+                            
+                            m_SimUserControl = new Simulation( m_RRPreferences.textBoxMODSIMFile.Text,
+                                                                m_RRPreferences.textBoxSyncingDB.Text,
                                                                 int.Parse(m_RRPreferences.textBoxPREFSRiparianCost.Text),
-                                                                Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMMSDatabase.Text),
-                                                                Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxControlFile.Text),
-                                                                pumpFile);
+                                                                m_RRPreferences.textBoxMMSDatabase.Text,
+                                                                m_RRPreferences.textBoxControlFile.Text,
+                                                                m_RRPreferences.textBoxPumpingFile.Text,
+                                                                m_RRPreferences.textBoxWorkspace.Text  );
                             m_SimUserControl.messageOut += ProcessMessage;
                             m_SimUserControl.simulationStarted += startSimulationRunWindow;
                             ProcessMessage($"Base MODSIM File: {m_RRPreferences.textBoxMODSIMFile.Text}");
@@ -94,8 +94,9 @@ namespace RRModelingSystem
                     case "Runs Manager":
                         if (m_RunsManager == null || m_RRPreferences.hasChanges)
                         {
-                            m_RunsManager = new RunsManager(Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMMSDatabase.Text));
-                            m_RunsManager.messageOut += ProcessMessage;
+                            m_RunsManager = new RunsManager( m_RRPreferences.textBoxMMSDatabase.Text,
+                                m_RRPreferences.textBoxWorkspace.Text);
+                            m_RunsManager.MessageOut += ProcessMessage;
                             
                         }
                         splitContainer1.Panel2.Controls.Add(m_RunsManager);
@@ -119,10 +120,12 @@ namespace RRModelingSystem
             }
         }
 
-        private void startSimulationRunWindow(int runID, string fileName,List<string> runMgs)
+        private void startSimulationRunWindow(int runID, string logFileName, string runFileName, bool riparianLogicOn, int riparianCost, List<string> runMgs = null)
         {
             string nodeName = "Run: " + runID.ToString();
-            SimulationRun sRWin = new SimulationRun(runID, fileName,runMgs);
+            SimulationRun sRWin = new SimulationRun(runID, logFileName, runFileName, riparianLogicOn, riparianCost,
+                                                    Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMMSDatabase.Text),runMgs);
+            sRWin.messageOut += ProcessMessage;
             if (simRunWindows.ContainsKey(nodeName))
                 simRunWindows[nodeName] = sRWin;
             else
@@ -133,6 +136,8 @@ namespace RRModelingSystem
                     treeView1.Nodes["Node2"].Nodes.Add(nodeName, nodeName);
                 }));
             }
+            //Start simulation worker
+            sRWin.StartSimulation(null,null);
         }
 
         private void ProcessMessage(string msg)
@@ -145,7 +150,7 @@ namespace RRModelingSystem
                     richTextBoxMsgs.SelectionColor = richTextBoxMsgs.ForeColor;
                     if (msg.ToLower().Contains("error"))
                         richTextBoxMsgs.SelectionColor = System.Drawing.Color.Red;
-                    if (msg.ToLower().StartsWith("warning"))
+                    if (msg.ToLower().Contains("warning"))
                         richTextBoxMsgs.SelectionColor = System.Drawing.Color.Orange;
                     richTextBoxMsgs.AppendText(DateTime.Now.ToString() + " " + msg + Environment.NewLine);
                     richTextBoxMsgs.ScrollToCaret();
@@ -175,8 +180,39 @@ namespace RRModelingSystem
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
                     LoadProject(dlg.FileName);
-                   
+                    m_RRPreferences.hasChanges = true;
                 }
+/*                string strDB;
+                strDB = string.Format("Data Source={0};Version={1}", dlg.FileName, 3);
+                string sql = @"SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY 1;";
+                string sql1 = "";
+                using (SQLiteConnection c = new SQLiteConnection(strDB))
+                {
+                    c.Open();
+                    using (SQLiteCommand cmd = new SQLiteCommand(sql, c))
+                    {
+                            sql1 = "";
+                        try
+                        {
+                            sql1 = sql1 + @"SELECT OutputDBScenario FROM MMS_RunsInfo where 1=2;";
+                            using (SQLiteCommand cmd1 = new SQLiteCommand(sql1, c))
+                            {
+                                cmd1.ExecuteNonQuery();
+                            }
+                        }
+                        catch (Exception ex) //catch block for catching errors
+                        {
+                            sql1 = "";
+                            sql1 = sql1 + @"ALTER TABLE MMS_RunsInfo ADD OutputDBScenario INT NULL; 
+                                            ALTER TABLE MMS_RunsInfo ADD RunType VARCHAR(20) NULL;";
+                            using (SQLiteCommand cmd2 = new SQLiteCommand(sql1, c))
+                            {
+                                cmd2.ExecuteNonQuery();
+                            }
+                        }
+                    }
+                    c.Close();
+                }*/
             }
         }
 
@@ -185,6 +221,8 @@ namespace RRModelingSystem
             this.Text = $"RTI-USGS Conjunctive SW-GW Modeling System - {fileName}";
             MMSDatabase = fileName;
             m_RRPreferences = new RRPreferences(MMSDatabase);
+            m_RRPreferences.messageOut += ProcessMessage;
+            
             treeView1.SelectedNode = treeView1.Nodes["Node0"];
             treeView1_AfterSelect(null, null);
         }

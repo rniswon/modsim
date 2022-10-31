@@ -71,7 +71,8 @@ namespace MODSIM_GSFLOW_C
             m_Source.graphics.nodeLoc.Y = coord["maxY"] + (coord["maxY"] - coord["minY"]) * 0.010f; ;
             m_Source.name = "MF_SOURCE";
             DataTable m_TSTbl = m_Source.m.adaInflowsM.dataTable;
-            SetDefaultTableValue(ref m_TSTbl, 99000000);
+            SetDefaultTableValue(ref m_TSTbl, (long)(99000*myModel.ScaleFactor));
+            m_Source.m.adaInflowsM.units = "acre-ft/day";
 
             // Connect both of just instantiated nodes so that unused source water 
             // is shunted out of the model through the sink Node
