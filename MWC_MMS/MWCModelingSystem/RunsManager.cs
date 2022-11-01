@@ -20,7 +20,6 @@ namespace RRModelingSystem
         public event ProcessMessage MessageOut; // event
         private string _workSpace;
         private string fileName;
-        private string pathOutputDB;
         private string runID;
         private string scenarioName;
 
@@ -59,17 +58,10 @@ namespace RRModelingSystem
             richTextBox1.AppendText(currentRow.Cells["Options"].Value.ToString() + "\n");
             richTextBox1.AppendText("\n__________Notes____________\n");
             richTextBox1.AppendText(currentRow.Cells["Notes"].Value.ToString());
-
             comboBoxOutputDB.Text = comboBoxOutputDB.Text.Replace(".xy", "OUTPUT.sqlite");
-
-            pathOutputDB = currentRow.Cells["BasePath"].Value.ToString();
-            pathOutputDB = pathOutputDB.Replace(".xy", "OUTPUT.sqlite");
-            pathOutputDB = string.Format(_workSpace + pathOutputDB);
-
             runID = currentRow.Cells["runID"].Value.ToString();
-            scenarioName = currentRow.Cells["ScnName"].Value.ToString();
-                                    
-            fileName = comboBoxOutputDB.Text.Replace("OUTPUT.sqlite","");
+            scenarioName = currentRow.Cells["ScnName"].Value.ToString();                  
+            //fileName = comboBoxOutputDB.Text.Replace("OUTPUT.sqlite","");
 
             /*string pathDB = string.Format(_workSpace + txtOutputDB.Text);
             if (File.Exists(pathDB))
@@ -184,7 +176,7 @@ namespace RRModelingSystem
                 //btnBrowseDB.Focus();
                 string strConn1;
                 SQLiteDataReader prefsTbl1;
-                strConn1 = string.Format("Data Source={0};Version={1}", pathOutputDB, 3);
+                strConn1 = string.Format("Data Source={0};Version={1}", _workSpace + comboBoxOutputDB.Text, 3);
 
                 string sql = @"SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY 1;";
                 string sql1 = "";
@@ -244,26 +236,40 @@ namespace RRModelingSystem
         {
             if (checkBoxRunID.Checked)
             {
-                fileName = comboBoxOutputDB.Text.Replace("OUTPUT.sqlite", "") + "_r" + runID;
-                labelScnName.Text = "Scenario Name: " + comboBoxOutputDB.Text.Replace("OUTPUT.sqlite", "") + "_r" + runID;
+                fileName = string.Format("r" + runID);
+                labelScnName.Text = "Scenario Name: " + fileName;
             }
+            /*else
+            {
+                labelScnName.Text = "Scenario Name: " + "";
+            }*/
+
         }
 
         private void checkBoxScenario_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBoxScenario.Checked)
             {
-                fileName = comboBoxOutputDB.Text.Replace("OUTPUT.sqlite", "") + "_" + scenarioName;
-                labelScnName.Text = "Scenario Name: " + comboBoxOutputDB.Text.Replace("OUTPUT.sqlite", "") + "_" + scenarioName;
+                fileName = scenarioName;
+                labelScnName.Text = "Scenario Name: " + fileName;
             }
+            /*else
+            {
+                labelScnName.Text = "Scenario Name: " + "";
+            }*/
         }
 
         private void checkBoxFileName_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBoxFileName.Checked)
             {
-                fileName = comboBoxOutputDB.Text.Replace("OUTPUT.sqlite", "");
-                labelScnName.Text = "Scenario Name: " + comboBoxOutputDB.Text.Replace("OUTPUT.sqlite", "");
+                fileName = Path.GetFileName(comboBoxOutputDB.Text).Replace("OUTPUT.sqlite", "");
+                labelScnName.Text = "Scenario Name: " + fileName;
+            }
+            else
+            {
+                fileName = "";
+                labelScnName.Text = "Scenario Name: ";
             }
         }
 
@@ -272,10 +278,18 @@ namespace RRModelingSystem
             if (checkBoxOutputDB.Checked)
             {
                 btnBrowseDB.Enabled = true;
+                comboBoxOutputDB.Enabled = false;
+                checkBoxRunID.Enabled = false;
+                checkBoxScenario.Enabled = false;
+                checkBoxFileName.Enabled = false;
             }
             else
             {
                 btnBrowseDB.Enabled = false;
+                comboBoxOutputDB.Enabled = true;
+                checkBoxRunID.Enabled = true;
+                checkBoxScenario.Enabled = true;
+                checkBoxFileName.Enabled = true;
             }
         }
     }

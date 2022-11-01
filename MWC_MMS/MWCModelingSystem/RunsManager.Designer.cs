@@ -36,8 +36,8 @@ namespace RRModelingSystem
             this.textBoxHeading = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.labelScnName = new System.Windows.Forms.Label();
             this.gBoxAdaptDB = new System.Windows.Forms.GroupBox();
+            this.labelScnName = new System.Windows.Forms.Label();
             this.checkBoxFileName = new System.Windows.Forms.CheckBox();
             this.checkBoxOutputDB = new System.Windows.Forms.CheckBox();
             this.txtOutputDB = new System.Windows.Forms.TextBox();
@@ -160,16 +160,6 @@ namespace RRModelingSystem
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             // 
-            // labelScnName
-            // 
-            this.labelScnName.AutoSize = true;
-            this.labelScnName.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F);
-            this.labelScnName.Location = new System.Drawing.Point(90, 69);
-            this.labelScnName.Name = "labelScnName";
-            this.labelScnName.Size = new System.Drawing.Size(59, 12);
-            this.labelScnName.TabIndex = 1;
-            this.labelScnName.Text = "No active file";
-            // 
             // gBoxAdaptDB
             // 
             this.gBoxAdaptDB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -190,6 +180,16 @@ namespace RRModelingSystem
             this.gBoxAdaptDB.TabIndex = 0;
             this.gBoxAdaptDB.TabStop = false;
             this.gBoxAdaptDB.Text = "Adapt SQLite DB Output";
+            // 
+            // labelScnName
+            // 
+            this.labelScnName.AutoSize = true;
+            this.labelScnName.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F);
+            this.labelScnName.Location = new System.Drawing.Point(90, 69);
+            this.labelScnName.Name = "labelScnName";
+            this.labelScnName.Size = new System.Drawing.Size(71, 12);
+            this.labelScnName.TabIndex = 1;
+            this.labelScnName.Text = "Scenario Name:";
             // 
             // checkBoxFileName
             // 
