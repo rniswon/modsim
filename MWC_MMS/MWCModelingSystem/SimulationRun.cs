@@ -105,7 +105,7 @@ namespace RRModelingSystem
                     string riparianArgs = _riparianON ? $"-RiparianON {_riparianCost} " : "";
                     process.StartInfo.Arguments = riparianArgs + "\"" + Path.GetFileName(_runFileName) + "\"";
                     process.StartInfo.WorkingDirectory = Path.GetDirectoryName(_runFileName);
-                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;
                     process.StartInfo.UseShellExecute = false;
                     process.StartInfo.RedirectStandardOutput = true;
                     SetButtonEnabled(buttonStopRun, true);
@@ -115,7 +115,7 @@ namespace RRModelingSystem
                     _fileName = Path.Combine(Path.GetDirectoryName(_runFileName), $"MMS_Run{_runID}Log.txt");
                     //SpinWait.SpinUntil(() => process.MainWindowHandle != IntPtr.Zero);
                     Thread.Sleep(100);  // <-- ugly hack
-                    SetWindowText(process.MainWindowHandle, "MWC_MS_GSF_Run.exe - Run " + _runID);
+                    //SetWindowText(process.MainWindowHandle, "MWC_MS_GSF_Run.exe - Run " + _runID);
                     
                     Dictionary<string, object> runInfo = new Dictionary<string, object>();
                     runInfo.Add("ProcessID", process.Id);
@@ -136,6 +136,7 @@ namespace RRModelingSystem
                         standardOutputThread.Join();
                     if (process != null)
                         process.Dispose();
+                    //process = null;
                     //buttonExecuteModel.BeginInvoke((Action)(() =>
                     //{
                     //    buttonExecuteModel.Visible = true;
@@ -429,10 +430,19 @@ namespace RRModelingSystem
         {
             if (process != null)
             {
-                Console.WriteLine("****** Processed killed by the user ********");
-                process.Kill();
-                process = null;
-                SetButtonEnabled(buttonStopRun, false);
+                try
+                {
+                    Console.WriteLine("****** Processed killed by the user ********");
+                    process.Kill();
+                    process = null;
+                    SetButtonEnabled(buttonStopRun, false);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    throw;
+                }
+                
             }
         }
 
@@ -490,6 +500,7 @@ namespace RRModelingSystem
             {
                 richTextBox1.Lines = _runMsgs.ToArray();
             }
+            richTextBox1.ScrollToCaret();
 
             var item = listView1.FindItemWithText("Time elapsed (Run start) : ");
             if (item == null)
