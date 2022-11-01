@@ -34,12 +34,19 @@ namespace RRModelingSystem
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.textBoxHeading = new System.Windows.Forms.TextBox();
-            this.gBoxAdaptDB = new System.Windows.Forms.GroupBox();
-            this.txtOutputDB = new System.Windows.Forms.TextBox();
-            this.btnAdaptDB = new System.Windows.Forms.Button();
-            this.btnBrowseDB = new System.Windows.Forms.Button();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.labelScnName = new System.Windows.Forms.Label();
+            this.gBoxAdaptDB = new System.Windows.Forms.GroupBox();
+            this.checkBoxFileName = new System.Windows.Forms.CheckBox();
+            this.checkBoxOutputDB = new System.Windows.Forms.CheckBox();
+            this.txtOutputDB = new System.Windows.Forms.TextBox();
+            this.btnBrowseDB = new System.Windows.Forms.Button();
+            this.checkBoxScenario = new System.Windows.Forms.CheckBox();
+            this.btnAdaptDB = new System.Windows.Forms.Button();
+            this.checkBoxRunID = new System.Windows.Forms.CheckBox();
+            this.comboBoxOutputDB = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -49,8 +56,8 @@ namespace RRModelingSystem
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
-            this.gBoxAdaptDB.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.gBoxAdaptDB.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer1
@@ -131,52 +138,15 @@ namespace RRModelingSystem
             this.textBoxHeading.TabStop = false;
             this.textBoxHeading.Text = "Run Preferences";
             // 
-            // gBoxAdaptDB
+            // groupBox2
             // 
-            this.gBoxAdaptDB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.gBoxAdaptDB.Controls.Add(this.txtOutputDB);
-            this.gBoxAdaptDB.Controls.Add(this.btnAdaptDB);
-            this.gBoxAdaptDB.Controls.Add(this.btnBrowseDB);
-            this.gBoxAdaptDB.Location = new System.Drawing.Point(6, 10);
-            this.gBoxAdaptDB.Name = "gBoxAdaptDB";
-            this.gBoxAdaptDB.Size = new System.Drawing.Size(502, 62);
-            this.gBoxAdaptDB.TabIndex = 0;
-            this.gBoxAdaptDB.TabStop = false;
-            this.gBoxAdaptDB.Text = "Adapt SQLite DB Output";
-            // 
-            // txtOutputDB
-            // 
-            this.txtOutputDB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtOutputDB.Location = new System.Drawing.Point(6, 24);
-            this.txtOutputDB.Name = "txtOutputDB";
-            this.txtOutputDB.ReadOnly = true;
-            this.txtOutputDB.Size = new System.Drawing.Size(331, 20);
-            this.txtOutputDB.TabIndex = 3;
-            // 
-            // btnAdaptDB
-            // 
-            this.btnAdaptDB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnAdaptDB.Location = new System.Drawing.Point(421, 22);
-            this.btnAdaptDB.Name = "btnAdaptDB";
-            this.btnAdaptDB.Size = new System.Drawing.Size(75, 23);
-            this.btnAdaptDB.TabIndex = 1;
-            this.btnAdaptDB.Text = "Adapt DB";
-            this.btnAdaptDB.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.btnAdaptDB.UseVisualStyleBackColor = true;
-            this.btnAdaptDB.Click += new System.EventHandler(this.btnAdaptDB_Click);
-            // 
-            // btnBrowseDB
-            // 
-            this.btnBrowseDB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnBrowseDB.Location = new System.Drawing.Point(343, 22);
-            this.btnBrowseDB.Name = "btnBrowseDB";
-            this.btnBrowseDB.Size = new System.Drawing.Size(75, 23);
-            this.btnBrowseDB.TabIndex = 2;
-            this.btnBrowseDB.Text = "Browse DB";
-            this.btnBrowseDB.UseVisualStyleBackColor = true;
-            this.btnBrowseDB.Click += new System.EventHandler(this.btnBrowseDB_Click);
+            this.groupBox2.Location = new System.Drawing.Point(469, 0);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(253, 185);
+            this.groupBox2.TabIndex = 2;
+            this.groupBox2.TabStop = false;
             // 
             // groupBox1
             // 
@@ -186,19 +156,138 @@ namespace RRModelingSystem
             this.groupBox1.Controls.Add(this.gBoxAdaptDB);
             this.groupBox1.Location = new System.Drawing.Point(0, 0);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(514, 185);
+            this.groupBox1.Size = new System.Drawing.Size(463, 185);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             // 
-            // groupBox2
+            // labelScnName
             // 
-            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.labelScnName.AutoSize = true;
+            this.labelScnName.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F);
+            this.labelScnName.Location = new System.Drawing.Point(90, 69);
+            this.labelScnName.Name = "labelScnName";
+            this.labelScnName.Size = new System.Drawing.Size(59, 12);
+            this.labelScnName.TabIndex = 1;
+            this.labelScnName.Text = "No active file";
+            // 
+            // gBoxAdaptDB
+            // 
+            this.gBoxAdaptDB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox2.Location = new System.Drawing.Point(520, 0);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(202, 185);
-            this.groupBox2.TabIndex = 2;
-            this.groupBox2.TabStop = false;
+            this.gBoxAdaptDB.Controls.Add(this.labelScnName);
+            this.gBoxAdaptDB.Controls.Add(this.checkBoxFileName);
+            this.gBoxAdaptDB.Controls.Add(this.checkBoxOutputDB);
+            this.gBoxAdaptDB.Controls.Add(this.txtOutputDB);
+            this.gBoxAdaptDB.Controls.Add(this.btnBrowseDB);
+            this.gBoxAdaptDB.Controls.Add(this.checkBoxScenario);
+            this.gBoxAdaptDB.Controls.Add(this.btnAdaptDB);
+            this.gBoxAdaptDB.Controls.Add(this.checkBoxRunID);
+            this.gBoxAdaptDB.Controls.Add(this.comboBoxOutputDB);
+            this.gBoxAdaptDB.Controls.Add(this.label1);
+            this.gBoxAdaptDB.Location = new System.Drawing.Point(6, 10);
+            this.gBoxAdaptDB.Name = "gBoxAdaptDB";
+            this.gBoxAdaptDB.Size = new System.Drawing.Size(451, 108);
+            this.gBoxAdaptDB.TabIndex = 0;
+            this.gBoxAdaptDB.TabStop = false;
+            this.gBoxAdaptDB.Text = "Adapt SQLite DB Output";
+            // 
+            // checkBoxFileName
+            // 
+            this.checkBoxFileName.AutoSize = true;
+            this.checkBoxFileName.Location = new System.Drawing.Point(239, 84);
+            this.checkBoxFileName.Name = "checkBoxFileName";
+            this.checkBoxFileName.Size = new System.Drawing.Size(73, 17);
+            this.checkBoxFileName.TabIndex = 6;
+            this.checkBoxFileName.Text = "File Name";
+            this.checkBoxFileName.UseVisualStyleBackColor = true;
+            this.checkBoxFileName.CheckedChanged += new System.EventHandler(this.checkBoxFileName_CheckedChanged);
+            // 
+            // checkBoxOutputDB
+            // 
+            this.checkBoxOutputDB.AutoSize = true;
+            this.checkBoxOutputDB.Location = new System.Drawing.Point(6, 21);
+            this.checkBoxOutputDB.Name = "checkBoxOutputDB";
+            this.checkBoxOutputDB.Size = new System.Drawing.Size(105, 17);
+            this.checkBoxOutputDB.TabIndex = 2;
+            this.checkBoxOutputDB.Text = "Use another DB:";
+            this.checkBoxOutputDB.UseVisualStyleBackColor = true;
+            this.checkBoxOutputDB.CheckedChanged += new System.EventHandler(this.checkBoxOutputDB_CheckedChanged);
+            // 
+            // txtOutputDB
+            // 
+            this.txtOutputDB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtOutputDB.Location = new System.Drawing.Point(111, 19);
+            this.txtOutputDB.Name = "txtOutputDB";
+            this.txtOutputDB.ReadOnly = true;
+            this.txtOutputDB.Size = new System.Drawing.Size(254, 20);
+            this.txtOutputDB.TabIndex = 3;
+            // 
+            // btnBrowseDB
+            // 
+            this.btnBrowseDB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnBrowseDB.Enabled = false;
+            this.btnBrowseDB.Location = new System.Drawing.Point(370, 18);
+            this.btnBrowseDB.Name = "btnBrowseDB";
+            this.btnBrowseDB.Size = new System.Drawing.Size(75, 23);
+            this.btnBrowseDB.TabIndex = 2;
+            this.btnBrowseDB.Text = "Browse DB";
+            this.btnBrowseDB.UseVisualStyleBackColor = true;
+            this.btnBrowseDB.Click += new System.EventHandler(this.btnBrowseDB_Click);
+            // 
+            // checkBoxScenario
+            // 
+            this.checkBoxScenario.AutoSize = true;
+            this.checkBoxScenario.Location = new System.Drawing.Point(165, 84);
+            this.checkBoxScenario.Name = "checkBoxScenario";
+            this.checkBoxScenario.Size = new System.Drawing.Size(68, 17);
+            this.checkBoxScenario.TabIndex = 5;
+            this.checkBoxScenario.Text = "Scenario";
+            this.checkBoxScenario.UseVisualStyleBackColor = true;
+            this.checkBoxScenario.CheckedChanged += new System.EventHandler(this.checkBoxScenario_CheckedChanged);
+            // 
+            // btnAdaptDB
+            // 
+            this.btnAdaptDB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnAdaptDB.Location = new System.Drawing.Point(370, 45);
+            this.btnAdaptDB.Name = "btnAdaptDB";
+            this.btnAdaptDB.Size = new System.Drawing.Size(75, 23);
+            this.btnAdaptDB.TabIndex = 1;
+            this.btnAdaptDB.Text = "Adapt DB";
+            this.btnAdaptDB.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.btnAdaptDB.UseVisualStyleBackColor = true;
+            this.btnAdaptDB.Click += new System.EventHandler(this.btnAdaptDB_Click);
+            // 
+            // checkBoxRunID
+            // 
+            this.checkBoxRunID.AutoSize = true;
+            this.checkBoxRunID.Location = new System.Drawing.Point(89, 84);
+            this.checkBoxRunID.Name = "checkBoxRunID";
+            this.checkBoxRunID.Size = new System.Drawing.Size(60, 17);
+            this.checkBoxRunID.TabIndex = 4;
+            this.checkBoxRunID.Text = "Run ID";
+            this.checkBoxRunID.UseVisualStyleBackColor = true;
+            this.checkBoxRunID.CheckedChanged += new System.EventHandler(this.checkBoxRunID_CheckedChanged);
+            // 
+            // comboBoxOutputDB
+            // 
+            this.comboBoxOutputDB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBoxOutputDB.FormattingEnabled = true;
+            this.comboBoxOutputDB.Location = new System.Drawing.Point(90, 45);
+            this.comboBoxOutputDB.Name = "comboBoxOutputDB";
+            this.comboBoxOutputDB.Size = new System.Drawing.Size(275, 21);
+            this.comboBoxOutputDB.TabIndex = 0;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 53);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(62, 13);
+            this.label1.TabIndex = 1;
+            this.label1.Text = "Run ID DB:";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // RunsManager
             // 
@@ -218,9 +307,9 @@ namespace RRModelingSystem
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            this.groupBox1.ResumeLayout(false);
             this.gBoxAdaptDB.ResumeLayout(false);
             this.gBoxAdaptDB.PerformLayout();
-            this.groupBox1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -233,10 +322,17 @@ namespace RRModelingSystem
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.TextBox textBoxHeading;
         private System.Windows.Forms.Button btnAdaptDB;
-        private System.Windows.Forms.TextBox txtOutputDB;
         private System.Windows.Forms.Button btnBrowseDB;
         private System.Windows.Forms.GroupBox gBoxAdaptDB;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.CheckBox checkBoxScenario;
+        private System.Windows.Forms.CheckBox checkBoxRunID;
+        private System.Windows.Forms.CheckBox checkBoxFileName;
+        private System.Windows.Forms.ComboBox comboBoxOutputDB;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox txtOutputDB;
+        private System.Windows.Forms.Label labelScnName;
+        private System.Windows.Forms.CheckBox checkBoxOutputDB;
     }
 }
