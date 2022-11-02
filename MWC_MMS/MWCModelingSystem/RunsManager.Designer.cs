@@ -45,8 +45,8 @@ namespace RRModelingSystem
             this.checkBoxScenario = new System.Windows.Forms.CheckBox();
             this.btnAdaptDB = new System.Windows.Forms.Button();
             this.checkBoxRunID = new System.Windows.Forms.CheckBox();
-            this.comboBoxOutputDB = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.txtOutputRunIDDB = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -164,6 +164,7 @@ namespace RRModelingSystem
             // 
             this.gBoxAdaptDB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.gBoxAdaptDB.Controls.Add(this.txtOutputRunIDDB);
             this.gBoxAdaptDB.Controls.Add(this.labelScnName);
             this.gBoxAdaptDB.Controls.Add(this.checkBoxFileName);
             this.gBoxAdaptDB.Controls.Add(this.checkBoxOutputDB);
@@ -172,7 +173,6 @@ namespace RRModelingSystem
             this.gBoxAdaptDB.Controls.Add(this.checkBoxScenario);
             this.gBoxAdaptDB.Controls.Add(this.btnAdaptDB);
             this.gBoxAdaptDB.Controls.Add(this.checkBoxRunID);
-            this.gBoxAdaptDB.Controls.Add(this.comboBoxOutputDB);
             this.gBoxAdaptDB.Controls.Add(this.label1);
             this.gBoxAdaptDB.Location = new System.Drawing.Point(6, 10);
             this.gBoxAdaptDB.Name = "gBoxAdaptDB";
@@ -217,7 +217,7 @@ namespace RRModelingSystem
             // 
             this.txtOutputDB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtOutputDB.Location = new System.Drawing.Point(111, 19);
+            this.txtOutputDB.Location = new System.Drawing.Point(111, 20);
             this.txtOutputDB.Name = "txtOutputDB";
             this.txtOutputDB.ReadOnly = true;
             this.txtOutputDB.Size = new System.Drawing.Size(254, 20);
@@ -269,16 +269,6 @@ namespace RRModelingSystem
             this.checkBoxRunID.UseVisualStyleBackColor = true;
             this.checkBoxRunID.CheckedChanged += new System.EventHandler(this.checkBoxRunID_CheckedChanged);
             // 
-            // comboBoxOutputDB
-            // 
-            this.comboBoxOutputDB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBoxOutputDB.FormattingEnabled = true;
-            this.comboBoxOutputDB.Location = new System.Drawing.Point(90, 45);
-            this.comboBoxOutputDB.Name = "comboBoxOutputDB";
-            this.comboBoxOutputDB.Size = new System.Drawing.Size(275, 21);
-            this.comboBoxOutputDB.TabIndex = 0;
-            // 
             // label1
             // 
             this.label1.AutoSize = true;
@@ -288,6 +278,15 @@ namespace RRModelingSystem
             this.label1.TabIndex = 1;
             this.label1.Text = "Run ID DB:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
+            // txtOutputRunIDDB
+            // 
+            this.txtOutputRunIDDB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtOutputRunIDDB.Location = new System.Drawing.Point(90, 47);
+            this.txtOutputRunIDDB.Name = "txtOutputRunIDDB";
+            this.txtOutputRunIDDB.Size = new System.Drawing.Size(275, 20);
+            this.txtOutputRunIDDB.TabIndex = 4;
             // 
             // RunsManager
             // 
@@ -329,10 +328,10 @@ namespace RRModelingSystem
         private System.Windows.Forms.CheckBox checkBoxScenario;
         private System.Windows.Forms.CheckBox checkBoxRunID;
         private System.Windows.Forms.CheckBox checkBoxFileName;
-        private System.Windows.Forms.ComboBox comboBoxOutputDB;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox txtOutputDB;
         private System.Windows.Forms.Label labelScnName;
         private System.Windows.Forms.CheckBox checkBoxOutputDB;
+        private System.Windows.Forms.TextBox txtOutputRunIDDB;
     }
 }

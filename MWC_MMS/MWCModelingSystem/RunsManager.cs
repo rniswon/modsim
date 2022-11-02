@@ -19,7 +19,7 @@ namespace RRModelingSystem
         private MyDBSqlite outputSqliteDB { get; set; }
         public event ProcessMessage MessageOut; // event
         private string _workSpace;
-        private string fileName;
+        private string _fileName;
         private string runID;
         private string scenarioName;
 
@@ -36,8 +36,6 @@ namespace RRModelingSystem
             DataTable dtRuns = sqliteDB.GetTableFromDB(sql, "keywords");
             dataGridView1.DataSource = dtRuns;
             //splitContainer1.Panel2Collapsed = true;
-            comboBoxOutputDB.DataSource = dtRuns;
-            comboBoxOutputDB.DisplayMember = "ModsimFile";
         }
 
         public void ReLoadForm()
@@ -58,10 +56,11 @@ namespace RRModelingSystem
             richTextBox1.AppendText(currentRow.Cells["Options"].Value.ToString() + "\n");
             richTextBox1.AppendText("\n__________Notes____________\n");
             richTextBox1.AppendText(currentRow.Cells["Notes"].Value.ToString());
-            comboBoxOutputDB.Text = comboBoxOutputDB.Text.Replace(".xy", "OUTPUT.sqlite");
+            txtOutputRunIDDB.Text = currentRow.Cells["ModsimFile"].Value.ToString();
+            txtOutputRunIDDB.Text = txtOutputRunIDDB.Text.Replace(".xy", "OUTPUT.sqlite");
             runID = currentRow.Cells["runID"].Value.ToString();
-            scenarioName = currentRow.Cells["ScnName"].Value.ToString();                  
-            //fileName = comboBoxOutputDB.Text.Replace("OUTPUT.sqlite","");
+            scenarioName = currentRow.Cells["ScnName"].Value.ToString();
+            //fileName = txtOutputRunIDDB.Text.Replace("OUTPUT.sqlite","");
 
             /*string pathDB = string.Format(_workSpace + txtOutputDB.Text);
             if (File.Exists(pathDB))
@@ -123,101 +122,17 @@ namespace RRModelingSystem
                 else
                 {
                     string strConn1, nomArchivo;
-                    SQLiteDataReader prefsTbl1;
                     strConn1 = string.Format("Data Source={0};Version={1}", _workSpace + txtOutputDB.Text, 3);
                     nomArchivo = Path.GetFileName(string.Format(_workSpace + txtOutputDB.Text));
                     nomArchivo = nomArchivo.Substring(0, nomArchivo.Length - 13);
-
-                    string sql = @"SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY 1;";
-                    string sql1 = "";
-                    using (SQLiteConnection c = new SQLiteConnection(strConn1))
-                    {
-                        c.Open();
-                        using (SQLiteCommand cmd = new SQLiteCommand(sql, c))
-                        {
-                            prefsTbl1 = cmd.ExecuteReader();
-                            while (prefsTbl1.Read())
-                            {
-                                sql1 = "";
-                                try
-                                {
-                                    sql1 = sql1 + @"SELECT Scenario FROM " + prefsTbl1.GetString(0) + " where 1=2;";
-                                    using (SQLiteCommand cmd1 = new SQLiteCommand(sql1, c))
-                                    {
-                                        cmd1.ExecuteNonQuery();
-                                    }
-                                    MessageOut("Field 'Scenario' exists in table " + prefsTbl1.GetString(0) + " of " + nomArchivo + "OUTPUT.sqlite.");
-                                }
-                                catch (Exception ex) //catch block for catching errors
-                                {
-                                    sql1 = "";
-                                    sql1 = sql1 + @"ALTER TABLE " + prefsTbl1.GetString(0) + " ADD Scenario TEXT NULL;";
-                                    using (SQLiteCommand cmd2 = new SQLiteCommand(sql1, c))
-                                    {
-                                        cmd2.ExecuteNonQuery();
-                                    }
-                                    MessageOut("Added field 'Scenario' in table " + prefsTbl1.GetString(0) + " of " + nomArchivo + "OUTPUT.sqlite.");
-                                }
-                                sql1 = "";
-                                sql1 = sql1 + @"UPDATE " + prefsTbl1.GetString(0) + " SET Scenario = '" + nomArchivo + "';\n";
-                                using (SQLiteCommand cmd3 = new SQLiteCommand(sql1, c))
-                                {
-                                    cmd3.ExecuteNonQuery();
-                                }
-                            }
-                        }
-                        c.Close();
-                    }
+                    AdaptDB(strConn1, nomArchivo);
                 }
             }
             else
             {
-                //MessageOut("Select a SQLite database output with the 'Browse DB' button or select a row of text box.");
-                //btnBrowseDB.Focus();
                 string strConn1;
-                SQLiteDataReader prefsTbl1;
-                strConn1 = string.Format("Data Source={0};Version={1}", _workSpace + comboBoxOutputDB.Text, 3);
-
-                string sql = @"SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY 1;";
-                string sql1 = "";
-                using (SQLiteConnection c = new SQLiteConnection(strConn1))
-                {
-                    c.Open();
-                    using (SQLiteCommand cmd = new SQLiteCommand(sql, c))
-                    {
-                        prefsTbl1 = cmd.ExecuteReader();
-                        while (prefsTbl1.Read())
-                        {
-                            sql1 = "";
-                            try
-                            {
-                                sql1 = sql1 + @"SELECT Scenario FROM " + prefsTbl1.GetString(0) + " where 1=2;";
-                                    using (SQLiteCommand cmd1 = new SQLiteCommand(sql1, c))
-                                    {
-                                        cmd1.ExecuteNonQuery();
-                                    }
-                                MessageOut("Updated field 'scenario' in table " + prefsTbl1.GetString(0) + " of " + fileName + "OUTPUT.sqlite.");
-                            }
-                            catch (Exception ex) //catch block for catching errors
-                            {
-                                sql1 = "";
-                                sql1 = sql1 + @"ALTER TABLE " + prefsTbl1.GetString(0) + " ADD scenario TEXT NULL;";
-                                    using (SQLiteCommand cmd2 = new SQLiteCommand(sql1, c))
-                                    {
-                                        cmd2.ExecuteNonQuery();
-                                    }
-                                MessageOut("Added field 'Scenario' in table " + prefsTbl1.GetString(0) + " of " + fileName + "OUTPUT.sqlite.");
-                            }
-                            sql1 = "";
-                            sql1 = sql1 + @"UPDATE " + prefsTbl1.GetString(0) + " SET Scenario = '" + fileName + "';\n";
-                                using (SQLiteCommand cmd3 = new SQLiteCommand(sql1, c))
-                                {
-                                    cmd3.ExecuteNonQuery();
-                                }
-                        }
-                    }
-                    c.Close();
-                }
+                strConn1 = string.Format("Data Source={0};Version={1}", _workSpace + txtOutputRunIDDB.Text, 3);
+                AdaptDB(strConn1, _fileName);
                 try
                 {
                     string sql2;
@@ -232,45 +147,87 @@ namespace RRModelingSystem
             }
         }
 
+        private void AdaptDB (string strConn, string filenames)
+        {
+            SQLiteDataReader prefsTbl;
+            string sql = @"SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY 1;";
+            string sql1 = "";
+            using (SQLiteConnection c = new SQLiteConnection(strConn))
+            {
+                c.Open();
+                using (SQLiteCommand cmd = new SQLiteCommand(sql, c))
+                {
+                    prefsTbl = cmd.ExecuteReader();
+                    while (prefsTbl.Read())
+                    {
+                        sql1 = "";
+                        try
+                        {
+                            sql1 = sql1 + @"SELECT Scenario FROM " + prefsTbl.GetString(0) + " where 1=2;";
+                            using (SQLiteCommand cmd1 = new SQLiteCommand(sql1, c))
+                            {
+                                cmd1.ExecuteNonQuery();
+                            }
+                            MessageOut("Updated field 'scenario' in table " + prefsTbl.GetString(0) + " of " + filenames + "OUTPUT.sqlite.");
+                        }
+                        catch (Exception ex) //catch block for catching errors
+                        {
+                            sql1 = "";
+                            sql1 = sql1 + @"ALTER TABLE " + prefsTbl.GetString(0) + " ADD scenario TEXT NULL;";
+                            using (SQLiteCommand cmd2 = new SQLiteCommand(sql1, c))
+                            {
+                                cmd2.ExecuteNonQuery();
+                            }
+                            MessageOut("Added field 'Scenario' in table " + prefsTbl.GetString(0) + " of " + filenames + "OUTPUT.sqlite.");
+                        }
+                        sql1 = "";
+                        sql1 = sql1 + @"UPDATE " + prefsTbl.GetString(0) + " SET Scenario = '" + filenames + "';\n";
+                        using (SQLiteCommand cmd3 = new SQLiteCommand(sql1, c))
+                        {
+                            cmd3.ExecuteNonQuery();
+                        }
+                    }
+                }
+                c.Close();
+            }
+        }
+        private void ProcessFileName()
+        {
+            if (checkBoxFileName.Checked == true)
+            {
+                _fileName = Path.GetFileName(txtOutputRunIDDB.Text).Replace("OUTPUT.sqlite", "");
+                labelScnName.Text = "Scenario Name: " + _fileName;
+            }
+            else
+            {
+                _fileName = "";
+                labelScnName.Text = "Scenario Name: ";
+            }
+            if(checkBoxRunID.Checked == true)
+            {
+                _fileName = _fileName + string.Format("r" + runID);
+                labelScnName.Text = "Scenario Name: " + _fileName;
+            }
+            if(checkBoxScenario.Checked == true)
+            {
+                _fileName = _fileName + scenarioName;
+                labelScnName.Text = "Scenario Name: " + _fileName;
+            }
+        }
+
         private void checkBoxRunID_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBoxRunID.Checked)
-            {
-                fileName = string.Format("r" + runID);
-                labelScnName.Text = "Scenario Name: " + fileName;
-            }
-            /*else
-            {
-                labelScnName.Text = "Scenario Name: " + "";
-            }*/
-
+            ProcessFileName();
         }
 
         private void checkBoxScenario_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBoxScenario.Checked)
-            {
-                fileName = scenarioName;
-                labelScnName.Text = "Scenario Name: " + fileName;
-            }
-            /*else
-            {
-                labelScnName.Text = "Scenario Name: " + "";
-            }*/
+            ProcessFileName();
         }
 
         private void checkBoxFileName_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBoxFileName.Checked)
-            {
-                fileName = Path.GetFileName(comboBoxOutputDB.Text).Replace("OUTPUT.sqlite", "");
-                labelScnName.Text = "Scenario Name: " + fileName;
-            }
-            else
-            {
-                fileName = "";
-                labelScnName.Text = "Scenario Name: ";
-            }
+            ProcessFileName();
         }
 
         private void checkBoxOutputDB_CheckedChanged(object sender, EventArgs e)
@@ -278,7 +235,7 @@ namespace RRModelingSystem
             if (checkBoxOutputDB.Checked)
             {
                 btnBrowseDB.Enabled = true;
-                comboBoxOutputDB.Enabled = false;
+                txtOutputRunIDDB.Enabled = false;
                 checkBoxRunID.Enabled = false;
                 checkBoxScenario.Enabled = false;
                 checkBoxFileName.Enabled = false;
@@ -286,7 +243,7 @@ namespace RRModelingSystem
             else
             {
                 btnBrowseDB.Enabled = false;
-                comboBoxOutputDB.Enabled = true;
+                txtOutputRunIDDB.Enabled = true;
                 checkBoxRunID.Enabled = true;
                 checkBoxScenario.Enabled = true;
                 checkBoxFileName.Enabled = true;
