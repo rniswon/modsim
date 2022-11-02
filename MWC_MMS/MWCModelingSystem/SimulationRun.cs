@@ -136,16 +136,19 @@ namespace RRModelingSystem
                         standardOutputThread.Join();
                     if (process != null)
                         process.Dispose();
-                    //process = null;
+                    process = null;
                     //buttonExecuteModel.BeginInvoke((Action)(() =>
                     //{
                     //    buttonExecuteModel.Visible = true;
                     //}));
-                    toolStripProgressBar1.GetCurrentParent().BeginInvoke((Action)(() =>
-                    {
-                        toolStripProgressBar1.Value = 0;
-                        toolStripStatusLabel1.Text = "Done.";
-                    }));
+                    UpdateStatusMessage("Done.");
+                    SetStatusStripProgressValue(0);
+                  
+                    //toolStripProgressBar1.GetCurrentParent().BeginInvoke((Action)(() =>
+                    //{
+                    //    toolStripProgressBar1.Value = 0;
+                    //    toolStripStatusLabel1.Text = "Done.";
+                    //}));
 
                 }
             }
