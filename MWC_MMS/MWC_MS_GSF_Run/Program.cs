@@ -36,7 +36,7 @@ namespace MODSIM_GSFLOW
 					CmdArgs = CmdArgs.Where(w => w != "Delete").ToArray();
 				}
 				//Initialize 'plug-ins'
-				if (CmdArgs.Contains(".contol"))
+				if (CmdArgs[0].Contains(".control"))
 				{
 					// This plugin read information from the Control file. This is done at initialize
 					//		MODSIM initialization uses the model read with the file name provided by the plugin

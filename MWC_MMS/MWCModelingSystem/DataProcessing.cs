@@ -1051,11 +1051,21 @@ namespace RRModelingSystem
 
         private void buttonProcessWR_Click(object sender, EventArgs e)
         {
+            ProcessWaterRights(CostOnly: false);
+
+        }
+
+        private void ProcessWaterRights(bool CostOnly)
+        {
+
             this.Cursor = Cursors.WaitCursor;
             PrintMessage($"Reading MODSIM file {ProcessModsimFile.Replace(".xy", "_Div.xy")} ...");
 
             myModel = new Model();
-            XYFileReader.Read(myModel, ProcessModsimFile.Replace(".xy", "_Div.xy"));
+            if(CostOnly)
+                XYFileReader.Read(myModel, ProcessModsimFile);
+            else
+                XYFileReader.Read(myModel, ProcessModsimFile.Replace(".xy", "_Div.xy"));
 
             // read the model start date
             DateTime startdate = myModel.TimeStepManager.dataStartDate;
@@ -1071,159 +1081,178 @@ namespace RRModelingSystem
             long ripCount = 0;
             try
             {
-
-                //Get the diversion poitns from the network to identify POUs
-                foreach (Node n in myModel.Nodes_NonStorage)
+                if (!CostOnly)
                 {
-                    if (n.name.EndsWith("_Diversion"))
+                    //Get the diversion poitns from the network to identify POUs
+                    foreach (Node n in myModel.Nodes_NonStorage)
                     {
-                        //Found a POU diversion point
-                        string POUName = n.name.Replace("_Diversion", "");
-                        DataRow[] drs = wrTbl.Select($"[POU_ID] = '{POUName}'");
-                        double[] x2y2, x1y1;
-
-                        if (drs.Length > 0)
+                        if (n.name.EndsWith("_Diversion"))
                         {
-                            PrintMessage($"  Processing {drs.Length} water rights data for POU {POUName} ...");
-                            //relocate the diversion point (half way the diversion link)
-                            LinkList ll = n.OutflowLinks;
-                            x2y2 = new double[2];
+                            //Found a POU diversion point
+                            string POUName = n.name.Replace("_Diversion", "");
+                            DataRow[] drs = wrTbl.Select($"[POU_ID] = '{POUName}'");
+                            double[] x2y2, x1y1;
 
-                            //get the first segment link
-                            Link l = ll.link;
-                            x1y1 = new double[2] { l.from.graphics.nodeLoc.X, l.from.graphics.nodeLoc.Y };
-                            x2y2 = new double[2] { l.to.graphics.nodeLoc.X, l.to.graphics.nodeLoc.Y };
-
-                            //Node riverFrom = n.InflowLinks.link.from;
-                            //n.graphics.nodeLoc.X = riverFrom.graphics.nodeLoc.X + (n.graphics.nodeLoc.X - riverFrom.graphics.nodeLoc.X) / 2;
-                            //n.graphics.nodeLoc.Y = riverFrom.graphics.nodeLoc.Y + (n.graphics.nodeLoc.Y - riverFrom.graphics.nodeLoc.Y) / 2;
-
-                            List<Node> connectedNodes = new List<Node>();
-
-                            int wrCount = 0;
-
-                            foreach (DataRow dr in drs)
+                            if (drs.Length > 0)
                             {
-                                string WRL_Name;
-                                Link m_Link;
-                                //Create new water right connections
-                                Node inNode;
-                                string nodeName = POUName + "_" + dr["Application ID"].ToString();
-                                string defaultWRLnk = null;
+                                PrintMessage($"  Processing {drs.Length} water rights data for POU {POUName} ...");
+                                //relocate the diversion point (half way the diversion link)
+                                LinkList ll = n.OutflowLinks;
+                                x2y2 = new double[2];
 
-                                //Connect water rights with uses and storage
-                                if (wrCount == 0)
+                                //get the first segment link
+                                Link l = ll.link;
+                                x1y1 = new double[2] { l.from.graphics.nodeLoc.X, l.from.graphics.nodeLoc.Y };
+                                x2y2 = new double[2] { l.to.graphics.nodeLoc.X, l.to.graphics.nodeLoc.Y };
+
+                                //Node riverFrom = n.InflowLinks.link.from;
+                                //n.graphics.nodeLoc.X = riverFrom.graphics.nodeLoc.X + (n.graphics.nodeLoc.X - riverFrom.graphics.nodeLoc.X) / 2;
+                                //n.graphics.nodeLoc.Y = riverFrom.graphics.nodeLoc.Y + (n.graphics.nodeLoc.Y - riverFrom.graphics.nodeLoc.Y) / 2;
+
+                                List<Node> connectedNodes = new List<Node>();
+
+                                int wrCount = 0;
+
+                                foreach (DataRow dr in drs)
                                 {
-                                    //Use the default WR node
-                                    inNode = l.to;
-                                    inNode.name = nodeName; //change the name of the default node
-                                    defaultWRLnk = inNode.InflowLinks.link.name; // existing link will be repurposed for this AppID
+                                    string WRL_Name;
+                                    Link m_Link;
+                                    //Create new water right connections
+                                    Node inNode;
+                                    string nodeName = POUName + "_" + dr["Application ID"].ToString();
+                                    string defaultWRLnk = null;
 
-                                    List<string> m_lnks = new List<string>();
-                                    foreach (string lOutName in inNode.OutflowLinkNames)
+                                    //Connect water rights with uses and storage
+                                    if (wrCount == 0)
                                     {
-                                        Link lout = myModel.FindLink(lOutName);
-                                        m_lnks.Add(lout.name);
-                                        connectedNodes.Add(lout.to);
-                                        lout.name = $"{inNode.name}-{lout.to.name}";
+                                        //Use the default WR node
+                                        inNode = l.to;
+                                        inNode.name = nodeName; //change the name of the default node
+                                        defaultWRLnk = inNode.InflowLinks.link.name; // existing link will be repurposed for this AppID
 
-
-                                        //Set Storage
-                                        if (lout.to.name.EndsWith("_STO"))
+                                        List<string> m_lnks = new List<string>();
+                                        foreach (string lOutName in inNode.OutflowLinkNames)
                                         {
-                                            Node resNode = myModel.FindNode(POUName + "_RES");
-                                            resNode.m.max_volume += (long)Math.Round(double.Parse(dr["StorageAmount_AF"].ToString()) * myModel.ScaleFactor, 0);
-                                            //setting target to max storage
-                                            SettingResTarget(ref resNode, resNode.m.max_volume, myModel.TimeStepManager.Index2Date(1, TypeIndexes.DataIndex));
-                                            resNode.description += $" { dr["Application ID"]}+{dr["StorageAmount_AF"]} :";
-                                            //SetMonthlyStorage(ref lout, dr, startdate);
+                                            Link lout = myModel.FindLink(lOutName);
+                                            m_lnks.Add(lout.name);
+                                            connectedNodes.Add(lout.to);
+                                            lout.name = $"{inNode.name}-{lout.to.name}";
+
+
+                                            //Set Storage
+                                            if (lout.to.name.EndsWith("_STO"))
+                                            {
+                                                Node resNode = myModel.FindNode(POUName + "_RES");
+                                                resNode.m.max_volume += (long)Math.Round(double.Parse(dr["StorageAmount_AF"].ToString()) * myModel.ScaleFactor, 0);
+                                                //setting target to max storage
+                                                SettingResTarget(ref resNode, resNode.m.max_volume, myModel.TimeStepManager.Index2Date(1, TypeIndexes.DataIndex));
+                                                resNode.description += $" { dr["Application ID"]}+{dr["StorageAmount_AF"]} :";
+                                                //SetMonthlyStorage(ref lout, dr, startdate);
+                                            }
+                                        }
+                                        ////reconnect existing links
+                                        //foreach (string lName in m_lnks)
+                                        //{
+                                        //    l = myModel.FindLink(lName);
+                                        //    Utils.DisConnectFromNode(l);
+                                        //    Utils.ConnectFromNode(l, inNode);
+
+                                        //    //Set Storage
+                                        //    if (l.to.name.Contains("_STO"))
+                                        //    {
+                                        //        Node resNode = myModel.FindNode(POUName + "_RES");
+                                        //        resNode.m.max_volume = (long)Math.Round(double.Parse(dr["StorageAmount_AF"].ToString()) * myModel.ScaleFactor, 0);
+                                        //        SetMonthlyStorage(ref l, dr, startdate);
+                                        //    }
+                                        //}
+                                    }
+                                    else
+                                    {
+                                        inNode = myModel.AddNewNode(true);
+                                        inNode.nodeType = NodeType.NonStorage;
+                                        inNode.name = nodeName;
+
+                                        double[] newCoords = CalculateDivCoords(x2y2[0], x2y2[1], x1y1[0], x1y1[1], gridNo: 0, xStep: 1, yPosition: wrCount);
+                                        inNode.graphics.nodeLoc.X = (float)newCoords[0];
+                                        inNode.graphics.nodeLoc.Y = (float)newCoords[1];
+
+                                        //connect each water right to the original uses and storage
+                                        foreach (Node m_n in connectedNodes)
+                                        {
+                                            WRL_Name = $"{inNode.name}-{m_n.name}";
+                                            m_Link = myModel.FindLink(WRL_Name);
+                                            if (m_Link == null)
+                                            {
+                                                m_Link = myModel.AddNewLink(true);
+                                                m_Link.name = WRL_Name;
+                                                Utils.ConnectFromNode(m_Link, inNode);
+                                                Utils.ConnectToNode(m_Link, m_n);
+                                            }
+
+                                            //Set Storage
+                                            if (m_n.name.EndsWith("_STO"))
+                                            {
+                                                Node resNode = myModel.FindNode(POUName + "_RES");
+                                                resNode.m.max_volume += (long)Math.Round(double.Parse(dr["StorageAmount_AF"].ToString()) * myModel.ScaleFactor, 0);
+                                                SettingResTarget(ref resNode, resNode.m.max_volume, myModel.TimeStepManager.Index2Date(1, TypeIndexes.DataIndex));
+                                                resNode.description += $" { dr["Application ID"]}+{dr["StorageAmount_AF"]} :";
+                                                //SetMonthlyStorage(ref m_Link, dr, startdate);
+                                            }
                                         }
                                     }
-                                    ////reconnect existing links
-                                    //foreach (string lName in m_lnks)
+
+                                    //Create the link
+                                    WRL_Name = $"WR_{dr["WR_Type"]}_{dr["Application ID"]}";
+                                    m_Link = myModel.FindLink(defaultWRLnk != null ? defaultWRLnk : WRL_Name);
+                                    if (m_Link == null)
+                                    {
+                                        m_Link = myModel.AddNewLink(true);
+                                        Utils.ConnectFromNode(m_Link, n);
+                                        Utils.ConnectToNode(m_Link, inNode);
+                                    }
+                                    m_Link.name = WRL_Name;
+                                    m_Link.m.waterRightsDate = DateTime.Parse(dr["Priority Date"].ToString());
+                                    long maxCapacity = (long)Math.Round(double.Parse(dr["Face Value"].ToString()) * myModel.ScaleFactor, 0);
+
+                                    // Ignoring tthe entries with Face Value = 0 since it's a reporting issue (missing)
+                                    //
+                                    //if (maxCapacity == 0)
                                     //{
-                                    //    l = myModel.FindLink(lName);
-                                    //    Utils.DisConnectFromNode(l);
-                                    //    Utils.ConnectFromNode(l, inNode);
-
-                                    //    //Set Storage
-                                    //    if (l.to.name.Contains("_STO"))
-                                    //    {
-                                    //        Node resNode = myModel.FindNode(POUName + "_RES");
-                                    //        resNode.m.max_volume = (long)Math.Round(double.Parse(dr["StorageAmount_AF"].ToString()) * myModel.ScaleFactor, 0);
-                                    //        SetMonthlyStorage(ref l, dr, startdate);
-                                    //    }
+                                    //    maxCapacity += 1;
+                                    //    m_Link.m.maxVariable.dataTable.Rows.Clear();
+                                    //    m_Link.m.maxVariable.dataTable.Rows.Add(new object[] { startdate, 0 });
                                     //}
-                                }
-                                else
-                                {
-                                    inNode = myModel.AddNewNode(true);
-                                    inNode.nodeType = NodeType.NonStorage;
-                                    inNode.name = nodeName;
+                                    m_Link.m.lnkallow = maxCapacity; //Face value give per year.
+                                    m_Link.description = m_Link.m.waterRightsDate.ToShortDateString();
 
-                                    double[] newCoords = CalculateDivCoords(x2y2[0], x2y2[1], x1y1[0], x1y1[1], gridNo: 0, xStep: 1, yPosition: wrCount);
-                                    inNode.graphics.nodeLoc.X = (float)newCoords[0];
-                                    inNode.graphics.nodeLoc.Y = (float)newCoords[1];
-
-                                    //connect each water right to the original uses and storage
-                                    foreach (Node m_n in connectedNodes)
+                                    if (dr["WR_Type"].ToString() == "Riparian")
                                     {
-                                        WRL_Name = $"{inNode.name}-{m_n.name}";
-                                        m_Link = myModel.FindLink(WRL_Name);
-                                        if (m_Link == null)
-                                        {
-                                            m_Link = myModel.AddNewLink(true);
-                                            m_Link.name = WRL_Name;
-                                            Utils.ConnectFromNode(m_Link, inNode);
-                                            Utils.ConnectToNode(m_Link, m_n);
-                                        }
-
-                                        //Set Storage
-                                        if (m_n.name.EndsWith("_STO"))
-                                        {
-                                            Node resNode = myModel.FindNode(POUName + "_RES");
-                                            resNode.m.max_volume += (long)Math.Round(double.Parse(dr["StorageAmount_AF"].ToString()) * myModel.ScaleFactor, 0);
-                                            SettingResTarget(ref resNode, resNode.m.max_volume, myModel.TimeStepManager.Index2Date(1, TypeIndexes.DataIndex));
-                                            resNode.description += $" { dr["Application ID"]}+{dr["StorageAmount_AF"]} :";
-                                            //SetMonthlyStorage(ref m_Link, dr, startdate);
-                                        }
+                                        m_Link.m.cost = long.Parse(textBoxRiparianCost.Text) + ripCount;
+                                        //setting unique riparian cost.
+                                        if (radioButtonUniqueRiparian.Checked)
+                                            ripCount++;
                                     }
+                                    wrCount += 1;
                                 }
-
-                                //Create the link
-                                WRL_Name = $"WR_{dr["WR_Type"]}_{dr["Application ID"]}";
-                                m_Link = myModel.FindLink(defaultWRLnk != null ? defaultWRLnk : WRL_Name);
-                                if (m_Link == null)
-                                {
-                                    m_Link = myModel.AddNewLink(true);
-                                    Utils.ConnectFromNode(m_Link, n);
-                                    Utils.ConnectToNode(m_Link, inNode);
-                                }
-                                m_Link.name = WRL_Name;
-                                m_Link.m.waterRightsDate = DateTime.Parse(dr["Priority Date"].ToString());
-                                long maxCapacity = (long)Math.Round(double.Parse(dr["Face Value"].ToString()) * myModel.ScaleFactor, 0);
-
-                                // Ignoring tthe entries with Face Value = 0 since it's a reporting issue (missing)
-                                //
-                                //if (maxCapacity == 0)
-                                //{
-                                //    maxCapacity += 1;
-                                //    m_Link.m.maxVariable.dataTable.Rows.Clear();
-                                //    m_Link.m.maxVariable.dataTable.Rows.Add(new object[] { startdate, 0 });
-                                //}
-                                m_Link.m.lnkallow = maxCapacity; //Face value give per year.
-                                m_Link.description = m_Link.m.waterRightsDate.ToShortDateString();
-
-                                if (dr["WR_Type"].ToString() == "Riparian")
-                                {
-                                    m_Link.m.cost = long.Parse(textBoxRiparianCost.Text) + ripCount;
-                                    //setting unique riparian cost.
-                                    if (radioButtonUniqueRiparian.Checked)
-                                        ripCount++;
-                                }
-                                wrCount += 1;
                             }
                         }
+                    }
+                }
+                else
+                {
+                    PrintMessage($"\tAssigning cost to riparian links ...");
+                    DataRow[] wrdrs2 = wrTbl.Select($"[WR_Type] = 'Riparian'", "Priority Date");
+                    foreach (DataRow dr in wrdrs2)
+                    {
+                        Link wrL = myModel.FindLink($"WR_{dr["WR_Type"]}_{dr["Application ID"]}");
+                        if (wrL != null)
+                        {
+                            wrL.m.cost = long.Parse(textBoxRiparianCost.Text) + ripCount; ;
+                            if (radioButtonUniqueRiparian.Checked)
+                                ripCount++;
+                        }
+                        else
+                            PrintMessage($"     ERROR [Setting cost] Water right {dr["Application ID"]} (POU:{dr["POU_ID"]}) not implemented.");
                     }
                 }
 
@@ -1248,7 +1277,10 @@ namespace RRModelingSystem
                         PrintMessage($"     ERROR [Setting cost] Water right {dr["Application ID"]} (POU:{dr["POU_ID"]}) not implemented.");
                 }
 
-                XYFileWriter.Write(myModel, myModel.fname.Replace(".xy", "_WR.xy"));
+                if (CostOnly)
+                    XYFileWriter.Write(myModel, myModel.fname);
+                else
+                    XYFileWriter.Write(myModel, myModel.fname.Replace(".xy", "_WR.xy"));
 
                 PrintMessage($"Finished. \n Saved file as: {myModel.fname}");
             }
@@ -2006,6 +2038,19 @@ namespace RRModelingSystem
             {
                 dgvr.Cells[1].Value = numericUpDownAnnFactor.Value;
             }
+        }
+
+        private void buttonWRCostOnly_Click(object sender, EventArgs e)
+        {
+            messageOut($"Processing accretion/depletion links and nodes...");
+            string m_FileName = ProcessModsimFile;
+            if (comboBoxMODSIMFile.Text.Contains("_DIV_WR.xy"))
+                ProcessModsimFile = m_FileName.Replace(".xy", "_DIV_WR.xy");
+            if (comboBoxMODSIMFile.Text.Contains("_DIV_WRTS.xy"))
+                ProcessModsimFile = m_FileName.Replace(".xy", "_DIV_WRTS.xy");
+
+            ProcessWaterRights(CostOnly: true);
+            ProcessModsimFile = m_FileName;
         }
     }
 }
