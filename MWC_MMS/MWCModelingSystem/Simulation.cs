@@ -596,7 +596,7 @@ namespace RRModelingSystem
                 Node ISFNode = _ActiveModel.FindNode(dr["Location"].ToString());
                 if(ISFNode!=null)
                 {
-                    if (dr["Target Flow [cfs]"].ToString() != "<<variable>>")
+                    if (dr["Target Flow [cfs]"] != DBNull.Value)
                     {
                         if (ISFNode.m.adaDemandsM.dataTable.Rows.Count == 0)
                             ISFNode.m.adaDemandsM.dataTable.Rows.Add(new object[] { m_ActiveModel.TimeStepManager.dataStartDate, 0 });
@@ -891,7 +891,7 @@ namespace RRModelingSystem
                                     }
                                     else
                                     {
-                                        ISFTargetsTbl.Rows.Add(new object[] { ISFNode.name, "<<variable>>" });
+                                        ISFTargetsTbl.Rows.Add(new object[] { ISFNode.name, DBNull.Value });
                                         messageOut("\tWARNING: Note that you cannot edit variable ISF target in this interface.");
                                     }
                                     countISF += 1;
