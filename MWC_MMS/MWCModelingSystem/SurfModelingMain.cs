@@ -95,7 +95,7 @@ namespace RRModelingSystem
                         if (m_RunsManager == null || m_RRPreferences.hasChanges)
                         {
                             m_RunsManager = new RunsManager( m_RRPreferences.textBoxMMSDatabase.Text,
-                                m_RRPreferences.textBoxWorkspace.Text);
+                                m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxControlFile.Text);
                             m_RunsManager.MessageOut += ProcessMessage;
                             
                         }

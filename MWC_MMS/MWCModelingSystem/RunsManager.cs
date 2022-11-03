@@ -19,15 +19,18 @@ namespace RRModelingSystem
         private MyDBSqlite outputSqliteDB { get; set; }
         public event ProcessMessage MessageOut; // event
         private string _workSpace;
-        private string _fileName;
+        private string _controlFile;
         private string runID;
         private string scenarioName;
+        private string runType;
+        private string modsimFile;
 
-        public RunsManager(string MMS_db, string workSpace)
+        public RunsManager(string MMS_db, string workSpace, string controlFile)
         {
             InitializeComponent();
             sqliteDB = new MyDBSqlite(Path.Combine(workSpace,MMS_db));
             _workSpace = workSpace;
+            _controlFile = Path.Combine(workSpace, controlFile);
         }
 
         private void RunsManager_Load(object sender, EventArgs e)
@@ -60,7 +63,10 @@ namespace RRModelingSystem
             txtOutputRunIDDB.Text = txtOutputRunIDDB.Text.Replace(".xy", "OUTPUT.sqlite");
             runID = currentRow.Cells["runID"].Value.ToString();
             scenarioName = currentRow.Cells["ScnName"].Value.ToString();
-            //fileName = txtOutputRunIDDB.Text.Replace("OUTPUT.sqlite","");
+            runType = currentRow.Cells["RunType"].Value.ToString();
+            modsimFile = currentRow.Cells["ModsimFile"].Value.ToString();
+            txtScnName.Text = "";
+            ProcessFileName();
 
             /*string pathDB = string.Format(_workSpace + txtOutputDB.Text);
             if (File.Exists(pathDB))
@@ -105,6 +111,8 @@ namespace RRModelingSystem
                 {
                     txtOutputDB.Text = Uri.UnescapeDataString(dlg.FileName);
                     txtOutputDB.Text = txtOutputDB.Text.Replace(_workSpace,"");
+                    txtScnName.Text = Path.GetFileName(string.Format(_workSpace + txtOutputDB.Text));
+                    txtScnName.Text = txtScnName.Text.Substring(0, txtScnName.Text.Length - 13);
                 }
             }
             btnAdaptDB.Enabled = true;
@@ -121,18 +129,16 @@ namespace RRModelingSystem
                 }
                 else
                 {
-                    string strConn1, nomArchivo;
+                    string strConn1;
                     strConn1 = string.Format("Data Source={0};Version={1}", _workSpace + txtOutputDB.Text, 3);
-                    nomArchivo = Path.GetFileName(string.Format(_workSpace + txtOutputDB.Text));
-                    nomArchivo = nomArchivo.Substring(0, nomArchivo.Length - 13);
-                    AdaptDB(strConn1, nomArchivo);
+                    AdaptDB(strConn1, txtScnName.Text);
                 }
             }
             else
             {
                 string strConn1;
                 strConn1 = string.Format("Data Source={0};Version={1}", _workSpace + txtOutputRunIDDB.Text, 3);
-                AdaptDB(strConn1, _fileName);
+                AdaptDB(strConn1, txtScnName.Text);
                 try
                 {
                     string sql2;
@@ -147,7 +153,7 @@ namespace RRModelingSystem
             }
         }
 
-        private void AdaptDB (string strConn, string filenames)
+        private void AdaptDB (string strConn, string fileName)
         {
             SQLiteDataReader prefsTbl;
             string sql = @"SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY 1;";
@@ -168,7 +174,7 @@ namespace RRModelingSystem
                             {
                                 cmd1.ExecuteNonQuery();
                             }
-                            MessageOut("Updated field 'scenario' in table " + prefsTbl.GetString(0) + " of " + filenames + "OUTPUT.sqlite.");
+                            MessageOut("Updated field 'scenario' in table " + prefsTbl.GetString(0) + " of " + fileName + "OUTPUT.sqlite.");
                         }
                         catch (Exception ex) //catch block for catching errors
                         {
@@ -178,10 +184,10 @@ namespace RRModelingSystem
                             {
                                 cmd2.ExecuteNonQuery();
                             }
-                            MessageOut("Added field 'Scenario' in table " + prefsTbl.GetString(0) + " of " + filenames + "OUTPUT.sqlite.");
+                            MessageOut("Added field 'Scenario' in table " + prefsTbl.GetString(0) + " of " + fileName + "OUTPUT.sqlite.");
                         }
                         sql1 = "";
-                        sql1 = sql1 + @"UPDATE " + prefsTbl.GetString(0) + " SET Scenario = '" + filenames + "';\n";
+                        sql1 = sql1 + @"UPDATE " + prefsTbl.GetString(0) + " SET Scenario = '" + fileName + "';\n";
                         using (SQLiteCommand cmd3 = new SQLiteCommand(sql1, c))
                         {
                             cmd3.ExecuteNonQuery();
@@ -195,23 +201,19 @@ namespace RRModelingSystem
         {
             if (checkBoxFileName.Checked == true)
             {
-                _fileName = Path.GetFileName(txtOutputRunIDDB.Text).Replace("OUTPUT.sqlite", "");
-                labelScnName.Text = "Scenario Name: " + _fileName;
+                txtScnName.Text = Path.GetFileName(txtOutputRunIDDB.Text).Replace("OUTPUT.sqlite", "");
             }
             else
             {
-                _fileName = "";
-                labelScnName.Text = "Scenario Name: ";
+                txtScnName.Text = "";
             }
             if(checkBoxRunID.Checked == true)
             {
-                _fileName = _fileName + string.Format("r" + runID);
-                labelScnName.Text = "Scenario Name: " + _fileName;
+                txtScnName.Text = txtScnName.Text + string.Format("r" + runID);
             }
             if(checkBoxScenario.Checked == true)
             {
-                _fileName = _fileName + scenarioName;
-                labelScnName.Text = "Scenario Name: " + _fileName;
+                txtScnName.Text = txtScnName.Text + scenarioName;
             }
         }
 
@@ -237,8 +239,12 @@ namespace RRModelingSystem
                 btnBrowseDB.Enabled = true;
                 txtOutputRunIDDB.Enabled = false;
                 checkBoxRunID.Enabled = false;
+                checkBoxRunID.Checked = false;
                 checkBoxScenario.Enabled = false;
+                checkBoxScenario.Checked = false;
                 checkBoxFileName.Enabled = false;
+                checkBoxFileName.Checked = false;
+                txtScnName.Text = "";
             }
             else
             {
@@ -247,7 +253,23 @@ namespace RRModelingSystem
                 checkBoxRunID.Enabled = true;
                 checkBoxScenario.Enabled = true;
                 checkBoxFileName.Enabled = true;
+                txtScnName.Text = "";
             }
+        }
+
+        private void btnDeleteRun_Click(object sender, EventArgs e)
+        {
+            /*if(runType== "MODSIMOnly")
+            {
+                File.Delete(string.Format(_workSpace + modsimFile));
+                File.Delete(string.Format(_workSpace + modsimFile.Replace(".xy", "OUTPUT.sqlite")));
+            }
+            else
+            {
+                File.Delete(string.Format(_workSpace + modsimFile));
+                File.Delete(string.Format(_workSpace + modsimFile.Replace(".xy", "OUTPUT.sqlite")));
+                Directory.Delete(Path.GetDirectoryName(_controlFile) + "_r" + runID);
+            }*/
         }
     }
 }

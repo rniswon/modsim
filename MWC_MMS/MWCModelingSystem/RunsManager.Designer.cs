@@ -37,6 +37,8 @@ namespace RRModelingSystem
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.gBoxAdaptDB = new System.Windows.Forms.GroupBox();
+            this.txtScnName = new System.Windows.Forms.TextBox();
+            this.txtOutputRunIDDB = new System.Windows.Forms.TextBox();
             this.labelScnName = new System.Windows.Forms.Label();
             this.checkBoxFileName = new System.Windows.Forms.CheckBox();
             this.checkBoxOutputDB = new System.Windows.Forms.CheckBox();
@@ -46,7 +48,8 @@ namespace RRModelingSystem
             this.btnAdaptDB = new System.Windows.Forms.Button();
             this.checkBoxRunID = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.txtOutputRunIDDB = new System.Windows.Forms.TextBox();
+            this.btnDeleteRun = new System.Windows.Forms.Button();
+            this.btnRunLog = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -56,6 +59,7 @@ namespace RRModelingSystem
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.gBoxAdaptDB.SuspendLayout();
             this.SuspendLayout();
@@ -142,6 +146,8 @@ namespace RRModelingSystem
             // 
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox2.Controls.Add(this.btnRunLog);
+            this.groupBox2.Controls.Add(this.btnDeleteRun);
             this.groupBox2.Location = new System.Drawing.Point(469, 0);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(253, 185);
@@ -164,6 +170,7 @@ namespace RRModelingSystem
             // 
             this.gBoxAdaptDB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.gBoxAdaptDB.Controls.Add(this.txtScnName);
             this.gBoxAdaptDB.Controls.Add(this.txtOutputRunIDDB);
             this.gBoxAdaptDB.Controls.Add(this.labelScnName);
             this.gBoxAdaptDB.Controls.Add(this.checkBoxFileName);
@@ -176,25 +183,43 @@ namespace RRModelingSystem
             this.gBoxAdaptDB.Controls.Add(this.label1);
             this.gBoxAdaptDB.Location = new System.Drawing.Point(6, 10);
             this.gBoxAdaptDB.Name = "gBoxAdaptDB";
-            this.gBoxAdaptDB.Size = new System.Drawing.Size(451, 108);
+            this.gBoxAdaptDB.Size = new System.Drawing.Size(451, 120);
             this.gBoxAdaptDB.TabIndex = 0;
             this.gBoxAdaptDB.TabStop = false;
             this.gBoxAdaptDB.Text = "Adapt SQLite DB Output";
             // 
+            // txtScnName
+            // 
+            this.txtScnName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtScnName.Location = new System.Drawing.Point(90, 73);
+            this.txtScnName.Name = "txtScnName";
+            this.txtScnName.Size = new System.Drawing.Size(275, 20);
+            this.txtScnName.TabIndex = 1;
+            // 
+            // txtOutputRunIDDB
+            // 
+            this.txtOutputRunIDDB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtOutputRunIDDB.Location = new System.Drawing.Point(90, 47);
+            this.txtOutputRunIDDB.Name = "txtOutputRunIDDB";
+            this.txtOutputRunIDDB.Size = new System.Drawing.Size(275, 20);
+            this.txtOutputRunIDDB.TabIndex = 4;
+            // 
             // labelScnName
             // 
             this.labelScnName.AutoSize = true;
-            this.labelScnName.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F);
-            this.labelScnName.Location = new System.Drawing.Point(90, 69);
+            this.labelScnName.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelScnName.Location = new System.Drawing.Point(6, 78);
             this.labelScnName.Name = "labelScnName";
-            this.labelScnName.Size = new System.Drawing.Size(71, 12);
+            this.labelScnName.Size = new System.Drawing.Size(83, 13);
             this.labelScnName.TabIndex = 1;
             this.labelScnName.Text = "Scenario Name:";
             // 
             // checkBoxFileName
             // 
             this.checkBoxFileName.AutoSize = true;
-            this.checkBoxFileName.Location = new System.Drawing.Point(239, 84);
+            this.checkBoxFileName.Location = new System.Drawing.Point(240, 97);
             this.checkBoxFileName.Name = "checkBoxFileName";
             this.checkBoxFileName.Size = new System.Drawing.Size(73, 17);
             this.checkBoxFileName.TabIndex = 6;
@@ -227,7 +252,7 @@ namespace RRModelingSystem
             // 
             this.btnBrowseDB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnBrowseDB.Enabled = false;
-            this.btnBrowseDB.Location = new System.Drawing.Point(370, 18);
+            this.btnBrowseDB.Location = new System.Drawing.Point(370, 19);
             this.btnBrowseDB.Name = "btnBrowseDB";
             this.btnBrowseDB.Size = new System.Drawing.Size(75, 23);
             this.btnBrowseDB.TabIndex = 2;
@@ -238,7 +263,7 @@ namespace RRModelingSystem
             // checkBoxScenario
             // 
             this.checkBoxScenario.AutoSize = true;
-            this.checkBoxScenario.Location = new System.Drawing.Point(165, 84);
+            this.checkBoxScenario.Location = new System.Drawing.Point(166, 97);
             this.checkBoxScenario.Name = "checkBoxScenario";
             this.checkBoxScenario.Size = new System.Drawing.Size(68, 17);
             this.checkBoxScenario.TabIndex = 5;
@@ -249,7 +274,7 @@ namespace RRModelingSystem
             // btnAdaptDB
             // 
             this.btnAdaptDB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnAdaptDB.Location = new System.Drawing.Point(370, 45);
+            this.btnAdaptDB.Location = new System.Drawing.Point(370, 46);
             this.btnAdaptDB.Name = "btnAdaptDB";
             this.btnAdaptDB.Size = new System.Drawing.Size(75, 23);
             this.btnAdaptDB.TabIndex = 1;
@@ -261,7 +286,7 @@ namespace RRModelingSystem
             // checkBoxRunID
             // 
             this.checkBoxRunID.AutoSize = true;
-            this.checkBoxRunID.Location = new System.Drawing.Point(89, 84);
+            this.checkBoxRunID.Location = new System.Drawing.Point(90, 97);
             this.checkBoxRunID.Name = "checkBoxRunID";
             this.checkBoxRunID.Size = new System.Drawing.Size(60, 17);
             this.checkBoxRunID.TabIndex = 4;
@@ -272,21 +297,31 @@ namespace RRModelingSystem
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 53);
+            this.label1.Location = new System.Drawing.Point(6, 52);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(62, 13);
             this.label1.TabIndex = 1;
             this.label1.Text = "Run ID DB:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
-            // txtOutputRunIDDB
+            // btnDeleteRun
             // 
-            this.txtOutputRunIDDB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtOutputRunIDDB.Location = new System.Drawing.Point(90, 47);
-            this.txtOutputRunIDDB.Name = "txtOutputRunIDDB";
-            this.txtOutputRunIDDB.Size = new System.Drawing.Size(275, 20);
-            this.txtOutputRunIDDB.TabIndex = 4;
+            this.btnDeleteRun.Location = new System.Drawing.Point(172, 19);
+            this.btnDeleteRun.Name = "btnDeleteRun";
+            this.btnDeleteRun.Size = new System.Drawing.Size(75, 23);
+            this.btnDeleteRun.TabIndex = 0;
+            this.btnDeleteRun.Text = "Delete Run";
+            this.btnDeleteRun.UseVisualStyleBackColor = true;
+            this.btnDeleteRun.Click += new System.EventHandler(this.btnDeleteRun_Click);
+            // 
+            // btnRunLog
+            // 
+            this.btnRunLog.Location = new System.Drawing.Point(91, 19);
+            this.btnRunLog.Name = "btnRunLog";
+            this.btnRunLog.Size = new System.Drawing.Size(75, 23);
+            this.btnRunLog.TabIndex = 1;
+            this.btnRunLog.Text = "Run Log";
+            this.btnRunLog.UseVisualStyleBackColor = true;
             // 
             // RunsManager
             // 
@@ -306,6 +341,7 @@ namespace RRModelingSystem
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            this.groupBox2.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.gBoxAdaptDB.ResumeLayout(false);
             this.gBoxAdaptDB.PerformLayout();
@@ -333,5 +369,8 @@ namespace RRModelingSystem
         private System.Windows.Forms.Label labelScnName;
         private System.Windows.Forms.CheckBox checkBoxOutputDB;
         private System.Windows.Forms.TextBox txtOutputRunIDDB;
+        private System.Windows.Forms.TextBox txtScnName;
+        private System.Windows.Forms.Button btnRunLog;
+        private System.Windows.Forms.Button btnDeleteRun;
     }
 }
