@@ -259,17 +259,31 @@ namespace RRModelingSystem
 
         private void btnDeleteRun_Click(object sender, EventArgs e)
         {
-            /*if(runType== "MODSIMOnly")
+            string sql;
+            if(MessageBox.Show("Are you sure do you want to delete the MODSIM file with Run ID " + runID + 
+                " and all the data and files associated with it?","Delete Run ID",MessageBoxButtons.YesNo,
+                MessageBoxIcon.Information)==DialogResult.Yes)
             {
-                File.Delete(string.Format(_workSpace + modsimFile));
-                File.Delete(string.Format(_workSpace + modsimFile.Replace(".xy", "OUTPUT.sqlite")));
+                if (runType == "MODSIMOnly")
+                {
+                    File.Delete(string.Format(_workSpace + modsimFile));
+                    File.Delete(string.Format(_workSpace + modsimFile.Replace(".xy", "OUTPUT.sqlite")));
+                    File.Delete(Path.Combine(Path.GetDirectoryName(_workSpace + modsimFile), $"MMS_Run{runID}Log.txt"));
+                    sql = "DELETE FROM MMS_RunsInfo WHERE runID = " + runID;
+                    sqliteDB.ExecuteQuery(sql);
+
+                }
+                if (runType == "MODSIM-GSFLOW")
+                {
+                    File.Delete(string.Format(_workSpace + modsimFile));
+                    File.Delete(string.Format(_workSpace + modsimFile.Replace(".xy", "OUTPUT.sqlite")));
+                    Directory.Delete(Path.GetDirectoryName(_controlFile) + "_r" + runID + "\\",true);
+                    sql = "DELETE FROM MMS_RunsInfo WHERE runID = " + runID;
+                    sqliteDB.ExecuteQuery(sql);
+                }
             }
-            else
-            {
-                File.Delete(string.Format(_workSpace + modsimFile));
-                File.Delete(string.Format(_workSpace + modsimFile.Replace(".xy", "OUTPUT.sqlite")));
-                Directory.Delete(Path.GetDirectoryName(_controlFile) + "_r" + runID);
-            }*/
+            ReLoadForm();
+            MessageOut("MODSIM file and all the data and files associated with it deleted");
         }
     }
 }
