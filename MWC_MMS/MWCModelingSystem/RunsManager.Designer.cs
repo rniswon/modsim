@@ -35,6 +35,8 @@ namespace RRModelingSystem
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.textBoxHeading = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.btnRunLog = new System.Windows.Forms.Button();
+            this.btnDeleteRun = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.gBoxAdaptDB = new System.Windows.Forms.GroupBox();
             this.txtScnName = new System.Windows.Forms.TextBox();
@@ -48,8 +50,6 @@ namespace RRModelingSystem
             this.btnAdaptDB = new System.Windows.Forms.Button();
             this.checkBoxRunID = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.btnDeleteRun = new System.Windows.Forms.Button();
-            this.btnRunLog = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -153,6 +153,26 @@ namespace RRModelingSystem
             this.groupBox2.Size = new System.Drawing.Size(253, 185);
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
+            // 
+            // btnRunLog
+            // 
+            this.btnRunLog.Location = new System.Drawing.Point(64, 19);
+            this.btnRunLog.Name = "btnRunLog";
+            this.btnRunLog.Size = new System.Drawing.Size(88, 23);
+            this.btnRunLog.TabIndex = 1;
+            this.btnRunLog.Text = "Read Run Log";
+            this.btnRunLog.UseVisualStyleBackColor = true;
+            this.btnRunLog.Click += new System.EventHandler(this.btnRunLog_Click);
+            // 
+            // btnDeleteRun
+            // 
+            this.btnDeleteRun.Location = new System.Drawing.Point(159, 19);
+            this.btnDeleteRun.Name = "btnDeleteRun";
+            this.btnDeleteRun.Size = new System.Drawing.Size(88, 23);
+            this.btnDeleteRun.TabIndex = 0;
+            this.btnDeleteRun.Text = "Delete Run";
+            this.btnDeleteRun.UseVisualStyleBackColor = true;
+            this.btnDeleteRun.Click += new System.EventHandler(this.btnDeleteRun_Click);
             // 
             // groupBox1
             // 
@@ -303,25 +323,6 @@ namespace RRModelingSystem
             this.label1.TabIndex = 1;
             this.label1.Text = "Run ID DB:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.TopRight;
-            // 
-            // btnDeleteRun
-            // 
-            this.btnDeleteRun.Location = new System.Drawing.Point(172, 19);
-            this.btnDeleteRun.Name = "btnDeleteRun";
-            this.btnDeleteRun.Size = new System.Drawing.Size(75, 23);
-            this.btnDeleteRun.TabIndex = 0;
-            this.btnDeleteRun.Text = "Delete Run";
-            this.btnDeleteRun.UseVisualStyleBackColor = true;
-            this.btnDeleteRun.Click += new System.EventHandler(this.btnDeleteRun_Click);
-            // 
-            // btnRunLog
-            // 
-            this.btnRunLog.Location = new System.Drawing.Point(91, 19);
-            this.btnRunLog.Name = "btnRunLog";
-            this.btnRunLog.Size = new System.Drawing.Size(75, 23);
-            this.btnRunLog.TabIndex = 1;
-            this.btnRunLog.Text = "Run Log";
-            this.btnRunLog.UseVisualStyleBackColor = true;
             // 
             // RunsManager
             // 

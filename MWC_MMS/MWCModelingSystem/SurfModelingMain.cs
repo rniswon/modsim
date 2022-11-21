@@ -97,7 +97,8 @@ namespace RRModelingSystem
                             m_RunsManager = new RunsManager( m_RRPreferences.textBoxMMSDatabase.Text,
                                 m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxControlFile.Text);
                             m_RunsManager.MessageOut += ProcessMessage;
-                            
+                            m_RunsManager.simulationView += startSimulationRunWindow;
+
                         }
                         splitContainer1.Panel2.Controls.Add(m_RunsManager);
                         m_RunsManager.Dock = DockStyle.Fill;

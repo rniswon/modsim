@@ -24,6 +24,11 @@ namespace RRModelingSystem
         private string scenarioName;
         private string runType;
         private string modsimFile;
+        private string basePath;
+        private string _riparianON;
+        private string options;
+
+        public event ProcessSimulationRum simulationView; // event
 
         public RunsManager(string MMS_db, string workSpace, string controlFile)
         {
@@ -65,7 +70,10 @@ namespace RRModelingSystem
             scenarioName = currentRow.Cells["ScnName"].Value.ToString();
             runType = currentRow.Cells["RunType"].Value.ToString();
             modsimFile = currentRow.Cells["ModsimFile"].Value.ToString();
+            basePath = currentRow.Cells["BasePath"].Value.ToString();
+            _riparianON = currentRow.Cells["RiparianON"].Value.ToString();
             txtScnName.Text = "";
+            options = currentRow.Cells["Options"].Value.ToString();
             ProcessFileName();
 
             /*string pathDB = string.Format(_workSpace + txtOutputDB.Text);
@@ -284,6 +292,26 @@ namespace RRModelingSystem
             }
             ReLoadForm();
             MessageOut("MODSIM file and all the data and files associated with it deleted");
+        }
+
+        private void btnRunLog_Click(object sender, EventArgs e)
+        {
+            string logFileName;
+            string _runFile = Path.Combine(_workSpace + basePath);
+            bool riparianLogic = _riparianON == "1"? true : false;
+            int riparianCost = int.Parse(options.Substring(options.IndexOf("1. Riparian WRs (") + 17, 6));
+            if (runType == "MODSIM-GSFLOW")
+            {
+                //Start the run execution/monitoring control
+                logFileName = Path.Combine(Path.GetDirectoryName(Path.Combine(_workSpace + basePath)), $"MMS_Run{runID}Log.txt");
+                simulationView(int.Parse(runID), logFileName, _runFile, riparianLogic, riparianCost, null);
+            }
+            else
+            {
+                simulationView(int.Parse(runID), "", _runFile, riparianLogic, riparianCost, null);
+
+            }
+
         }
     }
 }
