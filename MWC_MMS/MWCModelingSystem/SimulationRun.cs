@@ -103,7 +103,7 @@ namespace RRModelingSystem
                     process = new Process();
                     process.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "MWC_MS_GSF_Run.exe";
                     string riparianArgs = _riparianON ? $"-RiparianON {_riparianCost} " : "";
-                    process.StartInfo.Arguments = riparianArgs + "\"" + Path.GetFileName(_runFileName) + "\"";
+                    process.StartInfo.Arguments = riparianArgs + "" + Path.GetFileName(_runFileName) + "";
                     process.StartInfo.WorkingDirectory = Path.GetDirectoryName(_runFileName);
                     process.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;
                     process.StartInfo.UseShellExecute = false;
@@ -492,11 +492,18 @@ namespace RRModelingSystem
         {
             if (_fileName != "")
             {
-                FileStream fs = new FileStream(_fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, FileOptions.SequentialScan);
-                using (StreamReader sr = new StreamReader(fs))
+                if (File.Exists(_fileName))
                 {
-                    richTextBox1.Text = sr.ReadToEnd();
-                    sr.Close();
+                    FileStream fs = new FileStream(_fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, FileOptions.SequentialScan);
+                    using (StreamReader sr = new StreamReader(fs))
+                    {
+                        richTextBox1.Text = sr.ReadToEnd();
+                        sr.Close();
+                    }
+                }
+                else
+                {
+                    messageOut("ERROR: Log file not found.");
                 }
             }
             else
