@@ -97,7 +97,7 @@ namespace RRModelingSystem
                             m_RunsManager = new RunsManager( m_RRPreferences.textBoxMMSDatabase.Text,
                                 m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxControlFile.Text);
                             m_RunsManager.MessageOut += ProcessMessage;
-                            m_RunsManager.simulationView += startSimulationRunWindow;
+                            m_RunsManager.simulationView += viewRunWindow;
 
                         }
                         splitContainer1.Panel2.Controls.Add(m_RunsManager);
@@ -139,6 +139,24 @@ namespace RRModelingSystem
             }
             //Start simulation worker
             sRWin.StartSimulation(null,null);
+        }
+
+        private void viewRunWindow(int runID, string logFileName, string runFileName, bool riparianLogicOn, int riparianCost, List<string> runMgs = null)
+        {
+            string nodeName = "Run: " + runID.ToString();
+            SimulationRun sRWin = new SimulationRun(runID, logFileName, runFileName, riparianLogicOn, riparianCost,
+                                                    Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMMSDatabase.Text), runMgs);
+            sRWin.messageOut += ProcessMessage;
+            if (simRunWindows.ContainsKey(nodeName))
+                simRunWindows[nodeName] = sRWin;
+            else
+            {
+                simRunWindows.Add(nodeName, sRWin);
+                treeView1.BeginInvoke((Action)(() =>
+                {
+                    treeView1.Nodes["Node2"].Nodes.Add(nodeName, nodeName);
+                }));
+            }
         }
 
         private void ProcessMessage(string msg)

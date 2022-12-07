@@ -33,7 +33,7 @@ namespace RRModelingSystem
         public RunsManager(string MMS_db, string workSpace, string controlFile)
         {
             InitializeComponent();
-            sqliteDB = new MyDBSqlite(Path.Combine(workSpace,MMS_db));
+            sqliteDB = new MyDBSqlite(Path.Combine(workSpace, MMS_db));
             _workSpace = workSpace;
             _controlFile = Path.Combine(workSpace, controlFile);
         }
@@ -53,7 +53,7 @@ namespace RRModelingSystem
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             //UpdateInfo(((DataGridView)sender).CurrentRow);
-            
+
         }
 
         private void UpdateInfo(DataGridViewRow currentRow)
@@ -90,17 +90,17 @@ namespace RRModelingSystem
 
         private void dataGridView1_RowEnter(object sender, DataGridViewCellEventArgs e)
         {
-            
+
         }
 
         private void dataGridView1_Validated(object sender, EventArgs e)
         {
-            
+
         }
 
         private void dataGridView1_RowValidated(object sender, DataGridViewCellEventArgs e)
         {
-           
+
         }
 
         private void dataGridView1_SelectionChanged(object sender, EventArgs e)
@@ -118,7 +118,7 @@ namespace RRModelingSystem
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
                     txtOutputDB.Text = Uri.UnescapeDataString(dlg.FileName);
-                    txtOutputDB.Text = txtOutputDB.Text.Replace(_workSpace,"");
+                    txtOutputDB.Text = txtOutputDB.Text.Replace(_workSpace, "");
                     txtScnName.Text = Path.GetFileName(string.Format(_workSpace + txtOutputDB.Text));
                     txtScnName.Text = txtScnName.Text.Substring(0, txtScnName.Text.Length - 13);
                 }
@@ -129,9 +129,9 @@ namespace RRModelingSystem
 
         private void btnAdaptDB_Click(object sender, EventArgs e)
         {
-            if(checkBoxOutputDB.Checked==true)
+            if (checkBoxOutputDB.Checked == true)
             {
-                if(txtOutputDB.Text.Trim()=="")
+                if (txtOutputDB.Text.Trim() == "")
                 {
                     MessageOut("Select a SQLite database output with the 'Browse DB'.");
                 }
@@ -161,7 +161,7 @@ namespace RRModelingSystem
             }
         }
 
-        private void AdaptDB (string strConn, string fileName)
+        private void AdaptDB(string strConn, string fileName)
         {
             SQLiteDataReader prefsTbl;
             string sql = @"SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY 1;";
@@ -215,11 +215,11 @@ namespace RRModelingSystem
             {
                 txtScnName.Text = "";
             }
-            if(checkBoxRunID.Checked == true)
+            if (checkBoxRunID.Checked == true)
             {
                 txtScnName.Text = txtScnName.Text + string.Format("r" + runID);
             }
-            if(checkBoxScenario.Checked == true)
+            if (checkBoxScenario.Checked == true)
             {
                 txtScnName.Text = txtScnName.Text + scenarioName;
             }
@@ -268,9 +268,9 @@ namespace RRModelingSystem
         private void btnDeleteRun_Click(object sender, EventArgs e)
         {
             string sql;
-            if(MessageBox.Show("Are you sure do you want to delete the MODSIM file with Run ID " + runID + 
-                " and all the data and files associated with it?","Delete Run ID",MessageBoxButtons.YesNo,
-                MessageBoxIcon.Information)==DialogResult.Yes)
+            if (MessageBox.Show("Are you sure do you want to delete the MODSIM file with Run ID " + runID +
+                " and all the data and files associated with it?", "Delete Run ID", MessageBoxButtons.YesNo,
+                MessageBoxIcon.Information) == DialogResult.Yes)
             {
                 if (runType == "MODSIMOnly")
                 {
@@ -285,7 +285,7 @@ namespace RRModelingSystem
                 {
                     File.Delete(string.Format(_workSpace + modsimFile));
                     File.Delete(string.Format(_workSpace + modsimFile.Replace(".xy", "OUTPUT.sqlite")));
-                    Directory.Delete(Path.GetDirectoryName(_controlFile) + "_r" + runID + "\\",true);
+                    Directory.Delete(Path.GetDirectoryName(_controlFile) + "_r" + runID + "\\", true);
                     sql = "DELETE FROM MMS_RunsInfo WHERE runID = " + runID;
                     sqliteDB.ExecuteQuery(sql);
                 }
@@ -296,19 +296,40 @@ namespace RRModelingSystem
 
         private void btnRunLog_Click(object sender, EventArgs e)
         {
-            string logFileName;
-            string _runFile = Path.Combine(_workSpace + basePath);
-            bool riparianLogic = _riparianON == "1"? true : false;
+            string runFile = Path.Combine(_workSpace + basePath);
+            string logFileName = Path.Combine(Path.GetDirectoryName(Path.Combine(_workSpace + basePath)), $"MMS_Run{runID}Log.txt");
+            bool riparianLogic = _riparianON == "1" ? true : false;
             int riparianCost = int.Parse(options.Substring(options.IndexOf("1. Riparian WRs (") + 17, 6));
+
+            using (BackgroundWorker bgworker = new BackgroundWorker())
+            {
+                bgworker.DoWork += ViewRunID;
+                bgworker.RunWorkerAsync(new object[]
+                                        { runID,
+                                            logFileName,
+                                            runFile,
+                                            riparianLogic,
+                                            riparianCost });
+            }
+
+        }
+
+        private void ViewRunID(object sender, DoWorkEventArgs e)
+        {
+            object[] args = e.Argument as object[];
+            int _runid = int.Parse(args[0].ToString());
+            string _logFileName = args[1].ToString();
+            string _runFile = args[2].ToString();
+            bool _riparianLogic = bool.Parse(args[3].ToString());
+            int _riparianCost = int.Parse(args[4].ToString());
             if (runType == "MODSIM-GSFLOW")
             {
                 //Start the run execution/monitoring control
-                logFileName = Path.Combine(Path.GetDirectoryName(Path.Combine(_workSpace + basePath)), $"MMS_Run{runID}Log.txt");
-                simulationView(int.Parse(runID), logFileName, _runFile, riparianLogic, riparianCost, null);
+                simulationView(_runid, _logFileName, _runFile, _riparianLogic, _riparianCost, null);
             }
             else
             {
-                simulationView(int.Parse(runID), "", _runFile, riparianLogic, riparianCost, null);
+                simulationView(_runid, "", _runFile, _riparianLogic, _riparianCost, null);
 
             }
 
