@@ -123,27 +123,19 @@ namespace RRModelingSystem
 
         private void startSimulationRunWindow(int runID, string logFileName, string runFileName, bool riparianLogicOn, int riparianCost, List<string> runMgs = null)
         {
-            string nodeName = "Run: " + runID.ToString();
-            SimulationRun sRWin = new SimulationRun(runID, logFileName, runFileName, riparianLogicOn, riparianCost,
-                                                    Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMMSDatabase.Text),runMgs);
-            sRWin.messageOut += ProcessMessage;
-            if (simRunWindows.ContainsKey(nodeName))
-                simRunWindows[nodeName] = sRWin;
-            else
-            {
-                simRunWindows.Add(nodeName, sRWin);
-                treeView1.BeginInvoke((Action)(() =>
-                {
-                    treeView1.Nodes["Node2"].Nodes.Add(nodeName, nodeName);
-                }));
-            }
+            SimulationRun sRWin; 
+            sRWin = processSimulation(runID, logFileName, runFileName, riparianLogicOn, riparianCost, runMgs);
             //Start simulation worker
             sRWin.StartSimulation(null,null);
         }
 
         private void viewRunWindow(int runID, string logFileName, string runFileName, bool riparianLogicOn, int riparianCost, List<string> runMgs = null)
         {
-            string nodeName = "Run: " + runID.ToString();
+
+            SimulationRun sRWin;
+            sRWin = processSimulation(runID, logFileName, runFileName, riparianLogicOn, riparianCost, runMgs);
+
+            /*string nodeName = "Run: " + runID.ToString();
             SimulationRun sRWin = new SimulationRun(runID, logFileName, runFileName, riparianLogicOn, riparianCost,
                                                     Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMMSDatabase.Text), runMgs);
             sRWin.messageOut += ProcessMessage;
@@ -156,7 +148,26 @@ namespace RRModelingSystem
                 {
                     treeView1.Nodes["Node2"].Nodes.Add(nodeName, nodeName);
                 }));
+            }*/
+        }
+
+        private SimulationRun processSimulation(int runID, string logFileName, string runFileName, bool riparianLogicOn, int riparianCost, List<string> runMgs = null)
+        {
+            SimulationRun sRWin = new SimulationRun(runID, logFileName, runFileName, riparianLogicOn, riparianCost,
+                Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMMSDatabase.Text), runMgs);
+            string nodeName = "Run: " + runID.ToString();
+            sRWin.messageOut += ProcessMessage;
+            if (simRunWindows.ContainsKey(nodeName))
+                simRunWindows[nodeName] = sRWin;
+            else
+            {
+                simRunWindows.Add(nodeName, sRWin);
+                treeView1.BeginInvoke((Action)(() =>
+                {
+                    treeView1.Nodes["Node2"].Nodes.Add(nodeName, nodeName);
+                }));
             }
+            return sRWin;
         }
 
         private void ProcessMessage(string msg)
