@@ -64,6 +64,7 @@ namespace MODSIM_GSFLOW_C
         public long[] LinkHi_Sv = new long[1];
         public string mappingFileName;
         public string xyFileName;
+        public string cmd_args;
         private double accuracy;
         private int localMODSIMIter;
         private SWGW_MODSIMUtils swgwUtils;
@@ -83,7 +84,7 @@ namespace MODSIM_GSFLOW_C
         public static extern void gsflow_prms(ref int Process_mode, ref bool afr, ref bool MS_GSF_converge, ref int Nsegshold, ref int nlakeshold, [In, Out] double[] Diversions, [In, Out] int[] IDivert, [In, Out] double[] EXCHANGE, [In, Out] double[] DELTAVOL, [In, Out] double[] LAKEVOL, [In, Out] double[] LAKEVAP, [In, Out] double[] agDemand);
 
         [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void put_prms_control_file([In] ref char[] command_line_args);
+        public static extern void put_prms_control_file(ref int ctl_len, [In] char[] command_lineArgs);
 
         [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void gsflow_prmsSettings([In, Out] ref int Numts, [In, Out] ref int Model_mode, [In, Out] int[] startTime, [In, Out] int[] endTime, ref int File1_length, [In, Out] char[] FileName1, ref int File2_length, [In, Out] char[] FileName2);
@@ -102,11 +103,13 @@ namespace MODSIM_GSFLOW_C
             {
 
                 Numts = 1;
-                int len_xyname, len_mapname;
+                int len_xyname, len_mapname, ctl_length;
 
                 xyFileName = new String(' ', 256);
                 mappingFileName = new String(' ', 256);
-                char[] command_line_args = String.Join(" ", CmdArgs).PadRight(512).ToCharArray();
+                cmd_args = new String(' ', 512);
+                cmd_args = CmdArgs[0];
+                ctl_length = cmd_args.Length;
                 len_xyname = xyFileName.Length;
                 len_mapname = mappingFileName.Length;
 
@@ -120,7 +123,8 @@ namespace MODSIM_GSFLOW_C
                 Nlakeshold = 1;  //initialize temporarily
                 try
                 {
-                    put_prms_control_file(ref command_line_args);
+                    char[] cmd_argsChars = ToCharacterArrayFortran(cmd_args, ctl_length);
+                    put_prms_control_file(ref ctl_length, cmd_argsChars);
                     gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
                 }
                 catch (Exception ex)

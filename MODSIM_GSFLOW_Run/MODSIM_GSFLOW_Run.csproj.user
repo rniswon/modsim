@@ -15,7 +15,7 @@
     <StartArguments>gsflow.control</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <StartWorkingDirectory>C:\Users\rniswon\Documents\Data\Git\gsflow_examples.git\sagehen_3lay_modsim_ag\windows</StartWorkingDirectory>
+    <StartWorkingDirectory>C:\Workspace\gsflow_examples\sagehen_3lay_modsim_ag\windows</StartWorkingDirectory>
     <StartArguments>gsflow.control</StartArguments>
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
   </PropertyGroup>
