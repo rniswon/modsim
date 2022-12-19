@@ -138,7 +138,7 @@ namespace RRModelingSystem
                 else
                 {
                     string strConn1;
-                    strConn1 = string.Format("Data Source={0};Version={1}", _workSpace + txtOutputDB.Text, 3);
+                    strConn1 = string.Format("Data Source={0};Version={1}", txtOutputDB.Text, 3);
                     AdaptDB(strConn1, txtScnName.Text);
                 }
             }
