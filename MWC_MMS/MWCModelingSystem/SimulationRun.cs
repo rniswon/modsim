@@ -36,6 +36,7 @@ namespace RRModelingSystem
         private long lastStatusTick = Environment.TickCount;
         private Model _ActiveModel;
         private MyDBSqlite sqliteDB { get; set; }
+        private string _workspace;
 
         public event ProcessMessage messageOut; // event
 
@@ -43,7 +44,8 @@ namespace RRModelingSystem
         static extern int SetWindowText(IntPtr hWnd, string text);
 
 
-        public SimulationRun(int runID, string logFileName, string runFileName, bool riparianLogicOn, int riparianCost, string MMS_db, List<string> runMgs = null)
+        public SimulationRun(int runID, string logFileName, string runFileName, bool riparianLogicOn, int riparianCost, 
+                                string MMS_db, string workspace, List<string> runMgs = null)
         {
             InitializeComponent();
             _fileName = logFileName;
@@ -71,6 +73,7 @@ namespace RRModelingSystem
 
             sqliteDB = new MyDBSqlite(Path.Combine(MMS_db));
             sqliteDB.messageOut += OnMessageOut;
+            _workspace = workspace;
 
         }
 
@@ -87,6 +90,9 @@ namespace RRModelingSystem
             {
                 var item = listView1.Items.Add("Run File:");
                 item.SubItems.Add(_runFileName);
+                item = listView1.Items.Add("MODSIM File:");
+                string modsimFile = Path.Combine(_workspace, sqliteDB.GetRunsInfoValue(_runID, "ModsimFile"));
+                item.SubItems.Add(modsimFile);
             }
             listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
         }
@@ -205,6 +211,27 @@ namespace RRModelingSystem
             }
             SetButtonEnabled(buttonRestart, true);
         }
+
+        public void CheckExecutingProcess(object sender, DoWorkEventArgs e)
+        {
+            string processID = sqliteDB.GetRunsInfoValue(_runID, "ProcessID");
+            process = GetOpenProcess(processID);
+            if (process != null)
+            {
+                toolStripStatusLabel1.Text = "Found running process.  Simulation in progress.";
+                SetButtonEnabled(buttonRestart, false);
+                SetButtonEnabled(buttonStopRun, true);
+            }
+            else
+            {
+                toolStripStatusLabel1.Text = "Simulation process completed.";
+                SetButtonEnabled(buttonRestart, true);
+                Dictionary<string, object> runInfo = new Dictionary<string, object>();
+                runInfo.Add("ProcessID", -1);
+                sqliteDB.UpdateRunsInfoTable(_runID, runInfo);
+            }
+        }
+
 
         private void SetButtonEnabled(Button button, bool v)
         {
@@ -381,6 +408,7 @@ namespace RRModelingSystem
                 {
                     toolStripProgressBar1.Value = 0;
                     toolStripStatusLabel1.Text = "Simulation completed.";
+                    checkBoxAutoUpdate.Checked = false;
                     sw.Stop();
                 }
             }
@@ -391,7 +419,7 @@ namespace RRModelingSystem
 
         private void button1_Click(object sender, EventArgs e)
         {
-            UpdateTxtFile();
+            UpdateTxtFile(_fileName);
         }
 
         private void treeViewMsgGroup_AfterSelect(object sender, TreeViewEventArgs e)
@@ -409,7 +437,7 @@ namespace RRModelingSystem
             List<string> searchLines = new List<string>();
             foreach (string line in richTextBox1.Lines)
             {
-                if (line.ToLower().Contains(comboBoxSearch.Text))
+                if (line.ToLower().Contains(comboBoxSearch.Text.ToLower()))
                     searchLines.Add(line);
             }
             richTextBox2.Lines = searchLines.ToArray();
@@ -439,6 +467,14 @@ namespace RRModelingSystem
                     process.Kill();
                     process = null;
                     SetButtonEnabled(buttonStopRun, false);
+                    SetButtonEnabled(buttonRestart, true);
+                    checkBoxAutoUpdate.Checked = false;
+
+                    Dictionary<string, object> runInfo = new Dictionary<string, object>();
+                    runInfo.Add("SimulationStatus", 4); //incomplete run
+                    runInfo.Add("LastAccess", DateTime.Now.ToString());
+                    runInfo.Add("ProcessID", -1);
+                    sqliteDB.UpdateRunsInfoTable(_runID, runInfo);
                 }
                 catch (Exception ex)
                 {
@@ -449,35 +485,39 @@ namespace RRModelingSystem
             }
         }
 
-        public bool IsProcessOpen(string name)
+        public Process GetOpenProcess(string name)
         {
-            //here we're going to get a list of all running processes on
-            //the computer
-            foreach (Process clsProcess in Process.GetProcesses())
+            if (name != "-1")
             {
-                //now we're going to see if any of the running processes
-                //match the currently running processes. Be sure to not
-                //add the .exe to the name you provide, i.e: NOTEPAD,
-                //not NOTEPAD.EXE or false is always returned even if
-                //notepad is running.
-                //Remember, if you have the process running more than once, 
-                //say IE open 4 times the loop thr way it is now will close all 4,
-                //if you want it to just close the first one it finds
-                //then add a return; after the Kill
-                if (clsProcess.ProcessName.Contains(name))
+                //here we're going to get a list of all running processes on
+                //the computer
+                foreach (Process clsProcess in Process.GetProcesses())
                 {
-                    //if the process is found to be running then we
-                    //return a true
-                    return true;
+                    //now we're going to see if any of the running processes
+                    //match the currently running processes. Be sure to not
+                    //add the .exe to the name you provide, i.e: NOTEPAD,
+                    //not NOTEPAD.EXE or false is always returned even if
+                    //notepad is running.
+                    //Remember, if you have the process running more than once, 
+                    //say IE open 4 times the loop thr way it is now will close all 4,
+                    //if you want it to just close the first one it finds
+                    //then add a return; after the Kill
+                    //if (clsProcess.ProcessName.Contains(name))
+                    if (clsProcess.Id == int.Parse(name))
+                    {
+                        //if the process is found to be running then we
+                        //return a true
+                        return clsProcess;
+                    }
                 }
             }
             //otherwise we return a false
-            return false;
+            return null;
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            UpdateTxtFile();
+            UpdateTxtFile(_fileName);
         }
 
         private void checkBoxAutoUpdate_CheckedChanged(object sender, EventArgs e)
@@ -488,13 +528,77 @@ namespace RRModelingSystem
                 timer1.Stop();
         }
 
-        private void UpdateTxtFile()
+        private void richTextBox2_TextChanged(object sender, EventArgs e)
         {
-            if (_fileName != "")
+
+        }
+
+        private void richTextBox2_Click(object sender, EventArgs e)
+        {
+            //int linenumber = richTextBox1.GetLineFromCharIndex(richTextBox1.Text.IndexOf(richTextBox1.SelectedText));
+            //MessageBox.Show("Linenumber: " + (richTextBox1.Lines[linenumber + 1]).ToString());
+            
+        }
+
+        private void richTextBox2_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
             {
-                if (File.Exists(_fileName))
+                int p = richTextBox2.GetCharIndexFromPosition(e.Location);
+                int line = richTextBox2.GetLineFromCharIndex(p);
+                // code...
+                //MessageBox.Show("Linenumber: " + (richTextBox2.Lines[line]).ToString());
+                
+                int wordstartIndex = richTextBox1.Find(richTextBox2.Lines[line]);
+                if (wordstartIndex != -1)
                 {
-                    FileStream fs = new FileStream(_fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, FileOptions.SequentialScan);
+                    richTextBox1.SelectionStart = wordstartIndex;
+                    richTextBox1.SelectionLength = richTextBox2.Lines[line].Length;
+                    richTextBox1.SelectionBackColor = Color.Yellow;
+                }
+                //else
+                //    break;
+                //startindex += wordstartIndex + word.Length;
+                richTextBox1.ScrollToCaret();
+            }
+        }
+
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void listView1_MouseClick(object sender, MouseEventArgs e)
+        {
+            //Point localPoint = listView1.PointToClient(e.Location);
+            ListViewItem item = listView1.GetItemAt(e.Location.X, e.Location.Y);
+            string newTxt = _fileName;
+            switch (item.Text)
+            {
+                case "Log File:":
+                case "Run File:":
+                case "MODSIM File:":
+                    newTxt = item.SubItems[1].Text;
+                    labelDisplayFile.Text = item.Text;
+                    break;
+            }
+
+            UpdateTxtFile(newTxt);
+        }
+
+        public void UpdateTxtFile(string fileName="")
+        {
+            if (fileName == "")
+            {
+                fileName = _fileName;
+                labelDisplayFile.Text = "Log File:";
+            }
+
+            if (fileName != "")
+            {
+                if (File.Exists(fileName))
+                {
+                    FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, FileOptions.SequentialScan);
                     using (StreamReader sr = new StreamReader(fs))
                     {
                         richTextBox1.Text = sr.ReadToEnd();
@@ -510,6 +614,7 @@ namespace RRModelingSystem
             {
                 richTextBox1.Lines = _runMsgs.ToArray();
             }
+            richTextBox1.SelectionStart = richTextBox1.TextLength;
             richTextBox1.ScrollToCaret();
 
             var item = listView1.FindItemWithText("Time elapsed (Run start) : ");

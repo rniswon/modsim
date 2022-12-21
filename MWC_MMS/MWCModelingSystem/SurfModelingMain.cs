@@ -114,6 +114,7 @@ namespace RRModelingSystem
                             //}));
                             splitContainer1.Panel2.Controls.Add(simRunWindows[treeView1.SelectedNode.Text]);
                             simRunWindows[treeView1.SelectedNode.Text].Dock = DockStyle.Fill;
+                            simRunWindows[treeView1.SelectedNode.Text].UpdateTxtFile();
                         }
                         break;
                 }
@@ -134,6 +135,7 @@ namespace RRModelingSystem
 
             SimulationRun sRWin;
             sRWin = processSimulation(runID, logFileName, runFileName, riparianLogicOn, riparianCost, runMgs);
+            sRWin.CheckExecutingProcess(null,null);
 
             /*string nodeName = "Run: " + runID.ToString();
             SimulationRun sRWin = new SimulationRun(runID, logFileName, runFileName, riparianLogicOn, riparianCost,
@@ -154,7 +156,7 @@ namespace RRModelingSystem
         private SimulationRun processSimulation(int runID, string logFileName, string runFileName, bool riparianLogicOn, int riparianCost, List<string> runMgs = null)
         {
             SimulationRun sRWin = new SimulationRun(runID, logFileName, runFileName, riparianLogicOn, riparianCost,
-                Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMMSDatabase.Text), runMgs);
+                Path.Combine(m_RRPreferences.textBoxWorkspace.Text, m_RRPreferences.textBoxMMSDatabase.Text), m_RRPreferences.textBoxWorkspace.Text, runMgs);
             string nodeName = "Run: " + runID.ToString();
             sRWin.messageOut += ProcessMessage;
             if (simRunWindows.ContainsKey(nodeName))

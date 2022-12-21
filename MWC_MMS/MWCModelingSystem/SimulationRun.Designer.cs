@@ -30,8 +30,8 @@ namespace RRModelingSystem
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Errors: 0");
-            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Convergence Issues: 0");
+            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("Errors: 0");
+            System.Windows.Forms.TreeNode treeNode4 = new System.Windows.Forms.TreeNode("Convergence Issues: 0");
             this.textBoxHeading = new System.Windows.Forms.TextBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
@@ -53,6 +53,7 @@ namespace RRModelingSystem
             this.buttonUpdate = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.labelDisplayFile = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -76,7 +77,7 @@ namespace RRModelingSystem
             this.textBoxHeading.Multiline = true;
             this.textBoxHeading.Name = "textBoxHeading";
             this.textBoxHeading.ReadOnly = true;
-            this.textBoxHeading.Size = new System.Drawing.Size(547, 21);
+            this.textBoxHeading.Size = new System.Drawing.Size(621, 21);
             this.textBoxHeading.TabIndex = 11;
             this.textBoxHeading.TabStop = false;
             this.textBoxHeading.Text = "Simulation Run Monitoring";
@@ -94,12 +95,13 @@ namespace RRModelingSystem
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.labelDisplayFile);
             this.splitContainer1.Panel2.Controls.Add(this.checkBoxAutoUpdate);
             this.splitContainer1.Panel2.Controls.Add(this.statusStrip1);
             this.splitContainer1.Panel2.Controls.Add(this.buttonUpdate);
             this.splitContainer1.Panel2.Controls.Add(this.richTextBox1);
-            this.splitContainer1.Size = new System.Drawing.Size(547, 403);
-            this.splitContainer1.SplitterDistance = 134;
+            this.splitContainer1.Size = new System.Drawing.Size(621, 462);
+            this.splitContainer1.SplitterDistance = 153;
             this.splitContainer1.TabIndex = 12;
             // 
             // splitContainer2
@@ -117,15 +119,15 @@ namespace RRModelingSystem
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.splitContainer3);
-            this.splitContainer2.Size = new System.Drawing.Size(547, 134);
-            this.splitContainer2.SplitterDistance = 198;
+            this.splitContainer2.Size = new System.Drawing.Size(621, 153);
+            this.splitContainer2.SplitterDistance = 224;
             this.splitContainer2.TabIndex = 1;
             // 
             // buttonStopRun
             // 
             this.buttonStopRun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonStopRun.Enabled = false;
-            this.buttonStopRun.Location = new System.Drawing.Point(18, 111);
+            this.buttonStopRun.Location = new System.Drawing.Point(44, 130);
             this.buttonStopRun.Name = "buttonStopRun";
             this.buttonStopRun.Size = new System.Drawing.Size(86, 20);
             this.buttonStopRun.TabIndex = 2;
@@ -137,7 +139,7 @@ namespace RRModelingSystem
             // 
             this.buttonRestart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonRestart.Enabled = false;
-            this.buttonRestart.Location = new System.Drawing.Point(110, 111);
+            this.buttonRestart.Location = new System.Drawing.Point(136, 130);
             this.buttonRestart.Name = "buttonRestart";
             this.buttonRestart.Size = new System.Drawing.Size(86, 20);
             this.buttonRestart.TabIndex = 1;
@@ -156,10 +158,12 @@ namespace RRModelingSystem
             this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(0, 0);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(198, 109);
+            this.listView1.Size = new System.Drawing.Size(224, 128);
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
+            this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
+            this.listView1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listView1_MouseClick);
             // 
             // columnItem
             // 
@@ -189,7 +193,7 @@ namespace RRModelingSystem
             // splitContainer3.Panel2
             // 
             this.splitContainer3.Panel2.Controls.Add(this.richTextBox2);
-            this.splitContainer3.Size = new System.Drawing.Size(345, 134);
+            this.splitContainer3.Size = new System.Drawing.Size(393, 153);
             this.splitContainer3.SplitterDistance = 48;
             this.splitContainer3.TabIndex = 0;
             // 
@@ -200,15 +204,15 @@ namespace RRModelingSystem
             this.comboBoxSearch.FormattingEnabled = true;
             this.comboBoxSearch.Location = new System.Drawing.Point(179, 21);
             this.comboBoxSearch.Name = "comboBoxSearch";
-            this.comboBoxSearch.Size = new System.Drawing.Size(134, 21);
+            this.comboBoxSearch.Size = new System.Drawing.Size(155, 21);
             this.comboBoxSearch.TabIndex = 4;
             // 
             // button2
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(319, 21);
+            this.button2.Location = new System.Drawing.Point(340, 21);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(22, 23);
+            this.button2.Size = new System.Drawing.Size(49, 23);
             this.button2.TabIndex = 3;
             this.button2.Text = "Search";
             this.button2.UseVisualStyleBackColor = true;
@@ -227,13 +231,13 @@ namespace RRModelingSystem
             // 
             this.treeViewMsgGroup.Location = new System.Drawing.Point(3, 3);
             this.treeViewMsgGroup.Name = "treeViewMsgGroup";
-            treeNode1.Name = "NodeErrors";
-            treeNode1.Text = "Errors: 0";
-            treeNode2.Name = "NodeConvergence";
-            treeNode2.Text = "Convergence Issues: 0";
+            treeNode3.Name = "NodeErrors";
+            treeNode3.Text = "Errors: 0";
+            treeNode4.Name = "NodeConvergence";
+            treeNode4.Text = "Convergence Issues: 0";
             this.treeViewMsgGroup.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1,
-            treeNode2});
+            treeNode3,
+            treeNode4});
             this.treeViewMsgGroup.Size = new System.Drawing.Size(166, 42);
             this.treeViewMsgGroup.TabIndex = 0;
             this.treeViewMsgGroup.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewMsgGroup_AfterSelect);
@@ -243,15 +247,18 @@ namespace RRModelingSystem
             this.richTextBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.richTextBox2.Location = new System.Drawing.Point(0, 0);
             this.richTextBox2.Name = "richTextBox2";
-            this.richTextBox2.Size = new System.Drawing.Size(345, 82);
+            this.richTextBox2.Size = new System.Drawing.Size(393, 101);
             this.richTextBox2.TabIndex = 0;
             this.richTextBox2.Text = "";
+            this.richTextBox2.Click += new System.EventHandler(this.richTextBox2_Click);
+            this.richTextBox2.TextChanged += new System.EventHandler(this.richTextBox2_TextChanged);
+            this.richTextBox2.MouseDown += new System.Windows.Forms.MouseEventHandler(this.richTextBox2_MouseDown);
             // 
             // checkBoxAutoUpdate
             // 
             this.checkBoxAutoUpdate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.checkBoxAutoUpdate.AutoSize = true;
-            this.checkBoxAutoUpdate.Location = new System.Drawing.Point(381, 4);
+            this.checkBoxAutoUpdate.Location = new System.Drawing.Point(455, 4);
             this.checkBoxAutoUpdate.Name = "checkBoxAutoUpdate";
             this.checkBoxAutoUpdate.Size = new System.Drawing.Size(86, 17);
             this.checkBoxAutoUpdate.TabIndex = 3;
@@ -265,9 +272,9 @@ namespace RRModelingSystem
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripProgressBar1,
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 243);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 283);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(547, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(621, 22);
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -285,7 +292,7 @@ namespace RRModelingSystem
             // buttonUpdate
             // 
             this.buttonUpdate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonUpdate.Location = new System.Drawing.Point(469, 3);
+            this.buttonUpdate.Location = new System.Drawing.Point(543, 3);
             this.buttonUpdate.Name = "buttonUpdate";
             this.buttonUpdate.Size = new System.Drawing.Size(75, 22);
             this.buttonUpdate.TabIndex = 1;
@@ -300,7 +307,7 @@ namespace RRModelingSystem
             | System.Windows.Forms.AnchorStyles.Right)));
             this.richTextBox1.Location = new System.Drawing.Point(3, 25);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(541, 215);
+            this.richTextBox1.Size = new System.Drawing.Size(615, 255);
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "";
             // 
@@ -309,6 +316,15 @@ namespace RRModelingSystem
             this.timer1.Interval = 4000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // labelDisplayFile
+            // 
+            this.labelDisplayFile.AutoSize = true;
+            this.labelDisplayFile.Location = new System.Drawing.Point(3, 8);
+            this.labelDisplayFile.Name = "labelDisplayFile";
+            this.labelDisplayFile.Size = new System.Drawing.Size(47, 13);
+            this.labelDisplayFile.TabIndex = 4;
+            this.labelDisplayFile.Text = "Log File:";
+            // 
             // SimulationRun
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -316,7 +332,7 @@ namespace RRModelingSystem
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.textBoxHeading);
             this.Name = "SimulationRun";
-            this.Size = new System.Drawing.Size(547, 424);
+            this.Size = new System.Drawing.Size(621, 483);
             this.Load += new System.EventHandler(this.SimulationRun_Load);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
@@ -362,5 +378,6 @@ namespace RRModelingSystem
         private System.Windows.Forms.Button buttonStopRun;
         private System.Windows.Forms.CheckBox checkBoxAutoUpdate;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Label labelDisplayFile;
     }
 }

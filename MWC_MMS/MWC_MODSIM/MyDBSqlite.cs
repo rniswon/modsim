@@ -606,6 +606,26 @@ namespace RTI.CWR.MWC_MODSIMUtils
             }
         }
 
+        public string GetRunsInfoValue(int runid, string field)
+        {
+            try
+            {
+                string sql = "SELECT * FROM MMS_RunsInfo WHERE (RunID = " + runid + ")";
+
+                DataTable runInfoDT = GetTableFromDB(sql, "MMS_RunsInfo");
+
+                if (runInfoDT.Rows.Count > 0)
+                {
+                    return runInfoDT.Rows[0][field].ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                messageOut(String.Concat("ERROR: ", ex.Message));
+            }
+            return "";
+        }
+
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
