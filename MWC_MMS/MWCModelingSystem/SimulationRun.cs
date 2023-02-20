@@ -1,6 +1,8 @@
 ﻿using Csu.Modsim.ModsimIO;
 using Csu.Modsim.ModsimModel;
-using RTI.CWR.MWC_MODSIMUtils;
+using RTI.CWR.MODSIMUtils;
+using RTI.CWR.MODSIMUtils.RRModelOps;
+using RTI.CWR.SQLiteUtils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -31,6 +33,7 @@ namespace RRModelingSystem
         private Process process;
         private static StreamReader _standardOutput;
         private RiparianAllocation allocationTool;
+        private RRResCustomOps RRResOps;
         private int run;
         private List<string> _runMsgs;
         private long lastStatusTick = Environment.TickCount;
@@ -164,6 +167,8 @@ namespace RRModelingSystem
                 try
                 {
                     _ActiveModel = new Model();
+                    _ActiveModel.OnMessage += OnMessageRunOut;
+                    _ActiveModel.OnModsimError += OnMessageRunOut;
 
                     OnMessageOut($"Reading MODSIM file: {_runFileName}");
                     XYFileReader.Read(_ActiveModel, _runFileName);
@@ -171,14 +176,19 @@ namespace RRModelingSystem
                     //Adding 'plug-ins'
                     if (_riparianON)
                     {
-                        OnMessageRunOut("\tActivating riparian logic allocation...");
-                        allocationTool = new RiparianAllocation(ref _ActiveModel, _riparianCost);
-                        allocationTool.messageOutRun += OnMessageRunOut;
+                        //OnMessageRunOut("\tActivating riparian logic allocation...");
+                        //allocationTool = new RiparianAllocation(ref _ActiveModel, _riparianCost);
+                        //allocationTool.messageOutRun += OnMessageRunOut;
+
+                        OnMessageRunOut("\tActivating Russian River operations logic ...");
+                        string opsDB = "RROpsModeling.sqlite";
+                        RRResOps = new RRResCustomOps(ref _ActiveModel, opsDB);
+                        RRResOps.messageOutRun += OnMessageRunOut;
                     }
                     else
                     {
-                        _ActiveModel.OnMessage += OnMessageRunOut;
-                        _ActiveModel.OnModsimError += OnMessageRunOut;
+                        //_ActiveModel.OnMessage += OnMessageRunOut;
+                        //_ActiveModel.OnModsimError += OnMessageRunOut;
                     }
                     OnMessageOut("Executing MODSIM model...");
                     OnMessageRunOut($"File: {_ActiveModel.fname}");

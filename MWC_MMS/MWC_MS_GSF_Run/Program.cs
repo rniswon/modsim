@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Csu.Modsim.ModsimIO;
 using Csu.Modsim.ModsimModel;
 using MODSIM_GSFLOW_C;
-using RTI.CWR.MWC_MODSIMUtils;
+using RTI.CWR.MODSIMUtils;
+using RTI.CWR.MODSIMUtils.RRModelOps;
 
 namespace MODSIM_GSFLOW
 {
@@ -13,6 +15,7 @@ namespace MODSIM_GSFLOW
 	{
 		public static Model myModel = new Model();
 		private static RiparianAllocation allocationTool;
+		private static RRResCustomOps RRResOps;
 
 		static void Main(string[] CmdArgs)
 		{
@@ -56,9 +59,15 @@ namespace MODSIM_GSFLOW
 						if (riparianON)
 						{
 
-							Console.WriteLine("\tActivating riparian logic allocation...");
-							allocationTool = new RiparianAllocation(ref myModel, _riparianCost);
-							allocationTool.messageOutRun += OnMessage;
+							//Console.WriteLine("\tActivating riparian logic allocation...");
+							//allocationTool = new RiparianAllocation(ref myModel, _riparianCost);
+							//allocationTool.messageOutRun += OnMessage;
+
+							Console.WriteLine("\tActivating Russian River operations logic ...");
+							string opsDB = Path.Combine(Path.GetDirectoryName(sSurfGWModule.xyFileName),"RROpsModeling.sqlite");
+							Console.WriteLine($"\tUsing RROpsDB: {opsDB}");
+							RRResOps = new RRResCustomOps(ref myModel, opsDB);
+							RRResOps.messageOutRun += OnMessage;
 						}
 
 						sSurfGWModule.InitializeRUN(ref myModel);

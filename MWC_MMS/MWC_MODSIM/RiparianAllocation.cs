@@ -7,9 +7,8 @@ using Csu.Modsim.ModsimModel;
 
 using System.IO;
 using System.Data;
-using RTI.CWR.MWC_MODSIMUtils;
 
-namespace RTI.CWR.MWC_MODSIMUtils
+namespace RTI.CWR.MODSIMUtils
 {
     public delegate void ProcessMessage(string msg);  // delegate
     public class RiparianAllocation
@@ -33,8 +32,9 @@ namespace RTI.CWR.MWC_MODSIMUtils
             model.IterBottom += OnIterationBottom;
             model.IterTop += OnIterationTop;
             model.Converged += OnIterationConverge;
-            model.OnMessage += OnMessageOut;
-            model.OnModsimError += OnMessageOut;
+            // Model messages should be handled by the parent class.
+            //model.OnMessage += OnMessageOut;
+            //model.OnModsimError += OnMessageOut;
             model.End += OnFinished;
 
             m_Model = model;

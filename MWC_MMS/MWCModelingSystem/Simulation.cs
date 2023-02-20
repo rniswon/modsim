@@ -12,7 +12,8 @@ using Csu.Modsim.ModsimModel;
 using Csu.Modsim.ModsimIO;
 using System.Diagnostics;
 using System.IO;
-using RTI.CWR.MWC_MODSIMUtils;
+using RTI.CWR.MODSIMUtils;
+using RTI.CWR.SQLiteUtils;
 using RRModelingSystem.Properties;
 using System.Threading;
 
