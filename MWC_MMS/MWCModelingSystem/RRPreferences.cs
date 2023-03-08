@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-using RTI.CWR.MWC_MODSIMUtils;
+using RTI.CWR.SQLiteUtils;
 
 namespace RRModelingSystem
 {
