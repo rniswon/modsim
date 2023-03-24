@@ -187,7 +187,7 @@ namespace RRModelingSystem
                         catch (Exception ex) //catch block for catching errors
                         {
                             sql1 = "";
-                            sql1 = sql1 + @"ALTER TABLE " + prefsTbl.GetString(0) + " ADD scenario TEXT NULL;";
+                            sql1 = sql1 + @"ALTER TABLE " + prefsTbl.GetString(0) + " ADD Scenario TEXT NULL;";
                             using (SQLiteCommand cmd2 = new SQLiteCommand(sql1, c))
                             {
                                 cmd2.ExecuteNonQuery();
