@@ -26,6 +26,7 @@ namespace RRModelingSystem
         private string _ModsimFile { get; set; }
         private string _controlFile { get; set; }
 
+        private string _GSFLOWFolder;
         private RiparianAllocation allocationTool;
         private int _riparianCost;
         private Dictionary<string,long> costRange;
@@ -48,7 +49,7 @@ namespace RRModelingSystem
         private string _workSpace;
         private bool simDatesSet;
 
-        public Simulation(string ModsimFile, string opsDB, int riparianCost, string MMS_db, string controlFile, string rutaPumping, string workSpace)
+        public Simulation(string ModsimFile, string opsDB, int riparianCost, string MMS_db, string controlFile, string rutaPumping, string workSpace, string GSFLOWFolder)
         {
             InitializeComponent();
 
@@ -64,7 +65,8 @@ namespace RRModelingSystem
             _OpsDB = Path.Combine(workSpace, opsDB);
             _riparianCost = riparianCost;
             _controlFile = Path.Combine(workSpace, controlFile);
-            if(rutaPumping!="")
+            _GSFLOWFolder = Path.Combine(workSpace, GSFLOWFolder);
+            if (rutaPumping!="")
                 _rutaPumping = Path.Combine(workSpace, rutaPumping);
             _workSpace = workSpace;
             modelReady = false;
@@ -220,12 +222,19 @@ namespace RRModelingSystem
                     //Set input directories
                     if (runid >= 0)
                     {
-                        string inputFolder = Path.GetDirectoryName(_controlFile);
-                        string destFolder = inputFolder + "_r" + runid;
-                        RecursiveDelete(new DirectoryInfo(destFolder));
-                        CopyFilesRecursively(inputFolder, destFolder,"output");
-                        runControlFile = Path.Combine(inputFolder + "_r" + runid, Path.GetFileName(_controlFile));
-                        File.Move(runControlFile, runControlFile.Replace(".control", $"r{runid}.control"));
+                        try
+                        {
+                            string inputFolder = Path.GetDirectoryName(_GSFLOWFolder);// Path.GetDirectoryName(_controlFile);
+                            string destFolder = inputFolder + "_r" + runid;
+                            RecursiveDelete(new DirectoryInfo(destFolder));
+                            CopyFilesRecursively(inputFolder, destFolder, "output");
+                            runControlFile = runControlFile.Replace(inputFolder, destFolder);//Path.Combine(inputFolder + "_r" + runid, Path.GetFileName(_controlFile));
+                            File.Move(runControlFile, runControlFile.Replace(".control", $"r{runid}.control"));
+                        }
+                        catch (Exception)
+                        {
+                            messageOut("\t Failed to copy model folder.  Continuing with base files and location");
+                        }
                         runControlFile = runControlFile.Replace(".control", $"r{runid}.control");
                     }
 

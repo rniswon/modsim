@@ -180,10 +180,11 @@ namespace RRModelingSystem
                         //allocationTool = new RiparianAllocation(ref _ActiveModel, _riparianCost);
                         //allocationTool.messageOutRun += OnMessageRunOut;
 
-                        OnMessageRunOut("\tActivating Russian River operations logic ...");
-                        string opsDB = "RROpsModeling.sqlite";
-                        RRResOps = new RRResCustomOps(ref _ActiveModel, opsDB);
-                        RRResOps.messageOutRun += OnMessageRunOut;
+                        //OnMessageRunOut("\tActivating Russian River operations logic ...");
+                        //string opsDB = "RROpsModeling.sqlite";
+                        //RRResOps = new RRResCustomOps(ref _ActiveModel, opsDB);
+                        //RRResOps.messageOutRun += OnMessageRunOut;
+                        //RRResOps.SetDiversionLinkCost(-150500);
                     }
                     else
                     {
@@ -558,18 +559,27 @@ namespace RRModelingSystem
                 int line = richTextBox2.GetLineFromCharIndex(p);
                 // code...
                 //MessageBox.Show("Linenumber: " + (richTextBox2.Lines[line]).ToString());
-                
-                int wordstartIndex = richTextBox1.Find(richTextBox2.Lines[line]);
-                if (wordstartIndex != -1)
+                try
                 {
-                    richTextBox1.SelectionStart = wordstartIndex;
-                    richTextBox1.SelectionLength = richTextBox2.Lines[line].Length;
-                    richTextBox1.SelectionBackColor = Color.Yellow;
+
+                    int wordstartIndex = richTextBox1.Find(richTextBox2.Lines[line]);
+                    if (wordstartIndex != -1)
+                    {
+                        richTextBox1.SelectionStart = wordstartIndex;
+                        richTextBox1.SelectionLength = richTextBox2.Lines[line].Length;
+                        richTextBox1.SelectionBackColor = Color.Yellow;
+                    }
+                    //else
+                    //    break;
+                    //startindex += wordstartIndex + word.Length;
+                    richTextBox1.ScrollToCaret();
                 }
-                //else
-                //    break;
-                //startindex += wordstartIndex + word.Length;
-                richTextBox1.ScrollToCaret();
+                catch (Exception ex)
+                {
+                    messageOut(ex.Message);
+
+                }
+
             }
         }
 

@@ -109,6 +109,9 @@ namespace RRModelingSystem
                     case "MMSDatabase":
                         _baseMMSDatabase = dr[1].ToString();
                         break;
+                    case "GSFLOWFolder":
+                        textBoxGSFLOWFolder.Text = dr[1].ToString();
+                        break;
                     default:
                         break;
                 }
@@ -155,7 +158,8 @@ namespace RRModelingSystem
             ProcessExistFile(textBoxSyncingDB, "Syncing DB", oldWorspace);
             ProcessExistFile(textBoxPumpingFile, "Pumping", oldWorspace);
             ProcessExistFile(textBoxControlFile, "Control", oldWorspace);
-            if(oldWorspace!="")
+            ProcessExistFile(textBoxGSFLOWFolder, "GSFLOWFolder", oldWorspace);
+            if (oldWorspace!="")
             {
                 textBoxMMSDatabase.Text = _MMSDatabase.Replace(textBoxWorkspace.Text, "");
             }
@@ -177,9 +181,9 @@ namespace RRModelingSystem
                 }
                 filePath = Path.Combine(textBoxWorkspace.Text, textBox.Text);
 
-                if (!File.Exists(filePath))
+                if (!File.Exists(filePath) && !Directory.Exists(filePath))
                 {
-                    messageOut($"\t ERROR [missing file] {v} file {filePath} does not exist.");
+                    messageOut($"\t ERROR [missing file/folder] {v} file {filePath} does not exist.");
                     textBox.BackColor = Color.Pink;
                 }
                 else
@@ -410,6 +414,33 @@ namespace RRModelingSystem
         {
             hasChanges = true;
             UpdatePreferences("MMSDatabase", textBoxMMSDatabase.Text);
+        }
+
+        private void textBoxGSFLOWFolder_TextChanged(object sender, EventArgs e)
+        {
+            hasChanges = true;
+            UpdatePreferences("GSFLOWFolder", textBoxGSFLOWFolder.Text);
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            // Show the FolderBrowserDialog.
+            folderBrowserDialog1 = new FolderBrowserDialog();
+            DialogResult result = folderBrowserDialog1.ShowDialog();
+            //string oldWorspace = textBoxWorkspace.Text;
+            if (result == DialogResult.OK)
+            {
+                textBoxGSFLOWFolder.Text = Uri.UnescapeDataString(folderBrowserDialog1.SelectedPath + "\\");
+                if (textBoxGSFLOWFolder.Text.Contains(textBoxWorkspace.Text))
+                    textBoxGSFLOWFolder.Text = textBoxGSFLOWFolder.Text.Replace(textBoxWorkspace.Text, "");
+                else
+                {
+                    MessageBox.Show("Folder not found in the workspace. Please move the folder to the specified workspace.");
+                    textBoxGSFLOWFolder.Text = "";
+                }
+                textBoxGSFLOWFolder.Text = textBoxGSFLOWFolder.Text.StartsWith("\\") ? textBoxGSFLOWFolder.Text.Substring(1) : textBoxGSFLOWFolder.Text;
+                CheckFilesExist();
+            }
         }
     }
 }

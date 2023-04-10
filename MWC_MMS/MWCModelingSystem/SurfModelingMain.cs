@@ -81,7 +81,8 @@ namespace RRModelingSystem
                                                                 m_RRPreferences.textBoxMMSDatabase.Text,
                                                                 m_RRPreferences.textBoxControlFile.Text,
                                                                 m_RRPreferences.textBoxPumpingFile.Text,
-                                                                m_RRPreferences.textBoxWorkspace.Text  );
+                                                                m_RRPreferences.textBoxWorkspace.Text,
+                                                                m_RRPreferences.textBoxGSFLOWFolder.Text);
                             m_SimUserControl.messageOut += ProcessMessage;
                             m_SimUserControl.simulationStarted += startSimulationRunWindow;
                             ProcessMessage($"Base MODSIM File: {m_RRPreferences.textBoxMODSIMFile.Text}");

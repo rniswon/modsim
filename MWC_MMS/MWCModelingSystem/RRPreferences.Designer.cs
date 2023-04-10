@@ -49,11 +49,16 @@
             this.textBoxPREFSRiparianCost = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.button6 = new System.Windows.Forms.Button();
+            this.textBoxGSFLOWFolder = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox5.SuspendLayout();
+            this.groupBox6.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -137,27 +142,22 @@
             // 
             this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox3.Controls.Add(this.button5);
-            this.groupBox3.Controls.Add(this.textBoxPumpingFile);
-            this.groupBox3.Controls.Add(this.label4);
-            this.groupBox3.Controls.Add(this.label2);
-            this.groupBox3.Controls.Add(this.button4);
-            this.groupBox3.Controls.Add(this.textBoxControlFile);
+            this.groupBox3.Controls.Add(this.groupBox6);
             this.groupBox3.Controls.Add(this.label1);
             this.groupBox3.Controls.Add(this.button3);
             this.groupBox3.Controls.Add(this.textBoxSyncingDB);
             this.groupBox3.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.groupBox3.Location = new System.Drawing.Point(36, 240);
+            this.groupBox3.Location = new System.Drawing.Point(31, 237);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(539, 112);
+            this.groupBox3.Size = new System.Drawing.Size(539, 184);
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "MODSIM - GSFLOW";
             // 
             // button5
             // 
-            this.button5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button5.Location = new System.Drawing.Point(475, 78);
+            this.button5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button5.Location = new System.Drawing.Point(463, 104);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(58, 20);
             this.button5.TabIndex = 8;
@@ -167,20 +167,21 @@
             // 
             // textBoxPumpingFile
             // 
-            this.textBoxPumpingFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBoxPumpingFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxPumpingFile.Location = new System.Drawing.Point(132, 79);
+            this.textBoxPumpingFile.Location = new System.Drawing.Point(132, 104);
             this.textBoxPumpingFile.Multiline = true;
             this.textBoxPumpingFile.Name = "textBoxPumpingFile";
-            this.textBoxPumpingFile.Size = new System.Drawing.Size(336, 20);
+            this.textBoxPumpingFile.Size = new System.Drawing.Size(323, 20);
             this.textBoxPumpingFile.TabIndex = 7;
             this.textBoxPumpingFile.Text = "MMS-Data\\input\\MODFLOW\\SRP_mf_strm_dpl.wel";
             this.textBoxPumpingFile.TextChanged += new System.EventHandler(this.textBoxPumpingFile_TextChanged);
             // 
             // label4
             // 
+            this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 82);
+            this.label4.Location = new System.Drawing.Point(6, 108);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(97, 13);
             this.label4.TabIndex = 6;
@@ -189,7 +190,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 53);
+            this.label2.Location = new System.Drawing.Point(8, 76);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(62, 13);
             this.label2.TabIndex = 5;
@@ -198,7 +199,7 @@
             // button4
             // 
             this.button4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button4.Location = new System.Drawing.Point(475, 47);
+            this.button4.Location = new System.Drawing.Point(464, 73);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(58, 20);
             this.button4.TabIndex = 4;
@@ -210,10 +211,10 @@
             // 
             this.textBoxControlFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxControlFile.Location = new System.Drawing.Point(132, 48);
+            this.textBoxControlFile.Location = new System.Drawing.Point(134, 74);
             this.textBoxControlFile.Multiline = true;
             this.textBoxControlFile.Name = "textBoxControlFile";
-            this.textBoxControlFile.Size = new System.Drawing.Size(336, 20);
+            this.textBoxControlFile.Size = new System.Drawing.Size(323, 20);
             this.textBoxControlFile.TabIndex = 3;
             this.textBoxControlFile.Text = "MMS-Data\\SRPHM_strm_dpl.control";
             this.textBoxControlFile.TextChanged += new System.EventHandler(this.textBoxControlFile_TextChanged);
@@ -311,6 +312,58 @@
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "MODSIM";
             // 
+            // button6
+            // 
+            this.button6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button6.Location = new System.Drawing.Point(464, 31);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(58, 23);
+            this.button6.TabIndex = 10;
+            this.button6.Text = "Browse";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
+            // 
+            // textBoxGSFLOWFolder
+            // 
+            this.textBoxGSFLOWFolder.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxGSFLOWFolder.Location = new System.Drawing.Point(8, 32);
+            this.textBoxGSFLOWFolder.Multiline = true;
+            this.textBoxGSFLOWFolder.Name = "textBoxGSFLOWFolder";
+            this.textBoxGSFLOWFolder.Size = new System.Drawing.Size(450, 36);
+            this.textBoxGSFLOWFolder.TabIndex = 9;
+            this.textBoxGSFLOWFolder.Text = "C:\\Users\\etriana\\Research Triangle Institute\\Mark West Creek Modeling - Documents" +
+    "\\";
+            this.textBoxGSFLOWFolder.TextChanged += new System.EventHandler(this.textBoxGSFLOWFolder_TextChanged);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(8, 18);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(120, 13);
+            this.label5.TabIndex = 11;
+            this.label5.Text = "GSFLOW Model Folder:";
+            // 
+            // groupBox6
+            // 
+            this.groupBox6.Controls.Add(this.button5);
+            this.groupBox6.Controls.Add(this.label5);
+            this.groupBox6.Controls.Add(this.textBoxPumpingFile);
+            this.groupBox6.Controls.Add(this.button6);
+            this.groupBox6.Controls.Add(this.label4);
+            this.groupBox6.Controls.Add(this.textBoxControlFile);
+            this.groupBox6.Controls.Add(this.textBoxGSFLOWFolder);
+            this.groupBox6.Controls.Add(this.button4);
+            this.groupBox6.Controls.Add(this.label2);
+            this.groupBox6.Location = new System.Drawing.Point(9, 47);
+            this.groupBox6.Name = "groupBox6";
+            this.groupBox6.Size = new System.Drawing.Size(524, 133);
+            this.groupBox6.TabIndex = 17;
+            this.groupBox6.TabStop = false;
+            this.groupBox6.Text = "GSFLOW Model";
+            // 
             // RRPreferences
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -332,6 +385,8 @@
             this.groupBox4.PerformLayout();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
+            this.groupBox6.ResumeLayout(false);
+            this.groupBox6.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -359,5 +414,9 @@
         private System.Windows.Forms.Button button5;
         public System.Windows.Forms.TextBox textBoxPumpingFile;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.GroupBox groupBox6;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Button button6;
+        public System.Windows.Forms.TextBox textBoxGSFLOWFolder;
     }
 }
