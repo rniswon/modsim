@@ -69,7 +69,7 @@ namespace MODSIM_GSFLOW_C
         private int localMODSIMIter;
         private SWGW_MODSIMUtils swgwUtils;
         private int Numts;
-        private string map_FileName;
+        public string map_FileName;
         private int maxIterCount=0;
 
         //Flags for custom project codes
@@ -442,9 +442,9 @@ namespace MODSIM_GSFLOW_C
                     // the default units for MODSIM in english mode at run time is 
                     // total acre-ft for the entirety of the time step
                     // MODFLOW assumed to run in ft3.
-                    uConvToMODFLOW = 43560.0001;
+                    // uConvToMODFLOW = 43560.0001;
                     //temporary fix for RR PRMS
-                    //                uConvToMODFLOW = 1233.48;
+                                  uConvToMODFLOW = 1233.48;
                     //  PRMS will always send evap in inches.  We need to apply the conversion feet in english.
                     uConvRateToMODSIM = (double) 1 / 12;
                 }
@@ -1015,7 +1015,7 @@ namespace MODSIM_GSFLOW_C
                     LAK2MODSIM_InitLakes(DELTAVOL, LAKEVOL, MXLKVOL);
                     for (int i = 0; i < LAKEVOL.Length; i++)
                     {
-                        if (MS_Reservoirs[i] != null)
+                        if (i<MS_Reservoirs.Length && MS_Reservoirs[i] != null)
                         {
                             MS_Reservoirs[i].m.starting_volume = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
 
@@ -1030,14 +1030,12 @@ namespace MODSIM_GSFLOW_C
                             MS_Reservoirs[i].m.resBalance.targetPercentages[0] = (double)(DELTAVOL[i] * accuracy / uConvToMODFLOW) / MS_Reservoirs[i].m.max_volume * 100;
                             DPOOL[i] = (long)DELTAVOL[i];  // Store DPOOL in MODFLOW units, not MODSIM units.  
                             MS_Reservoirs[i].mnInfo.start = (long)(LAKEVOL[i] * accuracy / uConvToMODFLOW);
-                            MS_Reservoirs[i].mnInfo.start_storage[0] = MS_Reservoirs[i].mnInfo.start;
-
-                            STARTLAKEVOL[i] = LAKEVOL[i];
-
-                            // Because the code needs to cycle back to redo the MODSIM solution after running this bit of code,
-                            // reset the DELTAVOL values back to 0 since this variable is used in OnIterationTop()
-                            DELTAVOL[i] = 0;
+                            MS_Reservoirs[i].mnInfo.start_storage[0] = MS_Reservoirs[i].mnInfo.start;                           
                         }
+                        STARTLAKEVOL[i] = LAKEVOL[i];
+                        // Because the code needs to cycle back to redo the MODSIM solution after running this bit of code,
+                        // reset the DELTAVOL values back to 0 since this variable is used in OnIterationTop()
+                        DELTAVOL[i] = 0;
                     }
                     breakout = true;
                 }
@@ -1066,7 +1064,7 @@ namespace MODSIM_GSFLOW_C
         private void Store_Net_Res_AccDepl()
         {
             //Implement Reservoir accretions/depletions
-            for (int i = 0; i < MS_Reservoirs.Length; i++)
+            for (int i = 0; i < DELTAVOL.Length; i++)
             {
                 DELTAVOLPREV[i] = DELTAVOL[i];
                 if (Model_mode == 11) //PRMS-MODSIM mode
@@ -1142,18 +1140,22 @@ namespace MODSIM_GSFLOW_C
 
                 for (int i = 0; i < DELTAVOL.Length; i++)
                 {
+
                     //TO DO: Add reservoir volume convergence.
                     // Needs to compare MODSIM end storage with MODFLOW LAKEVOL
                     // Convergence checked in MODFLOW units.
                     converge = converge && ((double)Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) <= LAKEVol_Tolerance);
                     //if ((double)Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]) > (double)(Math.Abs(DELTAVOLPREV[i]) * percent_diff)) messageOut("Res:" + i + ":" + Math.Abs(DELTAVOL[i] - DELTAVOLPREV[i]));
-                    //Check for convergence on the Reservoir Volumes
-                    converge = converge && ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i]) <= LAKEVol_Tolerance);
-                    //if (i == 2 && myModel.mInfo.CurrentModelTimeStepIndex >= 364) messageOut("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
-                    if (MS_Reservoirs[i] != null)
+                    if (i < MS_Reservoirs.Length)
                     {
-                        if ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i]) > LAKEVol_Tolerance) 
-                            messageOut("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
+                        //Check for convergence on the Reservoir Volumes
+                        converge = converge && ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i]) <= LAKEVol_Tolerance);
+                        //if (i == 2 && myModel.mInfo.CurrentModelTimeStepIndex >= 364) messageOut("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
+                        if (MS_Reservoirs[i] != null)
+                        {
+                            if ((double)Math.Abs(MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW - LAKEVOL[i]) > LAKEVol_Tolerance)
+                                messageOut("Res. Converge" + i + ": MS:" + MS_Reservoirs[i].mnInfo.stend / accuracy * uConvToMODFLOW + " MF: " + LAKEVOL[i]);
+                        }
                     }
                 }
                 if (converge)
@@ -1178,6 +1180,19 @@ namespace MODSIM_GSFLOW_C
             return chars;
         }
 
+        public List<string> GetDiversionSegments()
+        {
+            List<string> segments = new List<string>();
+            foreach (DataRow dr in swgwUtils.m_SyncTblSEG.Rows)
+            {
+                if (swgwUtils != null)
+                {
+                    if (int.Parse(dr["Diversion"].ToString()) == 1)
+                        segments.Add(dr["Link Name"].ToString());
+                }
+            }
+            return segments;
+        }
     }
 
 }
