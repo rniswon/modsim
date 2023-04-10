@@ -22,7 +22,7 @@ namespace MODSIM_GSFLOW
 			try
 			{
 				//Process variables for riparian 'plug-in'
-				bool riparianON = false;
+				bool riparianON = true; // THis will triger the RR Ops custom code
 				int _riparianCost = -999;
 				if (CmdArgs.Contains("-RiparianON"))
 				{
@@ -64,15 +64,23 @@ namespace MODSIM_GSFLOW
 							//allocationTool.messageOutRun += OnMessage;
 
 							Console.WriteLine("\tActivating Russian River operations logic ...");
-							string opsDB = Path.Combine(Path.GetDirectoryName(sSurfGWModule.xyFileName),"RROpsModeling.sqlite");
+							string opsDB = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(sSurfGWModule.xyFileName)), "RROpsModeling.sqlite");
 							Console.WriteLine($"\tUsing RROpsDB: {opsDB}");
 							RRResOps = new RRResCustomOps(ref myModel, opsDB);
 							RRResOps.messageOutRun += OnMessage;
-						}
+                        }
 
 						sSurfGWModule.InitializeRUN(ref myModel);
 
-						int run = Modsim.RunSolver(myModel);
+                        if (riparianON)
+                        {
+							//This is only needed for Russian River ops when the network cost has not been procesed in advance.
+                            List<string> divLinks = sSurfGWModule.GetDiversionSegments();
+                            RRResOps.SetDiversionLinkCost(-150500, divLinks);
+							XYFileWriter.Write(myModel, myModel.fname);
+                        }
+
+                        int run = Modsim.RunSolver(myModel);
 
 						sSurfGWModule.FinalizeRUN();
 
@@ -96,16 +104,21 @@ namespace MODSIM_GSFLOW
 					//Adding 'plug-ins'
 					if (riparianON)
 					{
-						Console.WriteLine("\tActivating riparian logic allocation...");
-						allocationTool = new RiparianAllocation(ref myModel, _riparianCost);
-						allocationTool.messageOutRun += OnMessage;
-					}
-					else
-					{
-						myModel.OnMessage += OnMessage;
-						myModel.OnModsimError += OnMessage;
-					}
-					Console.WriteLine("Executing MODSIM model...");
+                        //Console.WriteLine("\tActivating riparian logic allocation...");
+                        //allocationTool = new RiparianAllocation(ref myModel, _riparianCost);
+                        //allocationTool.messageOutRun += OnMessage;
+                        Console.WriteLine("\tActivating Russian River operations logic ...");
+                        string opsDB = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(myModel.fname)), "RROpsModeling.sqlite");
+                        Console.WriteLine($"\tUsing RROpsDB: {opsDB}");
+                        RRResOps = new RRResCustomOps(ref myModel, opsDB);
+                        RRResOps.messageOutRun += OnMessage;
+
+                    }
+					
+                    myModel.OnMessage += OnMessage;
+                    myModel.OnModsimError += OnError;
+
+                    Console.WriteLine("Executing MODSIM model...");
 					
 					int run = Modsim.RunSolver(myModel);
 

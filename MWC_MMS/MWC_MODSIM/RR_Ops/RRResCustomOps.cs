@@ -26,12 +26,12 @@ namespace RTI.CWR.MODSIMUtils.RRModelOps
         public RRResCustomOps(ref Model model,string dataDBPath)
         {
 
-            m_Model.Init += OnInitialize;
-            m_Model.IterBottom += OnIterationBottom;
-            m_Model.IterTop += OnIterationTop;
-            m_Model.BackRoutIterTop += OnBRIterationTop;
-            m_Model.Converged += OnIterationConverge;
-            m_Model.End += OnFinished;
+            model.Init += OnInitialize;
+            model.IterBottom += OnIterationBottom;
+            model.IterTop += OnIterationTop;
+            model.BackRoutIterTop += OnBRIterationTop;
+            model.Converged += OnIterationConverge;
+            model.End += OnFinished;
             //m_Model.OnMessage += OnMessage;
             //m_Model.OnModsimError += OnError;
 
@@ -181,6 +181,23 @@ namespace RTI.CWR.MODSIMUtils.RRModelOps
 
         private  void OnFinished()
         {
+        }
+
+        public void SetDiversionLinkCost(long cost,List<string>links) 
+        {
+            long countLinks = 0;
+            foreach (var link in links) 
+            {
+                Link l = m_Model.FindLink(link); 
+                if (l != null) 
+                {
+                    
+                    l.m.cost = cost + countLinks;
+                    countLinks++;   
+                }
+
+            }
+            OnMessage($"\t Set costs in diversion links ({cost} to {cost + countLinks}).");
         }
     }
 }
