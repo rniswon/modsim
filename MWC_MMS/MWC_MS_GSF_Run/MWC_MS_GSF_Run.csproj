@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{22CE6D91-A70B-42C8-900E-1AB61C802AD2}</ProjectGuid>
+    <ProjectGuid>{7C0F421C-4918-403A-AB8C-42C30D3E8328}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>RRModelingSystem</RootNamespace>
     <AssemblyName>MWC_MS_GSF_Run</AssemblyName>
@@ -138,7 +138,9 @@
     <PreBuildEvent>REM uses the windows user name to copy files from the user location
 echo user: %25USERNAME%25
 COPY /Y  "$(ProjectDir)..\..\MODSIM_GSFLOW_DLL\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll" "$(TargetDir)GSFLOW_MODSIM.dll"
-COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\GSFLOW_MODSIM.pdb" "$(TargetDir)GSFLOW_MODSIM.pdb"</PreBuildEvent>
+REM if %25USERNAME%25 NOT = etriana (
+REM COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\GSFLOW_MODSIM.pdb" "$(TargetDir)GSFLOW_MODSIM.pdb"
+REM )</PreBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('$(SolutionDir)packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net40\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

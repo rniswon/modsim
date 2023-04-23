@@ -15,13 +15,13 @@
     <StartArguments>gsflow.control</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <StartWorkingDirectory>C:\Workspace\gsflow_examples\sagehen_3lay_modsim_ag\windows</StartWorkingDirectory>
+    <StartWorkingDirectory>C:\Users\etriana\source\repos\rniswon\gsflow_examples\sagehen_3lay_modsim_ag\windows\</StartWorkingDirectory>
     <StartArguments>gsflow.control</StartArguments>
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <StartArguments>gsflow.control</StartArguments>
-    <StartWorkingDirectory>C:\Users\rniswon\Documents\Data\Git\gsflow_examples.git\sagehen_3lay_modsim_ag\windows</StartWorkingDirectory>
+    <StartArguments>SRPHM_strm_dpl_v2r22.control</StartArguments>
+    <StartWorkingDirectory>C:\Users\etriana\source\repos\rniswon\SRP_MODSIM_v3\model_updated_r22\</StartWorkingDirectory>
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
   </PropertyGroup>
 </Project>

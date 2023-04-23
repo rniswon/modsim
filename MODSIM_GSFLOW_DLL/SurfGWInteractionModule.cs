@@ -664,7 +664,7 @@ namespace MODSIM_GSFLOW_C
                         {
                             int hydState = demNode.mnInfo.hydStateIndex;
                             demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * accuracy / uConvToMODFLOW, 0);
-                            messageOut($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
+                            //messageOut($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
                         }
                         //else
                         //    messageOut($"Demand node {demNode.name} not found in the model. Skipping MODSIM demand processing.");
@@ -946,7 +946,7 @@ namespace MODSIM_GSFLOW_C
                                     { 
                                         int hydState = demNode.mnInfo.hydStateIndex;
                                         demNode.mnInfo.nodedemand[myModel.mInfo.CurrentModelTimeStepIndex, hydState] = (long)Math.Round(agDemand[i] * accuracy / uConvToMODFLOW, 0);
-                                        messageOut($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
+                                        //messageOut($"                    MS_GSF Setting Demands for {demNode.name} to {agDemand[i]}");
                                     }
                                     //else
                                     //    messageOut($"Demand node {demNode.name} not found in the model. Skipping MODSIM demand processing.");
