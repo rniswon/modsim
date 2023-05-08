@@ -596,7 +596,7 @@ namespace RRModelingSystem
                 Node ISFNode = _ActiveModel.FindNode(dr["Location"].ToString());
                 if(ISFNode!=null)
                 {
-                    if (dr["Target Flow [cfs]"] != DBNull.Value)
+                    if (dr["Target Flow [cfs]"] != DBNull.Value && dr["Target Flow [cfs]"].ToString() != "Variable")
                     {
                         if (ISFNode.m.adaDemandsM.dataTable.Rows.Count == 0)
                             ISFNode.m.adaDemandsM.dataTable.Rows.Add(new object[] { m_ActiveModel.TimeStepManager.dataStartDate, 0 });
@@ -605,7 +605,8 @@ namespace RRModelingSystem
                     }
                     else
                     {
-                        OnMessageRunOut("WARNING - Processing variable target. NOT IMPLEMENTED");
+                        if(dr["Target Flow [cfs]"].ToString() != "Variable")
+                            OnMessageRunOut($"WARNING - ISF {ISFNode.name} unchanged variable targets.");
                     }
                 }
             }
@@ -842,7 +843,7 @@ namespace RRModelingSystem
             //Create the ISF target table
             ISFTargetsTbl = new DataTable("ISFTargets");
             ISFTargetsTbl.Columns.Add("Location", typeof(String));
-            ISFTargetsTbl.Columns.Add("Target Flow [cfs]", typeof(double));
+            ISFTargetsTbl.Columns.Add("Target Flow [cfs]", typeof(string));
 
             try
             {
@@ -891,8 +892,8 @@ namespace RRModelingSystem
                                     }
                                     else
                                     {
-                                        ISFTargetsTbl.Rows.Add(new object[] { ISFNode.name, DBNull.Value });
-                                        messageOut("\tWARNING: Note that you cannot edit variable ISF target in this interface.");
+                                        ISFTargetsTbl.Rows.Add(new object[] { ISFNode.name, "Variable" });
+                                        messageOut($"\tWARNING: Note that you cannot edit variable ISF target for {ISFNode.name} in this interface.");
                                     }
                                     countISF += 1;
                                 }

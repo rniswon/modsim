@@ -593,10 +593,12 @@
             // radioButtonMMSRun
             // 
             this.radioButtonMMSRun.AutoSize = true;
+            this.radioButtonMMSRun.Checked = true;
             this.radioButtonMMSRun.Location = new System.Drawing.Point(148, 15);
             this.radioButtonMMSRun.Name = "radioButtonMMSRun";
             this.radioButtonMMSRun.Size = new System.Drawing.Size(131, 17);
             this.radioButtonMMSRun.TabIndex = 1;
+            this.radioButtonMMSRun.TabStop = true;
             this.radioButtonMMSRun.Text = "Run in the MMS mode";
             this.radioButtonMMSRun.UseVisualStyleBackColor = true;
             this.radioButtonMMSRun.CheckedChanged += new System.EventHandler(this.radioButtonMMSRun_CheckedChanged);
@@ -604,12 +606,10 @@
             // radioButtonRunActive
             // 
             this.radioButtonRunActive.AutoSize = true;
-            this.radioButtonRunActive.Checked = true;
             this.radioButtonRunActive.Location = new System.Drawing.Point(21, 15);
             this.radioButtonRunActive.Name = "radioButtonRunActive";
             this.radioButtonRunActive.Size = new System.Drawing.Size(110, 17);
             this.radioButtonRunActive.TabIndex = 0;
-            this.radioButtonRunActive.TabStop = true;
             this.radioButtonRunActive.Text = "Run Active Model";
             this.radioButtonRunActive.UseVisualStyleBackColor = true;
             this.radioButtonRunActive.CheckedChanged += new System.EventHandler(this.radioButtonRunActive_CheckedChanged);
