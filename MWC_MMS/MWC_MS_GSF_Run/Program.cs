@@ -19,8 +19,8 @@ namespace MODSIM_GSFLOW
 			try
 			{
 				//Process variables for riparian 'plug-in'
-				bool riparianON = false;
-				int _riparianCost = -999;
+				bool riparianON = true;
+				int _riparianCost = -48888;
 				if (CmdArgs.Contains("-RiparianON"))
 				{
 					riparianON = true;
