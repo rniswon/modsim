@@ -108,8 +108,8 @@ namespace RRModelingSystem
                 {
                     process = new Process();
                     process.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "MWC_MS_GSF_Run.exe";
-                    string riparianArgs = _riparianON ? $"-RiparianON {_riparianCost} " : "";
-                    process.StartInfo.Arguments = riparianArgs + "" + Path.GetFileName(_runFileName) + "";
+                    string riparianArgs = _riparianON ? $" -RiparianON {_riparianCost} " : "";
+                    process.StartInfo.Arguments = "" + Path.GetFileName(_runFileName) + "" + riparianArgs  ;
                     process.StartInfo.WorkingDirectory = Path.GetDirectoryName(_runFileName);
                     process.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;
                     process.StartInfo.UseShellExecute = false;
