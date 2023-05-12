@@ -254,10 +254,6 @@
       <Project>{934db78e-6254-4053-9fa4-29e39c00e6d1}</Project>
       <Name>MWC_MODSIMUtils</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MWC_MS_GSF_Run\MWC_MS_GSF_Run.csproj">
-      <Project>{0666b2ff-0ae6-4505-82ea-2f4f95bd8b0a}</Project>
-      <Name>MWC_MS_GSF_Run</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
