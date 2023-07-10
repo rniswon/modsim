@@ -548,18 +548,20 @@ namespace RRModelingSystem
                 int line = richTextBox2.GetLineFromCharIndex(p);
                 // code...
                 //MessageBox.Show("Linenumber: " + (richTextBox2.Lines[line]).ToString());
-                
-                int wordstartIndex = richTextBox1.Find(richTextBox2.Lines[line]);
-                if (wordstartIndex != -1)
+                if (richTextBox2.Text != "")
                 {
-                    richTextBox1.SelectionStart = wordstartIndex;
-                    richTextBox1.SelectionLength = richTextBox2.Lines[line].Length;
-                    richTextBox1.SelectionBackColor = Color.Yellow;
+                    int wordstartIndex = richTextBox1.Find(richTextBox2.Lines[line]);
+                    if (wordstartIndex != -1)
+                    {
+                        richTextBox1.SelectionStart = wordstartIndex;
+                        richTextBox1.SelectionLength = richTextBox2.Lines[line].Length;
+                        richTextBox1.SelectionBackColor = Color.Yellow;
+                    }
+                    //else
+                    //    break;
+                    //startindex += wordstartIndex + word.Length;
+                    richTextBox1.ScrollToCaret();
                 }
-                //else
-                //    break;
-                //startindex += wordstartIndex + word.Length;
-                richTextBox1.ScrollToCaret();
             }
         }
 
