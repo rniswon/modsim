@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{0666B2FF-0AE6-4505-82EA-2F4F95BD8B0A}</ProjectGuid>
+    <ProjectGuid>{7C0F421C-4918-403A-AB8C-42C30D3E8328}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>RRModelingSystem</RootNamespace>
     <AssemblyName>MWC_MS_GSF_Run</AssemblyName>
