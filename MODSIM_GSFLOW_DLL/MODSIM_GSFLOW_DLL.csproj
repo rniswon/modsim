@@ -167,7 +167,7 @@ echo user: %25USERNAME%25
 if %25USERNAME%25  ==  rniswon (
 COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\gsflow_modsim.dll" "$(TargetDir)GSFLOW_MODSIM.dll"
 COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\gsflow_modsim.dll" "$(ProjectDir)\GSFlowLibraries\$(Platform)\GSFLOW_MODSIM.dll"
-COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\GSFLOW_MODSIM.pdb" "$(TargetDir)GSFLOW_MODSIM.pdb"
+REM COPY /Y  "$(SolutionDir)$(Platform)\$(Configuration)\GSFLOW_MODSIM.pdb" "$(TargetDir)GSFLOW_MODSIM.pdb"
 )
 if %25USERNAME%25 ==  emorway (
 COPY /Y  "$(SolutionDir)..\MODSIM-GSFLOW-DLL\$(PlatformName)\$(ConfigurationName)\MODSIM-GSFLOW-DLL.dll" "$(TargetDir)GSFLOW_MODSIM.dll"
