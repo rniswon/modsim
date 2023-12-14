@@ -297,7 +297,7 @@ namespace RRModelingSystem
             string runFile = Path.Combine(_workSpace + basePath);
             string logFileName = Path.Combine(Path.GetDirectoryName(Path.Combine(_workSpace + basePath)), $"MMS_Run{runID}Log.txt");
             bool riparianLogic = _riparianON == "1" ? true : false;
-            int startInd = options.IndexOf("1. Riparian WRs (") + 17;
+            int startInd = options.IndexOf(". Riparian WRs (") + 17;
             int endInd = options.IndexOf(")", startInd);
             int riparianCost = int.Parse(options.Substring(startInd, endInd-startInd));
 
