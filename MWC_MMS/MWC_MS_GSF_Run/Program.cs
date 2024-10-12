@@ -17,19 +17,29 @@ namespace MODSIM_GSFLOW
 		private static RiparianAllocation allocationTool;
 		private static RRResCustomOps RRResOps;
 
+		/// <summary>
+		/// This is the main program to run the MODFLOW-GSFLOW coupling code.
+		/// This version includes the option to run custom operations for the Russian River, using an optional argument (-RROps). Legacy versions
+		/// used the argument -RiparianON to trigger the RR operation.  This version support that legacy mode.  
+		/// The user can provide a control file as an argument to trigger the GSFLOW-MODSIM run with paraters defined in the control file, 
+		/// including the model mode that provides different integration between the components of GSFLOW and MODSIM.
+		/// The user can also provide a MODSIM XY file, in which case the MODSIM execution will include the Russian River operations
+		/// logic, if the argument -RROps is included.
+		/// </summary>
+		/// <param name="CmdArgs">Input file name (either a control file or a MODSIM file), [-RROps], GSLFOW arguments</param>
 		static void Main(string[] CmdArgs)
 		{
 			try
 			{
 				//Process variables for riparian 'plug-in'
-				bool riparianON = true; // THis will triger the RR Ops custom code
+				bool rROpsON = false; // THis will triger the RR Ops custom code
 				int _riparianCost = -999;
-				if (CmdArgs.Contains("-RiparianON"))
+				if (CmdArgs.Contains("-RROps") || CmdArgs.Contains("-RiparianON"))
 				{
-					riparianON = true;
+					rROpsON = true;
 					for (int i = 0; i<CmdArgs.Length;i++)
                     {
-						if(CmdArgs[i]== "-RiparianON")
+						if(CmdArgs[i]== "-RiparianON" || CmdArgs[i] == "-RROps")
                         {
 							CmdArgs[i] = "Delete";
 							_riparianCost = int.Parse(CmdArgs[i + 1]);
@@ -56,7 +66,7 @@ namespace MODSIM_GSFLOW
 
 
 						//Adding 'plug-ins'
-						if (riparianON)
+						if (rROpsON)
 						{
 
 							//Console.WriteLine("\tActivating riparian logic allocation...");
@@ -72,7 +82,7 @@ namespace MODSIM_GSFLOW
 
 						sSurfGWModule.InitializeRUN(ref myModel);
 
-                        if (riparianON)
+                        if (rROpsON)
                         {
 							//This is only needed for Russian River ops when the network cost has not been procesed in advance.
                             List<string> divLinks = sSurfGWModule.GetDiversionSegments();
@@ -102,7 +112,7 @@ namespace MODSIM_GSFLOW
 					XYFileReader.Read(myModel, CmdArgs[0]);
 
 					//Adding 'plug-ins'
-					if (riparianON)
+					if (rROpsON)
 					{
                         //Console.WriteLine("\tActivating riparian logic allocation...");
                         //allocationTool = new RiparianAllocation(ref myModel, _riparianCost);
