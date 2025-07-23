@@ -54,7 +54,7 @@ namespace MODSIM_GSFLOW_C
         //public  StreamWriter in_out_sw6 = new StreamWriter(@"Lake6_Ins_Outs.txt");
         //public  StreamWriter all_links = new StreamWriter(@"All_Links_Q.txt");     // Another debug file
         public List<int> Main_Ditches = new List<int>();
-        public bool afr, MS_GSF_converge;
+        public int afr, MS_GSF_converge;
         public int Model_mode, Nsegshold, Nlakeshold;
         public int[] startTime = new int[6];
         public int[] endTime = new int[6];
@@ -81,7 +81,7 @@ namespace MODSIM_GSFLOW_C
         //Fortran DLL interface
 
         [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void gsflow_prms(ref int Process_mode, ref bool afr, ref bool MS_GSF_converge, ref int Nsegshold, ref int nlakeshold, [In, Out] double[] Diversions, [In, Out] int[] IDivert, [In, Out] double[] EXCHANGE, [In, Out] double[] DELTAVOL, [In, Out] double[] LAKEVOL, [In, Out] double[] LAKEVAP, [In, Out] double[] agDemand);
+        public static extern void gsflow_prms(ref int Process_mode, ref int afr, ref int MS_GSF_converge, ref int Nsegshold, ref int nlakeshold, [In, Out] double[] Diversions, [In, Out] int[] IDivert, [In, Out] double[] EXCHANGE, [In, Out] double[] DELTAVOL, [In, Out] double[] LAKEVOL, [In, Out] double[] LAKEVAP, [In, Out] double[] agDemand);
 
         [DllImport("GSFLOW_MODSIM.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void put_prms_control_file(ref int ctl_len, [In] char[] command_lineArgs);
@@ -115,12 +115,13 @@ namespace MODSIM_GSFLOW_C
 
                 // Process_mode: 0 = run, 1 = delcare; 2 = initialize; 3 = clean; 4 = setdims
                 Process_mode = 4;  // setdims
-                afr = true;
-                MS_GSF_converge = false;
+                afr = 1;
+                MS_GSF_converge = 0;
                 /* pass 2 arrays with NSS values, first has Diversion flag, second has ResRelease flag */
                 /* need to pass DIVS */
                 Nsegshold = 1;  //initialize temporarily
                 Nlakeshold = 1;  //initialize temporarily
+
                 try
                 {
                     char[] cmd_argsChars = ToCharacterArrayFortran(cmd_args, ctl_length);
@@ -149,7 +150,13 @@ namespace MODSIM_GSFLOW_C
                     map_FileName = GetFullPath(map_FileName);
                 if(!File.Exists(xyFileName) && !Path.IsPathRooted(xyFileName))
                     xyFileName = GetFullPath(xyFileName);
-                
+                //Diversions = new double[1];
+                //IDivert = new int[1];
+                //EXCHANGE = new double[1];
+                //DELTAVOL = new double[1];
+                //LAKEVOL = new double[1];
+                //LAKEVAP = new double[1];
+                //agDemand = new double[1];
                 //These are the options to add in the .control file to run different versions
                 // 0=GSFLOW; 1=PRMS; 2=MODFLOW; 10=MODSIM-GSFLOW; 11=MODSIM-PRMS; 12=MODSIM-MODFLOW; 13=MODSIM
                 //  Option: MODSIM-GSFLOW is the fully integrated mode.
@@ -200,7 +207,7 @@ namespace MODSIM_GSFLOW_C
 
             if (Model_mode < 10) // GSFLOW and PRMS-only
             {
-                afr = true;
+                afr = 1;
                 for (int i = 0; i < Numts; i++)
                 {
                     gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
@@ -277,7 +284,7 @@ namespace MODSIM_GSFLOW_C
                 //Finalize GSFLOW run
                 messageOut("\tClosing GSFLOW simulation ...");
                 Process_mode = 3; // clean
-                afr = true;
+                afr = 1;
                 gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, Diversions, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand);
 
                 if (maxIterCount > 0)
@@ -737,7 +744,7 @@ namespace MODSIM_GSFLOW_C
 
             if (Model_mode != 13)
             {
-                bool MS_GSF_converge = false;
+                int MS_GSF_converge = 0;
 
                 //Check for a minimum number of iteration after MS-GSF has not converged
                 if (localMODSIMIter >= 7)
@@ -886,8 +893,11 @@ namespace MODSIM_GSFLOW_C
                     // to here
 
                     //Check for convergence between MODSIM and MODFLOW
-                    MS_GSF_converge = Get_Div_Chng();
-                    MS_GSF_converge = MS_GSF_converge && MFRunYet;
+                    //MS_GSF_converge = Get_Div_Chng();
+                    //MS_GSF_converge = MS_GSF_converge && MFRunYet;
+                    // RGN added next 2 lines to replace previous 2 lines
+                    bool check = Get_Div_Chng() && MFRunYet;
+                    MS_GSF_converge = check ? 1 : 0;
                     if (Model_mode != 12)   //Different flow of console output in MODSIM-MODFLOW mode, don't want the '.' in this case 
                     {
                         messageOut(".");
@@ -900,16 +910,17 @@ namespace MODSIM_GSFLOW_C
                     {
                         messageOut("\r\n MODSIM & GSFLOW Ran into maximum number of iterations - Warning !!! models have not converged.");
                         maxIterCount++;
-                        MS_GSF_converge = true;
+                        MS_GSF_converge = 1;
 
                         update_lake_synchronization(maxIter:true);
                     }
                     //ETS - This check make sense if the iteration is reset every time that MODSIM restart. 
-                    if (myModel.mInfo.Iteration > myModel.maxit && !MS_GSF_converge)
-                    {
+                    //if (myModel.mInfo.Iteration > myModel.maxit && !MS_GSF_converge) RGN convert MS_GSF_converge to int
+                    if (myModel.mInfo.Iteration > myModel.maxit && MS_GSF_converge == 0)
+                        {
                         messageOut("\r\n MODSIM ran into maximum number of iterations - Warning !!! models have not converged.");
                         maxIterCount++;
-                        MS_GSF_converge = true;
+                        MS_GSF_converge = 1;
 
                         update_lake_synchronization(maxIter: true);
                     }
@@ -917,20 +928,22 @@ namespace MODSIM_GSFLOW_C
                     //ETS - these modes will not loop through the MODSIM loop
                     if (Model_mode == 0 || Model_mode == 1 || Model_mode == 2 || Model_mode == 3)
                     {
-                        afr = true;
+                        afr = 1;
                         swgwUtils.iterCount = 0;
                     }
                     else
                     {
                         //For modes MODSIM-GSFLOW, MODSIM-MODFLOW, MODSIM_PRMS(AG)
-                        if (!MS_GSF_converge || swgwUtils.iterCount < 2)
-                        {
-                            afr = false;
+                        //if (!MS_GSF_converge || swgwUtils.iterCount < 2) RGN convert to integer
+                        if (MS_GSF_converge == 0 || swgwUtils.iterCount < 2)
+
+                            {
+                                afr = 0;
                             MFRunYet = true;
                             //MODFLOWConverge = CheckOscillating(MF_Segs);
                             //MODSIM converged but we are sending it back to iterate with MODFLOW values.
 
-                            MS_GSF_converge = false;
+                            MS_GSF_converge = 0;
 
                             //Processing Demands from Ag.Package
                             for (int i = 0; i < swgwUtils.m_SyncTblSEG.Rows.Count; i++)
@@ -959,7 +972,7 @@ namespace MODSIM_GSFLOW_C
                         else
                         {
                             gsflow_prms(ref Process_mode, ref afr, ref MS_GSF_converge, ref Nsegshold, ref Nlakeshold, MS_Flows, IDivert, EXCHANGE, DELTAVOL, LAKEVOL, LAKEVAP, agDemand); // converged mode
-                            afr = true;
+                            afr = 1;
                             messageOut("           MS_GSF Last Iteration: " + swgwUtils.iterCount + " Total time steps: " + myModel.mInfo.CurrentModelTimeStepIndex + 1);
                             swgwUtils.iterCount = 0;
                             MFRunYet = false;
@@ -988,7 +1001,9 @@ namespace MODSIM_GSFLOW_C
                     }
                 }
                 //Set local MODSIM iteration count
-                myModel.mInfo.convg = MS_GSF_converge;
+                //myModel.mInfo.convg = MS_GSF_converge;
+                myModel.mInfo.convg = (MS_GSF_converge == 1);
+
             }
         }
 
